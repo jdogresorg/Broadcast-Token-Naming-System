@@ -27,7 +27,7 @@ Additional BTNS specs, indexers, and development tools are available at the offi
 
 # Definitions
 
-- `token` - A virtual token which was created via a `MINT` format `broadcast` transaction
+- `token` - A virtual token which was created via a `DEPLOY` or `MINT` format `broadcast` transaction
 - `broadcast` - A general purpose transaction type which allows broadcasting of a message to the Counterparty platform
 - `DEPLOY` - A specially formatted `broadcast` which registers a `token` name for usage
 - `MINT` - A specially formatted `broadcast` which allows for creation/minting of token supply 
