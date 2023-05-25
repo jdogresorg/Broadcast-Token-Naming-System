@@ -1,8 +1,6 @@
-        CIP: 28
         Title: Broadcast Token Naming System (BTNS)
         Author: Jeremy Johnson (J-Dog)
-        Discussions-To: https://forums.counterparty.io/t/cip28-broadcast-token-name-system-btns
-        Status: Draft
+        Status: Accepted
         Type: Informational
         Created: 2023-05-14
 
