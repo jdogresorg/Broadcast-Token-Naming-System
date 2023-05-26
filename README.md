@@ -10,6 +10,7 @@ The **`BTNS`** operates on the **`Counterparty`** platform using the `broadcast`
 
 This is a personal hobby project, to allow for experimentation with additional token features and functionality.
 
+
 # Disclaimer 
 `BTNS` is a bleeding-edge experimental protocol to play around with token functionality on **`Bitcoin`** and **`Counterparty`**. This is a hobby project, and  I am **NOT** responsible for any losses, financial or otherwise, incurred from using this experimental protocol and its functionality. 
 
@@ -25,8 +26,19 @@ Name                          | Title                                     |  Aut
 
 
 # BTNS Indexer
-Coming soon... got **`BTNS`** supported, working on Basic **`BTNS-420`** support... prolly a couple more days.
+- Coming soon
 
+
+# BTNS Explorers
+- Coming soon
+
+
+# BTNS APIs
+- Coming soon
+
+
+# BTNS Wallets
+- [Freewallet](https://freewallet.io/)
 
 # Counterparty Platform
 **`Counterparty`** is the swiss army knife of Bitcoin, and I encourage **ALL** developers looking to build on Bitcoin to take the time to go down the **`Counterparty`** rabbit hole.
