@@ -17,14 +17,21 @@ This spec defines the core `ACTION` commands that can be used to perform various
 
 BTNS-420 can be extended in the future to allow for additional `ACTION` and `PARAM` options. 
 
-This spec is a work in progress, and additional rules and notes will be added as spec is more clearly defined. BTNS `ACTION` `PARAMS` will not be considered finalized until `ACTIVATION_BLOCK` for the `ACTION` is reached.
+This spec is a work in progress, and additional rules and notes will be added as spec is more clearly defined. 
+
+BTNS-420 `ACTION` `PARAMS` will not be considered finalized until `ACTIVATION_BLOCK` for the `ACTION` is reached.
 
 # Definitions
-- `token` - A token created via a `MINT` or `DEPLOY` `ACTION` `broadcast` transaction
-- `broadcast` - A general purpose transaction type which allows broadcasting of a message to the Counterparty platform
-- `ACTION` - A specific type of command performed on a `token`
-- `PARAMS` - Parameters specified along with an `ACTION` command
 - `ACTIVATION_BLOCK` - A specific block height when a BTNS `ACTION` becomes usable
+- `ACTION` - A specific type of command performed on a `token`
+- `ASSET` - A token created via a `issuance` transaction
+- `JSON` - A text-based way of representing JavaScript object literals, arrays, and scalar data
+- `PARAMS` - Parameters specified along with an `ACTION` command
+- `broadcast` - A general purpose transaction type which allows broadcasting of a message to the Counterparty platform
+- `counterparty` - A token platform on Bitcoin (BTC) which was created in 2014 ([counterparty.io](https://counterparty.io))
+- `issuance` - A transaction type which allows for creation of `ASSET` and issuing of supply on the Counterparty platform
+- `token` - A token created in the BTNS via a `MINT` or `ISSUE` `ACTION` `broadcast` transaction
+
 
 # Specification
 
@@ -48,13 +55,14 @@ Below is a list of the defined BTNS `ACTION` commands and the function of each:
 - `BATCH` - Execute multiple BTNS `ACTION` commands in a single transaction
 - `BET` - Bet `token` on `broadcast` oracle feed outcomes
 - `CALLBACK` - Return all `token` supply to owner address after a set block, in exchange for a different `token`
-- `DEPLOY` - Create/Issue a `token` and define how the token works
 - `DESTROY` - Destroy `token` supply forever
 - `DISPENSER` - Create a dispenser (vending machine) to dispense a `token` when triggered
 - `DIVIDEND` - Issue a dividend on a `token`
+- `ISSUE` - Create or issue a `token` and define how the token works
 - `LIST` - Create a list for use with various BTNS `ACTION` commands
 - `MINT` - Create `token` supply
-- `RUG` - Coming soon... its amazing... lol
+- `RUG` - Perform a rug pull on a `token` 
+- `SLEEP` - Pause all actions on a `token` for a certain number of blocks
 - `SEND` - Transfer or move some `token` balances between addresses
 - `SWEEP` - Transfer all `token` and/or ownerships to a destination address
 
@@ -94,7 +102,7 @@ This `ACTION` allows one to batch execute multiple BTNS `ACTION` commands in a s
 `bt:BATCH|COMMAND;COMMAND`
 
 **Example 1:**
-`bt:BATCH|DEPLOY|JDOG;DEPLOY|TEST`
+`bt:BATCH|ISSUE|JDOG;ISSUE|TEST`
 
 ### Rules
 ### Notes
@@ -169,82 +177,6 @@ The above example destroys 1 BRRR `token` from the `broadcast` address
 ### Rules
 - Any destroyed `token` supply should be debited from broadcasting address balances
 
-
-## `DEPLOY` command
-This `ACTION` allows one to create a token and specify the following information about it
-
-`PARAM` options:
-- `TICK` - 1 to 250 characters in length (see rules below ) (required)
-- `MAX_SUPPLY` - Maximum token supply (max: 18,446,744,073,709,551,615 - commas not allowed)
-- `MAX_MINT` - Maximum amount of supply a `MINT` transaction can issue
-- `DECIMALS` - Number of decimal places token should have (max: 18, default: 0)
-- `ICON` - URL to a an icon to use for this token (48x48 standard size)
-- `MINT_SUPPLY` - Amount of token supply to mint in immediately (default:0)
-- `TRANSFER` - Address to transfer ownership of the `token` to (owner can perform future actions on token)
-- `TRANSFER_SUPPLY` - Address to transfer `MINT_SUPPLY` to (mint initial supply and transfer to address)
-- `LOCK_SUPPLY` - Lock `MAX_SUPPLY` permanently (cannot increase `MAX_SUPPLY`)
-- `LOCK_MINT` - Lock `MAX_MINT` permanently (cannot edit `MAX_MINT`)
-- `LOCK_RUG` - Lock `token` against `RUG` command
-- `LOCK_CALLBACK` - Lock `token` `CALLBACK` info
-- `CALLBACK_BLOCK` - Enable `CALLBACK` `ACTION` after `CALLBACK_BLOCK` 
-- `CALLBACK_TICK` - `TICK` `token` users get when callback occurs
-- `CALLBACK_AMOUNT` - `TICK` `token` users get 
-
-**Broadcast Format:**
-`bt:DEPLOY|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|ICON|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_SUPPLY|LOCK_MINT|LOCK_RUG|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT`
-
-**Example 1:**
-`bt:DEPLOY|JDOG`
-The above example issues a JDOG token 
-
-**Example 2:**
-`bt:DEPLOY|JDOG||||||||1`
-The above example issues a JDOG token and `LOCK_SUPPLY` set to `1` to permanently
-
-**Example 3:**
-`bt:DEPLOY|JDOG|0|0|0|http://j-dog.net/images/JDOG_icon.png`
-The above example issues a JDOG token with an `ICON`
-
-**Example 4:**
-`bt:DEPLOY|JDOG|0|0|0|http://j-dog.net/images/JDOG_icon.png|0|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev` 
-The above example issues a JDOG token with an `ICON` and transfers token ownership to 1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev
-
-**Example 5:**
-`bt:DEPLOY|JDOG|1000|1|0`
-The above example issues a JDOG token with a max supply of 1000, and a maximum mint of 1 JDOG per `MINT`
-
-**Example 6:**
-`bt:DEPLOY|JDOG|1000|1|0|http://j-dog.net/images/JDOG_icon.png`
-The above example issues a JDOG token with a max supply of 1000, and a maximum mint of 1 JDOG per `MINT` and associates an `ICON` with the `token`
-
-**Example 7:**
-`bt:DEPLOY|BRRR|10000000000000000000|10000000000000|0|https://j-dog.net/images/BRRR_icon.png|100`
-The above example issues a BRRR token with a max supply of 1 Quandrillion supply and a maximum mint of 1 Trillion BRRR per `MINT`, associates an `ICON` with the `token`, and immediately mints 100 BRRR to the broadcasting address.
-
-**Example 8:**
-`bt:DEPLOY|TEST|100|1|0||1|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev`
-The above example issues a TEST token with a max supply of 100, and a maximum mint of 1 TEST per `MINT`. This also mints 1 TEST token, and transfers ownership AND initial token supply to 1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev
-
-### Rules
-- First `TICK` `DEPLOY` will be considered as valid.
-- Additional `TICK` `DEPLOY` transactions after first valid `TICK` `DEPLOY`, will be considered invalid and ignored, unless broadcast from `token` owners address
-- If `TICK` contains any unicode characters, then `TICK` should be `base64` encoded
-- Allowed characters in `TICK`:
-   - Any word character (alphanumeric characters and underscores)
-   - Special characters: ~!@#$%^&*()_+\-={}[\]\\:<>.?/
-   - Most printable emojis in U+1F300 to U+1F5FF
-- Special characters pipe `|` and semicolon `;` are **NOT** to be used in `TICK` names 
-
-### Notes
-- `DEPLOY` `TICK` with `MAX_SUPPLY` set to `0` to reserve the `token` name (reserve name)
-- `DEPLOY` `TICK` with `MAX_SUPPLY` and `MINT_SUPPLY` set to any non `0` value, to mint supply until `MAX_SUPPLY` is reached (owner can mint beyond `MAX_MINT`)
-- `DEPLOY` `TICK` with `MAX_SUPPLY` and `MAX_MINT` set to any non `0` value, to enable user minting (fair minting)
-- `DEPLOY` `TICK` with `LOCK_SUPPLY` set to `1` to permanently lock `MAX_SUPPLY` (irreversible)
-- `DEPLOY` `TICK` with `LOCK_MINT` set to `1` to permanently lock `MAX_MINT` (irreversible)
-- `DEPLOY` `TICK` with `LOCK_CALLBACK` set to `1` to permanently lock `CALLBACK_BLOCK`, `CALLBACK_TICK`, and `CALLBACK_AMOUNT` (irreversible)
-- `CALLBACK_BLOCK`, `CALLBACK_TICK`, and `CALLBACK_AMOUNT` can be edited via `DEPLOY` action until `LOCK_CALLBACK` is set to `1`
-
-
 ## `DISPENSER` command
 This `ACTION` allows one to create a vending machine to dispense `tokens` when triggered
 
@@ -307,34 +239,121 @@ This `ACTION` allows one to pay a dividend to `token` holders of a `token`.
 - To send large amounts of `tokens` to users, see the `AIRDROP` or `SEND` commands
 
 
+## `ISSUE` command
+This `ACTION` allows one to create or issue a token and specify the following information about it
+
+`PARAM` options:
+- `TICK` - 1 to 250 characters in length (see rules below ) (required)
+- `MAX_SUPPLY` - Maximum token supply (max: 18,446,744,073,709,551,615 - commas not allowed)
+- `MAX_MINT` - Maximum amount of supply a `MINT` transaction can issue
+- `DECIMALS` - Number of decimal places token should have (max: 18, default: 0)
+- `DESCRIPTION` - Description of token (250 chars max) 
+- `MINT_SUPPLY` - Amount of token supply to mint in immediately (default:0)
+- `TRANSFER` - Address to transfer ownership of the `token` to (owner can perform future actions on token)
+- `TRANSFER_SUPPLY` - Address to transfer `MINT_SUPPLY` to (mint initial supply and transfer to address)
+- `LOCK_SUPPLY` - Lock `MAX_SUPPLY` permanently (cannot increase `MAX_SUPPLY`)
+- `LOCK_MINT` - Lock `MAX_MINT` permanently (cannot edit `MAX_MINT`)
+- `LOCK_DESCRIPTION` - Lock `token` against `DESCRIPTION` changes
+- `LOCK_RUG` - Lock `token` against `RUG` command
+- `LOCK_SLEEP` - Lock `token` against `SLEEP` command
+- `LOCK_CALLBACK` - Lock `token` `CALLBACK` info
+- `CALLBACK_BLOCK` - Enable `CALLBACK` `ACTION` after `CALLBACK_BLOCK` 
+- `CALLBACK_TICK` - `TICK` `token` users get when `CALLBACK` command is used
+- `CALLBACK_AMOUNT` - `TICK` `token` amount that users get when `CALLBACK` command is used
+
+**Broadcast Format:**
+`bt:ISSUE|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT`
+
+**Example 1:**
+`bt:ISSUE|JDOG`
+The above example issues a JDOG token 
+
+**Example 2:**
+`bt:ISSUE|JDOG||||||||1`
+The above example issues a JDOG token and `LOCK_SUPPLY` set to `1` to permanently
+
+**Example 3:**
+`bt:ISSUE|JDOG|0|0|0|http://j-dog.net/images/JDOG_icon.png`
+The above example issues a JDOG token with a `DESCRIPTION` which points to an icon
+
+**Example 4:**
+`bt:ISSUE|JDOG|0|0|0|http://j-dog.net/images/JDOG_icon.png|0|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev` 
+The above example issues a JDOG token with a `DESCRIPTION` which points to an icon, and transfers token ownership to 1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev
+
+**Example 5:**
+`bt:ISSUE|JDOG|1000|1|0`
+The above example issues a JDOG token with a max supply of 1000, and a maximum mint of 1 JDOG per `MINT`
+
+**Example 6:**
+`bt:ISSUE|JDOG|1000|1|0|BTNS Tokens Are Cool!`
+The above example issues a JDOG token with a max supply of 1000, and a `DESCRIPTION` of 'BTNS Tokens are Cool!'
+
+**Example 7:**
+`bt:ISSUE|BRRR|10000000000000000000|10000000000000|0|https://j-dog.net/json/JDOG.json|100`
+The above example issues a BRRR token with a max supply of 1 Quandrillion supply and a maximum mint of 1 Trillion BRRR per `MINT`, associates a `JSON` file with the `token`, and immediately mints 100 BRRR to the broadcasting address.
+
+**Example 8:**
+`bt:ISSUE|TEST|100|1|0||1|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev`
+The above example issues a TEST token with a max supply of 100, and a maximum mint of 1 TEST per `MINT`. This also mints 1 TEST token, and transfers ownership AND initial token supply to 1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev
+
+### Rules
+- First `TICK` `ISSUE` will be considered as valid.
+- Additional `TICK` `ISSUE` transactions after first valid `TICK` `ISSUE`, will be considered invalid and ignored, unless broadcast from `token` owners address
+- If `TICK` contains any unicode characters, then `TICK` should be `base64` encoded
+- Allowed characters in `TICK`:
+   - Any word character (alphanumeric characters and underscores)
+   - Special characters: ~!@#$%^&*()_+\-={}[\]\\:<>.?/
+   - Most printable emojis in U+1F300 to U+1F5FF
+- Special characters pipe `|` and semicolon `;` are **NOT** to be used in `TICK` names 
+- `TEXT` can contain a URL to a an icon to use for this token (48x48 standard size)
+- `TEXT` can contain a URL to a JSON file with additional information
+
+
+### Notes
+- `ISSUE` `TICK` with `MAX_SUPPLY` set to `0` to reserve the `token` name (reserve name)
+- `ISSUE` `TICK` with `MAX_SUPPLY` and `MINT_SUPPLY` set to any non `0` value, to mint supply until `MAX_SUPPLY` is reached (owner can mint beyond `MAX_MINT`)
+- `ISSUE` `TICK` with `MAX_SUPPLY` and `MAX_MINT` set to any non `0` value, to enable user minting (fair minting)
+- `ISSUE` `TICK` with `LOCK_SUPPLY` set to `1` to permanently lock `MAX_SUPPLY` (irreversible)
+- `ISSUE` `TICK` with `LOCK_MINT` set to `1` to permanently lock `MAX_MINT` (irreversible)
+- `ISSUE` `TICK` with `LOCK_CALLBACK` set to `1` to permanently lock `CALLBACK_BLOCK`, `CALLBACK_TICK`, and `CALLBACK_AMOUNT` (irreversible)
+- `CALLBACK_BLOCK`, `CALLBACK_TICK`, and `CALLBACK_AMOUNT` can be edited via `ISSUE` action until `LOCK_CALLBACK` is set to `1`
+- `DEPLOY` `ACTION` can be used for backwards-compatability with BRC20/SRC20 `DEPLOY`
+- `DESCRIPTION` field can not contain any pipe `|` or semi-colon `;` characters, as these are reserved
+
+
 ## `LIST` command
 This `ACTION` allows one to create lists of items for usage in BTNS functions
 
 `PARAM` options:
-- `ITEM` - may be any valid `TICK` or address
+- `ITEM` - may be any valid `TICK`, `ASSET`, or address
+- `TYPE` - List type (1=address, 2=TICK, 3=)
 
 **Broadcast Format:**
-`bt:LIST|ITEM|ITEM|ITEM`
+`bt:LIST|TYPE|ITEM|ITEM|ITEM`
 
 **Example 1:**
-`bt:LIST|JDOG|BRRR|TEST`
-The above example creates a list of `token` tickers
+`bt:LIST|1|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev|1FWDonkMbC6hL64JiysuggHnUAw2CKWszs|bc1q5jw436vef6ezsgggk93pwhh9swrdxzx2e3a7kj`
+The above example creates a list of addresses
 
 **Example 2:**
-`bt:LIST|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev|1FWDonkMbC6hL64JiysuggHnUAw2CKWszs|bc1q5jw436vef6ezsgggk93pwhh9swrdxzx2e3a7kj`
-The above example creates a list of `token` addresses
+`bt:LIST|2|JDOG|BRRR|TEST`
+The above example creates a list of `token` tickers
+
+**Example 3:**
+`bt:LIST|3|XCP|RAREPEPE|JPMCHASE|A4211151421115130001`
+The above example creates a list of `counterparty` `ASSET`s
 
 ### Rules
 - In order for a `LIST` to be considered `valid`, all tickers or addresses must be valid.
-
-### Notes
-
+- A `TICK` list contain only BTNS `TICK` items
+- A `ASSET` list contains only Counterparty `ASSET` items
+- 
 
 ## `MINT` command
 This `ACTION` allows one to mint token supply
 
 `PARAM` options:
-- `TICK` - `token` name registered with `DEPLOY` format (required)
+- `TICK` - `token` name registered with `ISSUE` format (required)
 - `AMOUNT` - Amount of tokens to mint (required)
 - `DESTINATION` - Address to transfer tokens to
 
@@ -359,7 +378,7 @@ The above example mints 10,000,000,000,000 BRRR tokens and transfers them to 1JD
 This `ACTION` allows one to place an order on the Decentralized EXchange (DEX) to trade `token`s
 
 `PARAM` options:
-- `TICK` - `token` name registered with `DEPLOY` format (required)
+- `TICK` - `token` name registered with `ISSUE` format (required)
 
 **Broadcast Format:**
 `bt:RUG|TICK`
@@ -377,7 +396,7 @@ The above example does a rugpull on the BRRR `token`
    - Destroys all `TICK` `token` supply (including `tokens` held in addresses)
 
 ### Notes
-   - Can use `LOCK_RUG` in `DEPLOY` command to prevent `RUG` command
+   - Can use `LOCK_RUG` in `ISSUE` command to prevent `RUG` command
    - Why? Why not! We are experimenting and having fun (Don't Trust, Verify!)
 
 
@@ -385,7 +404,7 @@ The above example does a rugpull on the BRRR `token`
 This `ACTION` allows one to transfer or send a `token` between addresses
 
 `PARAM` options:
-- `TICK` - `token` name registered with `DEPLOY` format (required)
+- `TICK` - `token` name registered with `ISSUE` format (required)
 - `AMOUNT` - Amount of tokens to send (required)
 - `DESTINATION` - Address to transfer tokens to (required)
 - `MEMO` - An optional Memo to include
@@ -429,6 +448,28 @@ The above example sends 5 BRRR tokens to 1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev and 
 - `TRANSFER` `ACTION` can be used for backwards-compatability with BRC20/SRC20 `TRANSFER`
 
 
+## `SLEEP` command
+This `ACTION` allows one to pause all `token` `ACTIONS` until `BLOCK` is reached
+
+`PARAMS` options:
+- `TICK` - 1 to 5 characters in length (required)
+- `RESUME_BLOCK` - Block index to resume BTNS `ACTION` commands
+
+**Broadcast Format:**
+`bt:SLEEP|TICK|RESUME_BLOCK`
+
+**Example 1:**
+`bt:SLEEP|JDOG|791495`
+The above example pauses/sleeps ALL BTNS `ACTION` commands on JDOG `token` until block 791495
+
+### Rules
+### Notes
+ - USE WITH CAUTION! `SLEEP` will stop/pause all BTNS actions, including dispenses.
+ - `SLEEP` can result in loss of user funds, as payments to BTNS dispensers will be ignored.
+ - Can use `LOCK_SLEEP` in `ISSUE` command to prevent `SLEEP` command
+ - Can issue a `SLEEP` before `RESUME_BLOCK` to extend a `SLEEP`
+
+
 ## `SWEEP` command
 This `ACTION` transfers all `token` and/or ownerships to a destination address
 
@@ -461,21 +502,22 @@ Below is a list of the BTNS `ACTION` commands and the `ACTIVATION_BLOCK` for eac
 - `BATCH` - TBD
 - `BET` - TBD
 - `CALLBACK` - TBD
-- `DEPLOY`   - TBD
 - `DESTROY` - TBD
 - `DISPENSER` -  TBD
 - `DIVIDEND` - TBD
+- `ISSUE`   - TBD
 - `LIST` - TBD
 - `MINT` - TBD
 - `RUG` -  TBD
 - `SEND` - TBD
+- `SLEEP` - TBD
 - `SWEEP` -  TBD
 
 
 ## Additional Notes
 - `broadcast` `status` must be `valid` in order for BTNS `ACTION` to be considered `valid`
 - BTNS tokens can also be used in combination with other protocols, by specifying the semicolon (`;`) as a protocol delimiter.
-- Only one BTNS action (`DEPLOY`,`MINT`,`TRANSFER`) can be included in a `broadcast`
+- Only one BTNS action (`ISSUE`,`MINT`,`SEND`) can be included in a `broadcast`
 - BTNS tokens can be stamped using the STAMP Protocol
 - By allowing combining of protocols, you can do powerful thinks in a single transaction, such as:
   - Issue BTNS `token` with an `ICON` pointing to an external URL
@@ -486,7 +528,7 @@ Below is a list of the BTNS `ACTION` commands and the `ACTIVATION_BLOCK` for eac
   - Reference an IPFS CID
 
 Example 1
-`bt:DEPLOY|JDOG;stamp:base64data`
+`bt:ISSUE|JDOG;stamp:base64data`
 The above example issues a JDOG token, and STAMPs file data into the token.
 
 ## Current BTNS `ACTION` Functionality
@@ -496,7 +538,7 @@ The above example issues a JDOG token, and STAMPs file data into the token.
 - `CALLBACK`
    - Return all `token` supply to owner address after `CALLBACK_BLOCK`
    - Compensate `token` supply holders by giving them `CALLBACK_AMOUNT` of `CALLBACK_TICK` `token` per unit
-- `DEPLOY`
+- `ISSUE`
    - Register / Reserve `TICK` for `token` usage
    - Associate `ICON` with your `token`
    - Adjust `MAX_SUPPLY` until `LOCK_SUPPLY` is set to `1`
@@ -517,6 +559,7 @@ The above example issues a JDOG token, and STAMPs file data into the token.
 - `SEND`
   - Transfer `AMOUNT` of `token` from broadcast address to a `DESTINATION` address
   - Send multiple `AMOUNT` of `token` to multiple `DESTINATION` addresses
+- `SLEEP`
 - `SWEEP`
 
 # Copyright
