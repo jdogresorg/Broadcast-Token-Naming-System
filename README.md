@@ -11,4 +11,4 @@ If you would like to contribute a spec to the BTNS, please contact me at <j-dog@
 Name                          | Title                                   |  Author / Owner        | Status        |
 ----------------------------  | --------------------------------------- | ---------------------- | ------------- |
 [BTNS](./docs/BTNS.md)        | Broadcast Token Naming System (BTNS)    | Jeremy Johnson (J-Dog) | Accepted      |
-[BTNS-420](./docs/BTNS-420.md)| BTNS Token Standard (BTNS-TS)           | Jeremy Johnson (J-Dog) | Draft         |
+[BTNS-420](./docs/BTNS-420.md)| BTNS Token Standard (BTNS-420)          | Jeremy Johnson (J-Dog) | Draft         |
