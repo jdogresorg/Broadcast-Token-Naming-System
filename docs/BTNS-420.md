@@ -17,7 +17,7 @@ This spec defines the core `ACTION` commands that can be used to perform various
 
 BTNS-420 can be extended in the future to allow for additional `ACTION` and `PARAM` options. 
 
-This spec is a work in progress, and additional rules and notes will be added as spec is more clearly defined. 
+This spec is a work in progress, and additional rules and notes will be added as spec is more clearly defined. BTNS `ACTION` `PARAMS` will not be considered finalized until `ACTIVATION_BLOCK` for the `ACTION` is reached.
 
 # Definitions
 - `token` - A token created via a `MINT` or `DEPLOY` `ACTION` `broadcast` transaction
