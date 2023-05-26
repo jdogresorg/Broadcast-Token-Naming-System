@@ -8,11 +8,7 @@ more info coming soon... busy writing indexer :)
 
 If you would like to contribute a spec to the BTNS, please contact me at <j-dog@j-dog.net>
 
-Name                   | Version | Actions added / supported     |  Author / Owner        | Status        |
----------------------  | ------- | ----------------------------- | ---------------------- | ------------- |
-[BTNS](./docs/BTNS.md) | `0`     | `DEPLOY`, `MINT`, `TRANSFER`  | Jeremy Johnson (J-Dog) | Accepted      |
-BTNS-69                | `1`     | Coming Soon                   | Jeremy Johnson (J-Dog) | Draft         |
-BTNS-420               | `2`     | Coming Soon                   | Jeremy Johnson (J-Dog) | Draft         |
-BTNS-442               | `3`     | Coming Soon                   | Jeremy Johnson (J-Dog) | Draft         |
-BTNS-l33t              | `4`     | Coming Soon                   | Jeremy Johnson (J-Dog) | Draft         |
-BTNS-80085             | `5`     | Coming Soon                   | Jeremy Johnson (J-Dog) | Draft         |
+Name                          | Title                                   |  Author / Owner        | Status        |
+----------------------------  | --------------------------------------- | ---------------------- | ------------- |
+[BTNS](./docs/BTNS.md)        | Broadcast Token Naming System (BTNS)    | Jeremy Johnson (J-Dog) | Accepted      |
+[BTNS-420](./docs/BTNS-420.md)| BTNS Token Standard (BTNS-TS)           | Jeremy Johnson (J-Dog) | Draft         |
