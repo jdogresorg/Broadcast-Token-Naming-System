@@ -51,23 +51,23 @@ By establishing pre-defined `broadcast` commands with `ACTION` and `PARAMS` for 
 ## BTNS `ACTION` commands
 Below is a list of the defined BTNS `ACTION` commands and the function of each:
 
-- `AIRDROP` - Transfer/Distribute `token` supply to a `LIST`
-- `BATCH` - Execute multiple BTNS `ACTION` commands in a single transaction
-- `BET` - Bet `token` on `broadcast` oracle feed outcomes
-- `CALLBACK` - Return all `token` supply to owner address after a set block, in exchange for a different `token`
-- `DESTROY` - Destroy `token` supply forever
-- `DISPENSER` - Create a dispenser (vending machine) to dispense a `token` when triggered
-- `DIVIDEND` - Issue a dividend on a `token`
-- `ISSUE` - Create or issue a `token` and define how the token works
-- `LIST` - Create a list for use with various BTNS `ACTION` commands
-- `MINT` - Create `token` supply
-- `RUG` - Perform a rug pull on a `token` 
-- `SLEEP` - Pause all actions on a `token` for a certain number of blocks
-- `SEND` - Transfer or move some `token` balances between addresses
-- `SWEEP` - Transfer all `token` and/or ownerships to a destination address
+- [`AIRDROP`](#AIRDROP-command) - Transfer/Distribute `token` supply to a `LIST`
+- [`BATCH`](#BATCH-command) - Execute multiple BTNS `ACTION` commands in a single transaction
+- [`BET`](#BET-command) - Bet `token` on `broadcast` oracle feed outcomes
+- [`CALLBACK`](#CALLBACK-command) - Return all `token` supply to owner address after a set block, in exchange for a different `token`
+- [`DESTROY`](#DESTROY-command) - Destroy `token` supply forever
+- [`DISPENSER`](#DISPENSER-command) - Create a dispenser (vending machine) to dispense a `token` when triggered
+- [`DIVIDEND`](#DIVIDEND-command) - Issue a dividend on a `token`
+- [`ISSUE`](#ISSUE-command) - Create or issue a `token` and define how the token works
+- [`LIST`](#LIST-command) - Create a list for use with various BTNS `ACTION` commands
+- [`MINT`](#MINT-command) - Create `token` supply
+- [`RUG`](#RUG-command) - Perform a rug pull on a `token` 
+- [`SLEEP`](#SLEEP-command) - Pause all actions on a `token` for a certain number of blocks
+- [`SEND`](#SEND-command) - Transfer or move some `token` balances between addresses
+- [`SWEEP`](#SWEEP-command) - Transfer all `token` and/or ownerships to a destination address
 
 
-## `AIRDROP` command
+## AIRDROP command
 This `ACTION` allows one to airdrop `token` supply to one or more BTNS lists.
 
 `PARAMS` options:
@@ -91,7 +91,7 @@ This `ACTION` allows one to airdrop `token` supply to one or more BTNS lists.
 - `AIRDROP` to a `token` `LIST` sends `AMOUNT` of `token` to holders of each `token` on the list
 
 
-## `BATCH` command
+## BATCH command
 This `ACTION` allows one to batch execute multiple BTNS `ACTION` commands in a single transaction
 
 `PARAMS` options:
@@ -108,7 +108,7 @@ This `ACTION` allows one to batch execute multiple BTNS `ACTION` commands in a s
 ### Notes
 
 
-## `BET` command
+## BET command
 This `ACTION` allows one to bet a `token` on a `broadcast` oracle feed
 
 `PARAM` options:
@@ -138,7 +138,7 @@ The above example places a bet on the feed at 1BetXQ5w9mMmJosZ21jUtrebdpgMhYQUaZ
   - Oracles require BTC to operate, and as such, collect a percentage (%) fee, which is determined by the `broadcast` `fee` value (0.01 = 1%)
 
 
-## `CALLBACK` command
+## CALLBACK command
 This `ACTION` allows one to perform a callback on a `token`. 
 
 `PARAM` options:
@@ -157,7 +157,7 @@ The above example calls back the JDOG `token` to the `token` owner address
 - All `token` supply holders will receive `CALLBACK_AMOUNT` of `CALLBACK_TICK` `token` per unit
 
 
-## `DESTROY` command
+## DESTROY command
 This `ACTION` allows one to permanently destroy `token` supply. 
 
 `PARAM` options:
@@ -177,7 +177,7 @@ The above example destroys 1 BRRR `token` from the `broadcast` address
 ### Rules
 - Any destroyed `token` supply should be debited from broadcasting address balances
 
-## `DISPENSER` command
+## DISPENSER command
 This `ACTION` allows one to create a vending machine to dispense `tokens` when triggered
 
 `PARAM` options:
@@ -223,7 +223,7 @@ The above example closes the dispenser in example 3 and credits any escrowed BRR
 - BTNS Dispensers that use `ORACLE_ADDRESS` pay the oracle the entire percentage (%) fee, at time of dispenser creation
 
 
-## `DIVIDEND` command
+## DIVIDEND command
 This `ACTION` allows one to pay a dividend to `token` holders of a `token`.
 
 `PARAM` options:
@@ -239,7 +239,7 @@ This `ACTION` allows one to pay a dividend to `token` holders of a `token`.
 - To send large amounts of `tokens` to users, see the `AIRDROP` or `SEND` commands
 
 
-## `ISSUE` command
+## ISSUE command
 This `ACTION` allows one to create or issue a token and specify the following information about it
 
 `PARAM` options:
@@ -321,7 +321,7 @@ The above example issues a TEST token with a max supply of 100, and a maximum mi
 - `DESCRIPTION` field can not contain any pipe `|` or semi-colon `;` characters, as these are reserved
 
 
-## `LIST` command
+## LIST command
 This `ACTION` allows one to create lists of items for usage in BTNS functions
 
 `PARAM` options:
@@ -349,7 +349,7 @@ The above example creates a list of `counterparty` `ASSET`s
 - A `ASSET` list contains only Counterparty `ASSET` items
 - 
 
-## `MINT` command
+## MINT command
 This `ACTION` allows one to mint token supply
 
 `PARAM` options:
@@ -374,7 +374,7 @@ The above example mints 10,000,000,000,000 BRRR tokens and transfers them to 1JD
 - Transactions that attempt to mint supply beyond `MAX_SUPPLY` shall be considered invalid and ignored.
 
 
-## `RUG` command
+## RUG command
 This `ACTION` allows one to place an order on the Decentralized EXchange (DEX) to trade `token`s
 
 `PARAM` options:
@@ -400,7 +400,7 @@ The above example does a rugpull on the BRRR `token`
    - Why? Why not! We are experimenting and having fun (Don't Trust, Verify!)
 
 
-## `SEND` command
+## SEND command
 This `ACTION` allows one to transfer or send a `token` between addresses
 
 `PARAM` options:
@@ -448,7 +448,7 @@ The above example sends 5 BRRR tokens to 1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev and 
 - `TRANSFER` `ACTION` can be used for backwards-compatability with BRC20/SRC20 `TRANSFER`
 
 
-## `SLEEP` command
+## SLEEP command
 This `ACTION` allows one to pause all `token` `ACTIONS` until `BLOCK` is reached
 
 `PARAMS` options:
@@ -470,7 +470,7 @@ The above example pauses/sleeps ALL BTNS `ACTION` commands on JDOG `token` until
  - Can issue a `SLEEP` before `RESUME_BLOCK` to extend a `SLEEP`
 
 
-## `SWEEP` command
+## SWEEP command
 This `ACTION` transfers all `token` and/or ownerships to a destination address
 
 `PARAM` options:
