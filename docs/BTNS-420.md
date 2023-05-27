@@ -51,20 +51,20 @@ By establishing pre-defined `broadcast` commands with `ACTION` and `PARAMS` for 
 ## BTNS `ACTION` commands
 Below is a list of the defined BTNS `ACTION` commands and the function of each:
 
-- [`AIRDROP`](#AIRDROP-command) - Transfer/Distribute `token` supply to a `LIST`
-- [`BATCH`](#BATCH-command) - Execute multiple BTNS `ACTION` commands in a single transaction
-- [`BET`](#BET-command) - Bet `token` on `broadcast` oracle feed outcomes
-- [`CALLBACK`](#CALLBACK-command) - Return all `token` supply to owner address after a set block, in exchange for a different `token`
-- [`DESTROY`](#DESTROY-command) - Destroy `token` supply forever
-- [`DISPENSER`](#DISPENSER-command) - Create a dispenser (vending machine) to dispense a `token` when triggered
-- [`DIVIDEND`](#DIVIDEND-command) - Issue a dividend on a `token`
-- [`ISSUE`](#ISSUE-command) - Create or issue a `token` and define how the token works
-- [`LIST`](#LIST-command) - Create a list for use with various BTNS `ACTION` commands
-- [`MINT`](#MINT-command) - Create `token` supply
-- [`RUG`](#RUG-command) - Perform a rug pull on a `token` 
-- [`SLEEP`](#SLEEP-command) - Pause all actions on a `token` for a certain number of blocks
-- [`SEND`](#SEND-command) - Transfer or move some `token` balances between addresses
-- [`SWEEP`](#SWEEP-command) - Transfer all `token` and/or ownerships to a destination address
+- [`AIRDROP`](#airdrop-command) - Transfer/Distribute `token` supply to a `LIST`
+- [`BATCH`](#batch-command) - Execute multiple BTNS `ACTION` commands in a single transaction
+- [`BET`](#bet-command) - Bet `token` on `broadcast` oracle feed outcomes
+- [`CALLBACK`](#callback-command) - Return all `token` supply to owner address after a set block, in exchange for a different `token`
+- [`DESTROY`](#destroy-command) - Destroy `token` supply forever
+- [`DISPENSER`](#dispenser-command) - Create a dispenser (vending machine) to dispense a `token` when triggered
+- [`DIVIDEND`](#dividend-command) - Issue a dividend on a `token`
+- [`ISSUE`](#issue-command) - Create or issue a `token` and define how the token works
+- [`LIST`](#list-command) - Create a list for use with various BTNS `ACTION` commands
+- [`MINT`](#mint-command) - Create `token` supply
+- [`RUG`](#rug-command) - Perform a rug pull on a `token` 
+- [`SLEEP`](#sleep-command) - Pause all actions on a `token` for a certain number of blocks
+- [`SEND`](#send-command) - Transfer or move some `token` balances between addresses
+- [`SWEEP`](#sweep-command) - Transfer all `token` and/or ownerships to a destination address
 
 
 ## AIRDROP command
