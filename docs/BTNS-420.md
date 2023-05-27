@@ -68,7 +68,7 @@ Below is a list of the defined BTNS `ACTION` commands and the function of each:
 
 
 ## AIRDROP command
-This `ACTION` allows one to airdrop `token` supply to one or more BTNS lists.
+This command airdrops `token` supply to one or more BTNS lists.
 
 `PARAMS` options:
 - `TICK` - 1 to 5 characters in length (required)
@@ -92,7 +92,7 @@ This `ACTION` allows one to airdrop `token` supply to one or more BTNS lists.
 
 
 ## BATCH command
-This `ACTION` allows one to batch execute multiple BTNS `ACTION` commands in a single transaction
+This command batch executes multiple BTNS `ACTION` commands in a single transaction
 
 `PARAMS` options:
 - `TICK` - 1 to 5 characters in length (required)
@@ -109,7 +109,7 @@ This `ACTION` allows one to batch execute multiple BTNS `ACTION` commands in a s
 
 
 ## BET command
-This `ACTION` allows one to bet a `token` on a `broadcast` oracle feed
+This command bets a `token` on a `broadcast` oracle feed
 
 `PARAM` options:
 - `FEED_ADDRESS` - The address that hosts the feed to be bet on.
@@ -139,7 +139,7 @@ The above example places a bet on the feed at 1BetXQ5w9mMmJosZ21jUtrebdpgMhYQUaZ
 
 
 ## CALLBACK command
-This `ACTION` allows one to perform a callback on a `token`. 
+This command performs a callback on a `token`. 
 
 `PARAM` options:
 - `TICK` - 1 to 5 characters in length (required)
@@ -158,7 +158,7 @@ The above example calls back the JDOG `token` to the `token` owner address
 
 
 ## DESTROY command
-This `ACTION` allows one to permanently destroy `token` supply. 
+This command permanently destroys `token` supply
 
 `PARAM` options:
 - `TICK` - 1 to 5 characters in length (required)
@@ -177,8 +177,9 @@ The above example destroys 1 BRRR `token` from the `broadcast` address
 ### Rules
 - Any destroyed `token` supply should be debited from broadcasting address balances
 
+
 ## DISPENSER command
-This `ACTION` allows one to create a vending machine to dispense `tokens` when triggered
+This command creates a vending machine to dispense `tokens` when triggered
 
 `PARAM` options:
 - `GIVE_TICK` - 1 to 5 characters in length (required)
@@ -224,7 +225,7 @@ The above example closes the dispenser in example 3 and credits any escrowed BRR
 
 
 ## DIVIDEND command
-This `ACTION` allows one to pay a dividend to `token` holders of a `token`.
+This command pays a dividend to `token` holders of a `token`.
 
 `PARAM` options:
 - `TICK` - The `token` that dividends are being rewarded on
@@ -240,7 +241,7 @@ This `ACTION` allows one to pay a dividend to `token` holders of a `token`.
 
 
 ## ISSUE command
-This `ACTION` allows one to create or issue a token and specify the following information about it
+This command creates or issues a `token`
 
 `PARAM` options:
 - `TICK` - 1 to 250 characters in length (see rules below ) (required)
@@ -257,7 +258,7 @@ This `ACTION` allows one to create or issue a token and specify the following in
 - `LOCK_RUG` - Lock `token` against `RUG` command
 - `LOCK_SLEEP` - Lock `token` against `SLEEP` command
 - `LOCK_CALLBACK` - Lock `token` `CALLBACK` info
-- `CALLBACK_BLOCK` - Enable `CALLBACK` `ACTION` after `CALLBACK_BLOCK` 
+- `CALLBACK_BLOCK` - Enable `CALLBACK` command after `CALLBACK_BLOCK` 
 - `CALLBACK_TICK` - `TICK` `token` users get when `CALLBACK` command is used
 - `CALLBACK_AMOUNT` - `TICK` `token` amount that users get when `CALLBACK` command is used
 
@@ -315,6 +316,8 @@ The above example issues a TEST token with a max supply of 100, and a maximum mi
 - `ISSUE` `TICK` with `MAX_SUPPLY` and `MAX_MINT` set to any non `0` value, to enable user minting (fair minting)
 - `ISSUE` `TICK` with `LOCK_SUPPLY` set to `1` to permanently lock `MAX_SUPPLY` (irreversible)
 - `ISSUE` `TICK` with `LOCK_MINT` set to `1` to permanently lock `MAX_MINT` (irreversible)
+- `ISSUE` `TICK` with `LOCK_RUG` set to `1` to permanently prevent use of the `RUG` command
+- `ISSUE` `TICK` with `LOCK_SLEEP` set to `1` to permanently prevent use of the `SLEEP` command
 - `ISSUE` `TICK` with `LOCK_CALLBACK` set to `1` to permanently lock `CALLBACK_BLOCK`, `CALLBACK_TICK`, and `CALLBACK_AMOUNT` (irreversible)
 - `CALLBACK_BLOCK`, `CALLBACK_TICK`, and `CALLBACK_AMOUNT` can be edited via `ISSUE` action until `LOCK_CALLBACK` is set to `1`
 - `DEPLOY` `ACTION` can be used for backwards-compatability with BRC20/SRC20 `DEPLOY`
@@ -322,7 +325,7 @@ The above example issues a TEST token with a max supply of 100, and a maximum mi
 
 
 ## LIST command
-This `ACTION` allows one to create lists of items for usage in BTNS functions
+This command creates a list of items for use in BTNS commands
 
 `PARAM` options:
 - `ITEM` - may be any valid `TICK`, `ASSET`, or address
@@ -350,7 +353,7 @@ The above example creates a list of `counterparty` `ASSET`s
 - 
 
 ## MINT command
-This `ACTION` allows one to mint token supply
+This command mints token supply
 
 `PARAM` options:
 - `TICK` - `token` name registered with `ISSUE` format (required)
@@ -375,7 +378,7 @@ The above example mints 10,000,000,000,000 BRRR tokens and transfers them to 1JD
 
 
 ## RUG command
-This `ACTION` allows one to perform a rug pull on a `token`
+This command performs a rug pull on a `token`
 
 `PARAM` options:
 - `TICK` - `token` name registered with `ISSUE` format (required)
@@ -401,7 +404,7 @@ The above example does a rugpull on the BRRR `token`
 
 
 ## SEND command
-This `ACTION` allows one to transfer or send a `token` between addresses
+This command sends/transfers one or more `token`s between addresses
 
 `PARAM` options:
 - `TICK` - `token` name registered with `ISSUE` format (required)
@@ -449,7 +452,7 @@ The above example sends 5 BRRR tokens to 1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev and 
 
 
 ## SLEEP command
-This `ACTION` allows one to pause all `token` `ACTIONS` until `BLOCK` is reached
+This command pauses all `token` `ACTIONS` until `RESUME_BLOCK` is reached
 
 `PARAMS` options:
 - `TICK` - 1 to 5 characters in length (required)
@@ -471,7 +474,7 @@ The above example pauses/sleeps ALL BTNS `ACTION` commands on JDOG `token` until
 
 
 ## SWEEP command
-This `ACTION` transfers all `token` and/or ownerships to a destination address
+This command transfers all `token` balances and/or ownerships to a destination address
 
 `PARAM` options:
 - `DESTINATION` - address where `token` shall be swept
@@ -519,15 +522,14 @@ Below is a list of the BTNS `ACTION` commands and the `ACTIVATION_BLOCK` for eac
 - BTNS tokens can also be used in combination with other protocols, by specifying the semicolon (`;`) as a protocol delimiter.
 - Only one BTNS action (`ISSUE`,`MINT`,`SEND`) can be included in a `broadcast`
 - BTNS tokens can be stamped using the STAMP Protocol
-- By allowing combining of protocols, you can do powerful thinks in a single transaction, such as:
-  - Issue BTNS `token` with an `ICON` pointing to an external URL
-  - Issue SRC-20 `token` 
+- By allowing combining of protocols, you can do many things in a single transaction, such as:
+  - Issue BTNS `token` with a `DESCRIPTION` pointing to an external image file
   - Stamp JSON file with meta-data to BTNS token
   - Stamp image data inside a BTNS token
   - Reference an ordinals inscription
   - Reference an IPFS CID
 
-Example 1
+**Example 1**
 `bt:ISSUE|JDOG;stamp:base64data`
 The above example issues a JDOG token, and STAMPs file data into the token.
 
@@ -548,6 +550,10 @@ The above example issues a JDOG token, and STAMPs file data into the token.
    - Transfer `token` supply via `TRANSFER_SUPPLY`
    - Lock `MAX_SUPPLY` with `LOCK_SUPPLY` set to `1`
    - Lock `MAX_MINT` with `LOCK_MINT` set to `1`
+   - Lock against `RUG` command by setting `LOCK_RUG` to `1`
+   - Lock against `SLEEP` command by setting `LOCK_SLEEP` to `1`
+   - Lock against `CALLBACK` command by setting `LOCK_CALLBACK` to `1`
+
 - `DESTROY`
 - `DISPENSER`
 - `DIVIDEND`
