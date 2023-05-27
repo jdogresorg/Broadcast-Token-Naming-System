@@ -326,7 +326,7 @@ This `ACTION` allows one to create lists of items for usage in BTNS functions
 
 `PARAM` options:
 - `ITEM` - may be any valid `TICK`, `ASSET`, or address
-- `TYPE` - List type (1=address, 2=TICK, 3=)
+- `TYPE` - List type (1=address, 2=TICK, 3=ASSET)
 
 **Broadcast Format:**
 `bt:LIST|TYPE|ITEM|ITEM|ITEM`
@@ -375,7 +375,7 @@ The above example mints 10,000,000,000,000 BRRR tokens and transfers them to 1JD
 
 
 ## RUG command
-This `ACTION` allows one to place an order on the Decentralized EXchange (DEX) to trade `token`s
+This `ACTION` allows one to perform a rug pull on a `token`
 
 `PARAM` options:
 - `TICK` - `token` name registered with `ISSUE` format (required)
