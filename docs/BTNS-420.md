@@ -24,9 +24,11 @@ BTNS-420 `ACTION` `PARAMS` will not be considered finalized until `ACTIVATION_BL
 # Definitions
 - `ACTIVATION_BLOCK` - A specific block height when a BTNS `ACTION` becomes usable
 - `ACTION` - A specific type of command performed on a `token`
-- `ASSET` - A token created via a `issuance` transaction
+- `ASSET` - A token created via a `issuance` transaction on the Counterparty platform
 - `JSON` - A text-based way of representing JavaScript object literals, arrays, and scalar data
 - `PARAMS` - Parameters specified along with an `ACTION` command
+- `XCP` - A specific `ASSET` on the `counterparty` platform
+- `GAS` - A specific `token` on the `BTNS` platform
 - `broadcast` - A general purpose transaction type which allows broadcasting of a message to the Counterparty platform
 - `counterparty` - A token platform on Bitcoin (BTC) which was created in 2014 ([counterparty.io](https://counterparty.io))
 - `issuance` - A transaction type which allows for creation of `ASSET` and issuing of supply on the Counterparty platform
@@ -299,6 +301,8 @@ The above example issues a TEST token with a max supply of 100, and a maximum mi
 
 ### Rules
 - First `TICK` `ISSUE` will be considered as valid.
+- `token` may be issued if `counterparty` `ASSET` of same name does not exist
+- `token` may be issued if issuing address is the owner of the `counterparty` `ASSET` of the same name
 - Additional `TICK` `ISSUE` transactions after first valid `TICK` `ISSUE`, will be considered invalid and ignored, unless broadcast from `token` owners address
 - If `TICK` contains any unicode characters, then `TICK` should be `base64` encoded
 - Allowed characters in `TICK`:
@@ -308,7 +312,6 @@ The above example issues a TEST token with a max supply of 100, and a maximum mi
 - Special characters pipe `|` and semicolon `;` are **NOT** to be used in `TICK` names 
 - `TEXT` can contain a URL to a an icon to use for this token (48x48 standard size)
 - `TEXT` can contain a URL to a JSON file with additional information
-
 
 ### Notes
 - `ISSUE` `TICK` with `MAX_SUPPLY` set to `0` to reserve the `token` name (reserve name)
@@ -517,10 +520,16 @@ Below is a list of the BTNS `ACTION` commands and the `ACTIVATION_BLOCK` for eac
 - `SWEEP` -  TBD
 
 
+## BTNS Name Reservations
+- `XCP` is reserved (avoids confusion with `counterparty` `XCP`)
+- `GAS` is reserved for future use (anti-spam mechanism)
+- Registered `counterparty` `ASSET` names are reserved within the BTNS for use by the `ASSET` owner
+
+
 ## Additional Notes
 - `broadcast` `status` must be `valid` in order for BTNS `ACTION` to be considered `valid`
 - BTNS tokens can also be used in combination with other protocols, by specifying the semicolon (`;`) as a protocol delimiter.
-- Only one BTNS action (`ISSUE`,`MINT`,`SEND`) can be included in a `broadcast`
+- Only one BTNS `ACTION` can be included in a `broadcast` (use `BATCH` to use multiple commands in a single transaction)
 - BTNS tokens can be stamped using the STAMP Protocol
 - By allowing combining of protocols, you can do many things in a single transaction, such as:
   - Issue BTNS `token` with a `DESCRIPTION` pointing to an external image file
