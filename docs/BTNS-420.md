@@ -224,6 +224,7 @@ The above example closes the dispenser in example 3 and credits any escrowed BRR
 - The `ORACLE_ADDRESS` option uses the Counterparty oracle system
 - Oracles require BTC to operate, and as such, collect a percentage (%) fee, which is determined by the `broadcast` `fee` value (0.01 = 1%)
 - BTNS Dispensers that use `ORACLE_ADDRESS` pay the oracle the entire percentage (%) fee, at time of dispenser creation
+- Dispenser payment can only trigger up to `25` sub-dispenses (dispenses that trigger additional dispenses)
 
 
 ## DIVIDEND command
