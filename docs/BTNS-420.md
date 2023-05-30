@@ -192,11 +192,11 @@ This command creates a vending machine to dispense `tokens` when triggered
 - `STATUS` - The state of the dispenser. (0=Open, 10=Closed)
 - `ADDRESS` - Address that you would like to open the dispenser on. (default=broadcasting address)
 - `ORACLE_ADDRESS` - address that you would like to use as a price oracle for this dispenser.
-- `WHITELIST` - `TX_HASH` of a BTNS `LIST` to allow trigger dispenser
-- `BLACKLIST` - `TX_HASH` of a BTNS `LIST` to NOT allow to trigger a dispenser
+- `ALLOW_LIST` - `TX_HASH` of a BTNS `LIST` of addresses to allow trigger dispenser
+- `BLOCK_LIST` - `TX_HASH` of a BTNS `LIST` of addresses to NOT allow to trigger a dispenser
 
 **Broadcast Format:**
-`bt:DISPENSER|GIVE_TICK|GIVE_AMOUNT|ESCROW_AMOUNT|TRIGGER_TICK|TRIGGER_AMOUNT|STATUS|ADDRESS|ORACLE_ADDRESS|WHITELIST|BLACKLIST`
+`bt:DISPENSER|GIVE_TICK|GIVE_AMOUNT|ESCROW_AMOUNT|TRIGGER_TICK|TRIGGER_AMOUNT|STATUS|ADDRESS|ORACLE_ADDRESS|ALLOW_LIST|BLOCK_LIST`
 
 **Example 1:**
 `bt:DISPENSER|JDOG|1|1|BTC|1.00000000|0|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev`
