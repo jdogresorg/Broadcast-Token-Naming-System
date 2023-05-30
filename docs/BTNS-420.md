@@ -235,6 +235,14 @@ This command pays a dividend to `token` holders of a `token`.
 - `DIVIDEND_TICK` - The `token` that dividends are paid in
 - `AMOUNT` - The quantity of `DIVIDEND_TICK` rewarded per `UNIT`
 
+**Broadcast Format:**
+`bt:DIVIDEND|TICK|DIVIDEND_TICK|AMOUNT`
+
+**Example 1:**
+`bt:DIVIDEND|BRRR|BACON|1`
+The above example pays a dividend of 1 BACON to every holder of 1 BRRR
+
+
 ### Rules
 - Dividends may only be paid out by the current `token` owner
 
@@ -305,6 +313,7 @@ The above example issues a TEST token with a max supply of 100, and a maximum mi
 - `token` may be issued if `counterparty` `ASSET` of same name does not exist
 - `token` may be issued if issuing address is the owner of the `counterparty` `ASSET` of the same name
 - Additional `TICK` `ISSUE` transactions after first valid `TICK` `ISSUE`, will be considered invalid and ignored, unless broadcast from `token` owners address
+- `DECIMALS` can not be changed after `token` supply is issued
 - If `TICK` contains any unicode characters, then `TICK` should be `base64` encoded
 - Allowed characters in `TICK`:
    - Any word character (alphanumeric characters and underscores)
