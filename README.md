@@ -62,12 +62,12 @@ Name                          | Title                                     |  Aut
 # BTNS Wallets
 - [Freewallet](https://freewallet.io/)
 
+
 # Counterparty Platform
 **`Counterparty`** is the swiss army knife of Bitcoin, and I encourage **ALL** developers looking to build on Bitcoin to take the time to go down the **`Counterparty`** rabbit hole.
 - [Counterparty Website](https://counterparty.io)
 - [Counterparty Documentation](https://docs.counterparty.io)
 - [Counterparty API](https://api.counterparty.io)
-- [FreeWallet](https://freewallet.io)
 
 
 # BTNS Logos
