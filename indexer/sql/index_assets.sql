@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS index_assets;
+CREATE TABLE index_assets (
+    id    INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    asset VARCHAR(129) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+CREATE INDEX asset on index_assets (asset);
