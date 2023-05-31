@@ -81,25 +81,6 @@ if($rollback){
     byeLog("Rollback to block {$block_index} complete.");
 }
 
-// Define the ACTIVATION_BLOCK for each ACTION
-$active = array(
-    'AIRDROP'   => 0,
-    'BATCH'     => 0,
-    'BET'       => 0,
-    'CALLBACK'  => 0,
-    'DESTROY'   => 0,
-    'DISPENSER' => 0,
-    'DIVIDEND'  => 0,
-    'ISSUE'     => 0,
-    'LIST'      => 0,
-    'MINT'      => 0,
-    'RUG'       => 0,
-    'SEND'      => 0,
-    'SLEEP'     => 0,
-    'SWEEP'     => 0
-);
-
-
 // If no block given, load last block from state file, or use first block with BTNX tx
 if(!$block){
     $last  = file_get_contents(LASTFILE);
@@ -180,8 +161,11 @@ while($block <= $current){
                 // Create database records and get ids for ticker, tx_hash, and source address
                 $source_id  = createAddress($row->source);
                 $tx_hash_id = createTransaction($row->tx_hash);
-
                 $tick_id    = createTicker($ticker);
+
+                // Support old BRC20/SRC20 actions 
+                if($action=='TRANSFER') $action = 'SEND';
+                if($action=='DEPLOY')   $action = 'ISSUE';
 
                 // Define basic BTNS transaction data object
                 $data = (object) array(
@@ -194,16 +178,12 @@ while($block <= $current){
                 // Create a record of this transaction in the transactions table
                 createTxIndex($data);
 
-                // Support old BRC20/SRC20 actions 
-                if($action=='TRANSFER') $action = 'SEND';
-                if($action=='DEPLOY')   $action = 'ISSUE';
-
                 // Validate Action
-                if(!in_array($action,$actions))
-                    $error = 'invalid: unknown BTNS action';
+                if(!array_key_exists($action,PROTOCOL_CHANGES))
+                    $error = 'invalid: Unknown ACTION';
 
                 // Verify action is activated (past ACTIVATION_BLOCK)
-                if(!$active[$action])
+                if(!$error && !isEnabled($action, $network, $block))
                     $error = 'invalid: ACTIVATION_BLOCK';
 
                 // Handle processing the specific BTNS ACTION commands

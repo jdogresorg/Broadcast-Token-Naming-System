@@ -8,7 +8,7 @@ $changes = array(
     // FORMAT
     // 'NAME' => array($version_major, $version_minor, $version_revision, $mainnet_block_index, $testnet_block_index),
 
-    // Define `ACTION` commands and `ACTIVATION_BLOCK` for each
+    // Define `ACTION` commands and `ACTIVATION_BLOCK` for each (ALL UPPER case)
     // BTNS-420 SPEC defines when things are ACTUALLY activated
     // active here just means active for testing / debugging
     'AIRDROP'   => array(0,  10,   0,     0,      0),
@@ -26,7 +26,7 @@ $changes = array(
     'SLEEP'     => array(0,  10,   0,     0,      0),
     'SWEEP'     => array(0,  10,   0,     0,      0),
 
-    // Define protocol changes
+    // Define protocol changes (ALL LOWER Case)
     // 'name' => array(0,  10,   0,     0,      0),
 );
 
