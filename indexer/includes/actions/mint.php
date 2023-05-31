@@ -73,3 +73,5 @@ function btnsMint($params=null, $data=null, $error=null){
                 //     }
                 // }
 }
+
+?>

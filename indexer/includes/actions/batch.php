@@ -1,6 +1,6 @@
 <?php
 /*********************************************************************
- * destroys.php - DESTROY command
+ * batches.php - BATCH command
  *
  * PARAMS:
  * - TICK    - 1 to 5 characters in length (required)
@@ -9,7 +9,9 @@
  * FORMATS:
  * - bt:BATCH|COMMAND;COMMAND
  ********************************************************************/
-function btnsSleeps($params=null, $data=null, $error=null){
+function btnsBatch($params=null, $data=null, $error=null){
     global $mysqli;
     // Coming soon
 }
+
+?>

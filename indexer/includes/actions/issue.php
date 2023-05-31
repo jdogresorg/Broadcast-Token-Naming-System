@@ -24,7 +24,7 @@
  * FORMATS:
  * - bt:ISSUE|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT
  ********************************************************************/
-function btnsIssuance( $params=null, $data=null, $error=null){
+function btnsIssue( $params=null, $data=null, $error=null){
     global $mysqli;
     // Add ACTION specific params to transaction data
     $data->TICK             = $params[1];           // 1 to 250 characters in length (see rules below ) (required)
@@ -54,17 +54,17 @@ function btnsIssuance( $params=null, $data=null, $error=null){
      */
 
     // Verify length is 1-250 chars (BTNS)
-    $max = 250
-    if(!$error && (strlen($ticker)<1 || strlen($ticker)>250))
-        $error = 'invalid: TICK (length)';
+    // $max = 250
+    // if(!$error && (strlen($ticker)<1 || strlen($ticker)>250))
+    //     $error = 'invalid: TICK (length)';
 
-    // Verify no pipe in TICK (BTNS uses pipe as field delimiter)
-    if(!$error && strpos($ticker,'|')!==false)
-        $error = 'invalid: TICK (pipe)';
+    // // Verify no pipe in TICK (BTNS uses pipe as field delimiter)
+    // if(!$error && strpos($ticker,'|')!==false)
+    //     $error = 'invalid: TICK (pipe)';
 
-    // Verify no semicolon in TICK (BTNS uses semicolon as action delimiter)
-    if(!$error && strpos($ticker,';')!==false)
-        $error = 'invalid: TICK (semicolon)';
+    // // Verify no semicolon in TICK (BTNS uses semicolon as action delimiter)
+    // if(!$error && strpos($ticker,';')!==false)
+    //     $error = 'invalid: TICK (semicolon)';
 
 
     /*

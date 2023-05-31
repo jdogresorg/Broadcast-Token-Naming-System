@@ -29,7 +29,7 @@ if($runtype=='testnet'){
 define("VERSION_MAJOR", 0);
 define("VERSION_MINOR", 10);
 define("VERSION_REVISION",0);
-define("VERSION_STRING", VERSION_MAJOR + '.' + VERSION_MINOR + '.' + VERSION_REVISION)
+define("VERSION_STRING", VERSION_MAJOR . '.' . VERSION_MINOR . '.' . VERSION_REVISION);
 
 // First block with BTNS transaction
 define("FIRST_BLOCK",789742);
@@ -44,20 +44,20 @@ require_once('profiler.php');
 require_once('protocol_changes.php');
 
 // BTNS Actions
-require_once('actions/airdrops.php');
-require_once('actions/batches.php');
-require_once('actions/bets.php');
-require_once('actions/callbacks.php');
-require_once('actions/destroys.php');
-require_once('actions/dispensers.php');
-require_once('actions/dividends.php');
-require_once('actions/issuances.php');
-require_once('actions/lists.php');
-require_once('actions/mints.php');
-require_once('actions/rugs.php');
-require_once('actions/sleeps.php');
-require_once('actions/sends.php');
-require_once('actions/sweeps.php');
+require_once('actions/airdrop.php');
+require_once('actions/batch.php');
+require_once('actions/bet.php');
+require_once('actions/callback.php');
+require_once('actions/destroy.php');
+require_once('actions/dispenser.php');
+require_once('actions/dividend.php');
+require_once('actions/issue.php');
+require_once('actions/list.php');
+require_once('actions/mint.php');
+require_once('actions/rug.php');
+require_once('actions/sleep.php');
+require_once('actions/send.php');
+require_once('actions/sweep.php');
 
 // Start runtime clock
 $runtime = new Profiler();

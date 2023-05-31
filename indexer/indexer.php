@@ -28,7 +28,7 @@
  ********************************************************************/
 
 // Hide all but errors and parse issues
-error_reporting(E_ERROR|E_PARSE);
+// error_reporting(E_ERROR|E_PARSE);
 
 // Parse in any command line args and set basic runtime flags
 $args     = getopt("", array("testnet::", "block::", "single::", "rollback::",));
@@ -54,6 +54,9 @@ initDB();
 
 // Create a lock file, and bail if we detect an instance is already running
 // createLockFile();
+
+// Print indexer version number so it shows up in debug logs
+print "BTNS Indexer v" . VERSION_STRING . "\n";
 
 // Handle rollbacks
 if($rollback){

@@ -21,3 +21,5 @@ function btnsDispenser($params=null, $data=null, $error=null){
     global $mysqli;
     // Coming soon
 }
+
+?>

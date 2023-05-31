@@ -128,3 +128,6 @@ function btnsSend($params=null, $data=null, $error=null){
                 //         }
                 //     }
                 // }}
+}
+
+?>

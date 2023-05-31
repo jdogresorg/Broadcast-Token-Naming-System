@@ -9,7 +9,7 @@
  * FORMATS:
  * - bt:DESTROY|TICK|AMOUNT
  ********************************************************************/
-function btnsCallback($params=null, $data=null, $error=null){
+function btnsDestroy($params=null, $data=null, $error=null){
     global $mysqli;
     // Coming soon
 }
