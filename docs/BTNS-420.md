@@ -274,9 +274,11 @@ This command creates or issues a `token`
 - `CALLBACK_BLOCK` - Enable `CALLBACK` command after `CALLBACK_BLOCK` 
 - `CALLBACK_TICK` - `TICK` `token` users get when `CALLBACK` command is used
 - `CALLBACK_AMOUNT` - `TICK` `token` amount that users get when `CALLBACK` command is used
+- `MINT_ALLOW_LIST` - `TX_HASH` of a BTNS `LIST` of addresses to allow minting from
+- `MINT_BLOCK_LIST` - `TX_HASH` of a BTNS `LIST` of addresses to NOT allow minting from
 
 **Broadcast Format:**
-`bt:ISSUE|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT`
+`bt:ISSUE|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT|MINT_ALLOW_LIST|MINT_BLOCK_LIST`
 
 **Example 1:**
 `bt:ISSUE|JDOG`
@@ -337,6 +339,7 @@ The above example issues a TEST token with a max supply of 100, and a maximum mi
 - `CALLBACK_BLOCK`, `CALLBACK_TICK`, and `CALLBACK_AMOUNT` can be edited via `ISSUE` action until `LOCK_CALLBACK` is set to `1`
 - `DEPLOY` `ACTION` can be used for backwards-compatability with BRC20/SRC20 `DEPLOY`
 - `DESCRIPTION` field can not contain any pipe `|` or semi-colon `;` characters, as these are reserved
+- By default any address can `MINT`, to change this behavior use `MINT_ALLOW_LIST` and `MINT_BLOCK_LIST`
 
 
 ## LIST command
@@ -426,6 +429,7 @@ This command sends/transfers one or more `token`s between addresses
 - `AMOUNT` - Amount of tokens to send (required)
 - `DESTINATION` - Address to transfer tokens to (required)
 - `MEMO` - An optional Memo to include
+
 This format also allows for repeating `AMOUNT` and `DESTINATION` to enable multiple transfers in a single transaction
 
 **Broadcast Format:**
