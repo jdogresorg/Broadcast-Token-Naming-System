@@ -723,7 +723,7 @@ function updateTokenInfo( $tick=null){
 }
 
 // Get token supply from credits/debits table (credits - debits = supply)
-function getTokenSupply( $tick=null){
+function getTokenSupply( $tick=null ){
     global $mysqli;
     $credits = 0;
     $debits  = 0;
@@ -849,5 +849,56 @@ function createTxIndex( $data=null ){
         byeLog('Error while trying to lookup record in index_tx table');
     }
 }
+
+// Handles adding protocol changes to $protocol_changes global var (used in PROTOCOL_CHANGES constant)
+// @param {name}                string  Unique Name for protocol change
+// @param {version_major}       integer BTNS Indexer MAJOR version
+// @param {version_minor}       integer BTNS Indexer MINOR version
+// @param {version_revision}    integer BTNS Indexer REVISION version
+// @param {mainnet_block_index} integer BTNS Indexer REVISION version
+// @param {testnet_block_index} integer BTNS Indexer REVISION version
+// Returns boolean (true) for success or string with specific error message
+function addProtocolChange($name=null, $version_major=null, $version_minor=null, $version_revision=null, $mainnet_block_index=null, $testnet_block_index=null){
+    global $protocol_changes;
+    $error = false;
+    // Name must be string
+    if(gettype($name)!='string')
+      $error = 'name value must be string';
+    $arr = array('version_major','version_minor','version_revision','mainnet_block_index','testnet_block_index');
+    foreach($arr as $a){
+        if(!$error && !is_int(${$a}))
+            $error = $a . ' value must be integer';
+    }
+    if($error){
+        return $error;
+    } else {
+        $protocol_changes[$name] = array($version_major, $version_minor, $version_revision, $mainnet_block_index, $testnet_block_index);
+        return true;
+    }
+}
+
+// Handle validating if a specific protocol change is activated yet
+// @param {name}        string  Unique Name for protocol change
+// @param {network}     string  Network Name (mainnet/testnet)
+// @param {block_index} integer Block index to check if feature is active
+function isEnabled($name=null, $network=null, $block_index=null){
+    $info = PROTOCOL_CHANGES[$name];
+    // Return false if we couldn't find any info on the specific protocol change
+    if(isset($info)){
+        $version_major       = $info[0];
+        $version_minor       = $info[1];
+        $version_revision    = $info[2];
+        $mainnet_block_index = $info[3];
+        $testnet_block_index = $info[4];
+        $enable_block_index  = ${$network . '_block_index'};
+        // if(VERSION_MAJOR < $version_major) return false;
+        // if(VERSION_MINOR < $version_minor) return false;
+        // if(VERSION_REVISION < $version_revision) return false;
+        if($block_index >= $enable_block_index) 
+            return true;
+    }
+    return false;
+}
+
 
 ?>

@@ -3,12 +3,12 @@
  * config.php - Config info / Credentials
  ********************************************************************/
 
-/* 
- * Database Config
- */
+// Network (mainnet/testnet)
+$network = ($network!='mainnet') ? $network : 'mainnet';
+define("NETWORK", $network);
 
 // Mainnet config
-if($runtype=='mainnet'){
+if(NETWORK=='mainnet'){
     define("DB_HOST", "localhost");
     define("DB_USER", "mysql_username");
     define("DB_PASS", "mysql_password");
@@ -17,7 +17,7 @@ if($runtype=='mainnet'){
 }
 
 // Testnet config
-if($runtype=='testnet'){
+if(NETWORK=='testnet'){
     define("DB_HOST", "localhost");
     define("DB_USER", "mysql_username");
     define("DB_PASS", "mysql_password");
