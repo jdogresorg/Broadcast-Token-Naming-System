@@ -2,16 +2,19 @@
 This command performs a rug pull on a `token`
 
 ## PARAMS
-| Name    | Type   | Description              			    |
-| ------- | ------ | -------------------------------------- |
-| `TICK`  | String | 1 to 250 characters in length          |
+| Name      | Type   | Description                   |
+| --------- | ------ | ----------------------------- |
+| `VERSION` | String | Broadcast Format Version      |
+| `TICK`    | String | 1 to 250 characters in length |
 
 ## Formats
-- `RUG|TICK`
+
+### Version `0`
+- `RUG|VERSION|TICK`
 
 ## Examples
 ```
-bt:RUG|BRRR
+bt:RUG|0|BRRR
 This example does a rugpull on the BRRR `token`
 ```
 

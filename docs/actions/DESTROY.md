@@ -2,19 +2,26 @@
 This command permanently destroys `token` supply
 
 ## PARAMS
-| Name     | Type   | Description                   |
-| -------- | ------ | ----------------------------- |
-| `TICK`   | String | 1 to 250 characters in length |
-| `AMOUNT` | String | Amount of `tokens` to destroy |
+| Name      | Type   | Description                   |
+| --------- | ------ | ----------------------------- |
+| `VERSION` | String | Broadcast Format Version      |
+| `TICK`    | String | 1 to 250 characters in length |
+| `AMOUNT`  | String | Amount of `tokens` to destroy |
 
 ## Formats
-- `DESTROY|TICK|AMOUNT`
-- `DESTROY|TICK|AMOUNT|TICK|AMOUNT`
+
+### Version `0`
+- `DESTROY|VERSION|TICK|AMOUNT|TICK|AMOUNT`
 
 ## Examples
 ```
-bt:DESTROY|BRRR|1
+bt:DESTROY|0|BRRR|1
 This example destroys 1 BRRR token from the broadcasting address
+```
+
+```
+bt:DESTROY|0|BRRR|1|GAS|10
+This example destroys 1 BRRR token and 10 GAS tokens from the broadcasting address
 ```
 
 ## Rules

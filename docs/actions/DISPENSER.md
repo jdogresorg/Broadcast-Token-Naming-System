@@ -4,6 +4,7 @@ This command creates a vending machine to dispense `tokens` when triggered
 ## PARAMS
 | Name             | Type   | Description                                                                          |
 | ---------------- | ------ | ------------------------------------------------------------------------------------ |
+| `VERSION`        | String | Broadcast Format Version                                                             |
 | `GIVE_TICK`      | String | 1 to 250 characters in length                                                        |
 | `GIVE_AMOUNT`    | String | Quantity of `GIVE_TICK` to dispense when triggered                                   |
 | `ESCROW_AMOUNT`  | String | Quantity of `GIVE_TICK` to escrow in dispenser                                       |
@@ -15,28 +16,29 @@ This command creates a vending machine to dispense `tokens` when triggered
 | `ALLOW_LIST`     | String | `TX_HASH` of a BTNS `LIST` of addresses to allow trigger dispenser                   |
 | `BLOCK_LIST`     | String | `TX_HASH` of a BTNS `LIST` of addresses to NOT allow to trigger a dispenser          |
 
-
 ## Formats
-- `DISPENSER|GIVE_TICK|GIVE_AMOUNT|ESCROW_AMOUNT|TRIGGER_TICK|TRIGGER_AMOUNT|STATUS|ADDRESS|ORACLE_ADDRESS|ALLOW_LIST|BLOCK_LIST`
+
+### Version `0`
+- `DISPENSER|VERSION|GIVE_TICK|GIVE_AMOUNT|ESCROW_AMOUNT|TRIGGER_TICK|TRIGGER_AMOUNT|STATUS|ADDRESS|ORACLE_ADDRESS|ALLOW_LIST|BLOCK_LIST`
 
 ## Examples
 ```
-bt:DISPENSER|JDOG|1|1|BTC|1.00000000|0|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev
+bt:DISPENSER|0|JDOG|1|1|BTC|1.00000000|0|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev
 This example creates a dispenser and escrows 1 JDOG `token` in it, which will dispense when 1.00000000 BTC is sent to 1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev
 ```
 
 ```
-bt:DISPENSER|JDOG|1|1|BTC|1.00000000|10
+bt:DISPENSER|0|JDOG|1|1|BTC|1.00000000|10
 This example closes the dispenser in example 1 and credits any escrowed JDOG to the dispenser address 1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev
 ```
 
 ```
-bt:DISPENSER|BRRR|1000|1|TEST|1|0|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev
+bt:DISPENSER|0|BRRR|1000|1|TEST|1|0|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev
 This example creates a dispenser and escrows 1000 BRRR `token` in it, which will dispense when 1 TEST `token` is sent to 1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev
 ```
 
 ```
-bt:DISPENSER|BRRR|1000|1|TEST|1|0|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev
+bt:DISPENSER|0|BRRR|1000|1|TEST|1|0|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev
 This example closes the dispenser in example 3 and credits any escrowed BRRR to the address 1BrrrrLLzVq8ZP1nE3BHKQZ14dBXkRVsx4
 ```
 

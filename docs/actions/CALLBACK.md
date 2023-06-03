@@ -2,16 +2,19 @@
 This command performs a callback on a `token`. 
 
 ## PARAMS
-| Name     | Type   | Description                   |
-| -------- | ------ | ----------------------------- |
-| `TICK`   | String | 1 to 250 characters in length |
+| Name      | Type   | Description                   |
+| --------- | ------ | ----------------------------- |
+| `VERSION` | String | Broadcast Format Version      |
+| `TICK`    | String | 1 to 250 characters in length |
 
 ## Formats
-- `CALLBACK|TICK`
+
+### Version `0`
+- `CALLBACK|VERSION|TICK`
 
 ## Examples
 ```
-bt:CALLBACK|JDOG
+bt:CALLBACK|0|JDOG
 This example calls back the JDOG token to the token owner address
 ```
 

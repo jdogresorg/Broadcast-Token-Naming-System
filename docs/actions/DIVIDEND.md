@@ -4,16 +4,19 @@ This command pays a dividend to `token` holders of a `token`.
 ## PARAMS
 | Name            | Type   | Description                                      |
 | --------------- | ------ | ------------------------------------------------ |
+| `VERSION`       | String | Broadcast Format Version                         |
 | `TICK`          | String | The `token` that dividends are being rewarded on |
 | `DIVIDEND_TICK` | String | The `token` that dividends are paid in           |
 | `AMOUNT`        | String | Amount of `tokens` to destroy                    |
 
 ## Formats
-- `DIVIDEND|TICK|DIVIDEND_TICK|AMOUNT`
+
+### Version `0`
+- `DIVIDEND|VERSION|TICK|DIVIDEND_TICK|AMOUNT`
 
 ## Examples
 ```
-bt:DIVIDEND|BRRR|BACON|1
+bt:DIVIDEND|0|BRRR|BACON|1
 This example pays a dividend of 1 BACON to every holder of 1 BRRR
 ```
 
