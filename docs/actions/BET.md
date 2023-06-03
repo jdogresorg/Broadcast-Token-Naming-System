@@ -4,6 +4,7 @@ This command bets a `token` on a `broadcast` oracle feed
 ## PARAMS
 | Name                  | Type   | Description                                                                              |
 | --------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| `VERSION`             | String | Broadcast Format Version                                                                 |
 | `FEED_ADDRESS`        | String | The address that hosts the feed to be bet on.                                            |
 | `BET_TYPE`            | String | 0 for Bullish CFD, 1 for Bearish CFD, 2 for Equal, 3 for NotEqual.                       |
 | `DEADLINE`            | String | The time at which the bet should be decided/settled, in Unix time (seconds since epoch). |
@@ -17,11 +18,13 @@ This command bets a `token` on a `broadcast` oracle feed
 
 
 ## Formats
-- `BET|FEED_ADDRESS|BET_TYPE|DEADLINE|WAGER_TICK|WAGER_AMOUNT|COUNTERWAGER_TICK|COUNTERWAGER_AMOUNT|EXPIRATION|LEVERAGE|TARGET_VALUE`
+
+### Version `0`
+- `BET|VERSION|FEED_ADDRESS|BET_TYPE|DEADLINE|WAGER_TICK|WAGER_AMOUNT|COUNTERWAGER_TICK|COUNTERWAGER_AMOUNT|EXPIRATION|LEVERAGE|TARGET_VALUE`
 
 ## Examples
 ```
-bt:BET|1BetXQ5w9mMmJosZ21jUtrebdpgMhYQUaZ|3|1497625200|TEST|100|BACON|100|604|5040|7
+bt:BET|0|1BetXQ5w9mMmJosZ21jUtrebdpgMhYQUaZ|3|1497625200|TEST|100|BACON|100|604|5040|7
 This example places a bet on the feed at 1BetXQ5w9mMmJosZ21jUtrebdpgMhYQUaZ and wagers 100 TEST for 100 BACON that the final value will be 7.
 ```
 

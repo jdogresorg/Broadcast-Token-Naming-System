@@ -4,6 +4,7 @@ This command creates or issues a `BTNS` `token`
 ## PARAMS
 | Name               | Type   | Description                                                                                 |
 | ------------------ | ------ | ------------------------------------------------------------------------------------------- |
+| `VERSION`          | String | Broadcast Format Version                                                                    |
 | `TICK`             | String | 1 to 250 characters in length (see rules below )                                            |
 | `MAX_SUPPLY`       | String | Maximum token supply (max: 18,446,744,073,709,551,615 - commas not allowed)                 |
 | `MAX_MINT`         | String | Maximum amount of supply a `MINT` transaction can issue                                     |
@@ -26,46 +27,48 @@ This command creates or issues a `BTNS` `token`
 
 
 ## Formats
-- `ISSUE|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT|MINT_ALLOW_LIST|MINT_BLOCK_LIST`
+
+### Version `0`
+- `ISSUE|VERSION|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT|MINT_ALLOW_LIST|MINT_BLOCK_LIST`
 
 ## Examples
 ```
-bt:ISSUE|JDOG
+bt:ISSUE|0|JDOG
 This example issues a JDOG token 
 ```
 
 ```
-bt:ISSUE|JDOG||||||||1
+bt:ISSUE|0|JDOG||||||||1
 This example issues a JDOG token with LOCK_SUPPLY set to 1 to permanently
 ```
 
 ```
-bt:ISSUE|JDOG|0|0|0|http://j-dog.net/images/JDOG_icon.png
+bt:ISSUE|0|JDOG|0|0|0|http://j-dog.net/images/JDOG_icon.png
 This example issues a JDOG token with a DESCRIPTION which points to an icon
 ```
 
 ```
-bt:ISSUE|JDOG|0|0|0|http://j-dog.net/images/JDOG_icon.png|0|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev
+bt:ISSUE|0|JDOG|0|0|0|http://j-dog.net/images/JDOG_icon.png|0|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev
 This example issues a JDOG token with a DESCRIPTION which points to an icon, and transfers token ownership to 1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev
 ```
 
 ```
-bt:ISSUE|JDOG|1000|1|0
+bt:ISSUE|0|JDOG|1000|1|0
 This example issues a JDOG token with a max supply of 1000, and a maximum mint of 1 JDOG per mint
 ```
 
 ```
-bt:ISSUE|JDOG|1000|1|0|BTNS Tokens Are Cool!
+bt:ISSUE|0|JDOG|1000|1|0|BTNS Tokens Are Cool!
 This example issues a JDOG token with a max supply of 1000, and a DESCRIPTION of 'BTNS Tokens are Cool!'
 ```
 
 ```
-bt:ISSUE|BRRR|10000000000000000000|10000000000000|0|https://j-dog.net/json/JDOG.json|100
+bt:ISSUE|0|BRRR|10000000000000000000|10000000000000|0|https://j-dog.net/json/JDOG.json|100
 This example issues a BRRR token with a max supply of 1 Quandrillion supply and a maximum mint of 1 Trillion BRRR per mint, associates a JSON file with the token, and immediately mints 100 BRRR to the broadcasting address.
 ```
 
 ```
-bt:ISSUE|TEST|100|1|0||1|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev
+bt:ISSUE|0|TEST|100|1|0||1|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev
 This example issues a TEST token with a max supply of 100, and a maximum mint of 1 TEST per mint. This also mints 1 TEST token, and transfers ownership AND initial token supply to 1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev
 ```
 

@@ -24,12 +24,13 @@ BTNS-420 `ACTION` `PARAMS` will not be considered finalized until `ACTIVATION_BL
 # Definitions
 - `ACTIVATION_BLOCK` - A specific block height when a BTNS `ACTION` becomes usable
 - `ACTION` - A specific type of command performed on a `token`
-- `ASSET` - A token created via a `issuance` transaction on the Counterparty platform
+- `ASSET` - A token created via `issuance` transactions on the `counterparty` platform
+- `VERSION` - A specific `ACTION` command `broadcast` format version
 - `JSON` - A text-based way of representing JavaScript object literals, arrays, and scalar data
 - `PARAMS` - Parameters specified along with an `ACTION` command
 - `XCP` - A specific `ASSET` on the `counterparty` platform
 - `GAS` - A specific `token` on the `BTNS` platform
-- `broadcast` - A general purpose transaction type which allows broadcasting of a message to the Counterparty platform
+- `broadcast` - A general purpose transaction type which allows broadcasting of a message to the `counterparty` platform
 - `counterparty` - A token platform on Bitcoin (BTC) which was created in 2014 ([counterparty.io](https://counterparty.io))
 - `issuance` - A transaction type which allows for creation of `ASSET` and issuing of supply on the Counterparty platform
 - `token` - A token created in the BTNS via a `MINT` or `ISSUE` `ACTION` `broadcast` transaction
@@ -42,6 +43,11 @@ The default BTNS prefix which should be used for BTNS transactions is `BTNS` and
 
 ## Project Versioning
 The default BTNS version is `0` when no `broadcast` `value` is specified
+
+## Format Versioning
+Establishing a `VERSION` in each BTNS `ACTION` command, allows for easier expansion and parsing of `PARAMS` in various standardized formats.
+
+The default BTNS format version is `0` when no `VERSION` is given
 
 ## `ACTION` and `PARAMS` commands
 By establishing pre-defined `broadcast` commands with `ACTION` and `PARAMS` for each, one is able to create `tokens` and perform various actions them.

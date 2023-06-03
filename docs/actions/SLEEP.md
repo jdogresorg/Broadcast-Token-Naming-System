@@ -4,15 +4,18 @@ This command pauses all `token` `ACTIONS` until `RESUME_BLOCK` is reached
 ## PARAMS
 | Name           | Type   | Description                                  |
 | -------------  | ------ | -------------------------------------------- |
+| `VERSION`      | String | Broadcast Format Version                     |
 | `TICK`         | String | 1 to 250 characters in length                |
 | `RESUME_BLOCK` | String | Block index to resume BTNS `ACTION` commands |
 
 ## Formats
-- `SLEEP|TICK|RESUME_BLOCK`
+
+### Version `0`
+- `SLEEP|VERSION|TICK|RESUME_BLOCK`
 
 ## Examples
 ```
-bt:SLEEP|JDOG|791495`
+bt:SLEEP|0|JDOG|791495`
 This example pauses/sleeps ALL BTNS `ACTION` commands on JDOG `token` until block 791495
 ```
 

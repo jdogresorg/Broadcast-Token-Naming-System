@@ -4,18 +4,22 @@ This command batch executes multiple `BTNS` `ACTION` commands in a single transa
 ## PARAMS
 | Name      | Type   | Description                            |
 | --------- | ------ | -------------------------------------- |
-| `TICK`    | String | 1 to 250 characters in length          |
+| `VERSION` | String | Broadcast Format Version               |
 | `COMMAND` | String | Any valid BTNS `ACTION` with `PARAMS`  |
 
 ## Formats
-- `BATCH|COMMAND;COMMAND`
+
+### Version `0`
+- `BATCH|VERSION|COMMAND;COMMAND`
 
 ## Examples
 ```
-bt:BATCH|ISSUE|JDOG;ISSUE|TEST
-This example issues the JDOG and TEST tokens
+bt:BATCH|0|MINT|0|GAS|1000;ISSUE|0|JDOG
+This example mints 1000 GAS tokens and reserves the JDOG token
 ```
 
 ## Rules
+- Can only use one `MINT` command in a `BATCH` command
+- Can only use one `ISSUE` command in a `BATCH` command
 
 ## Notes

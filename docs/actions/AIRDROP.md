@@ -2,23 +2,37 @@
 This command airdrops `token` supply to one or more `BTNS` lists.
 
 ## PARAMS
-| Name     | Type   | Description                         |
-| -------- | ------ | ----------------------------------- |
-| `TICK`   | String | 1 to 250 characters in length       |
-| `AMOUNT` | String | Amount of `tokens` to airdrops      |
-| `LIST`   | String | `TX_HASH` of a BTNS `LIST` commands |
+| Name      | Type   | Description                         |
+| --------- | ------ | ----------------------------------- |
+| `VERSION` | String | Broadcast Format Version            |
+| `TICK`    | String | 1 to 250 characters in length       |
+| `AMOUNT`  | String | Amount of `tokens` to airdrops      |
+| `LIST`    | String | `TX_HASH` of a BTNS `LIST` commands |
 
 ## Formats
-- `AIRDROP|AMOUNT|LIST`
-- `AIRDROP|AMOUNT|LIST|LIST`
-- `AIRDROP|AMOUNT|LIST|AMOUNT|LIST`
+
+### Version `0`
+- `AIRDROP|VERSION|TICK|AMOUNT|LIST|LIST`
+
+### Version `1`
+- `AIRDROP|VERSION|TICK|AMOUNT|LIST|TICK|AMOUNT|LIST`
 
 ## Examples
+```
+bt:AIRDROP|0|GAS|1|LIST
+This example airdops 1 GAS to every holder on a list
+```
+
+```
+bt:AIRDROP|1|GAS|1|LIST|BRRR|2|LIST
+This example airdops 1 GAS to every holder on a list and 2 BRRR to every holder on a list
+```
 
 ## Rules
 
 ## Notes
-- The same `AMOUNT` is distributed to all airdrip recipients
-- `AIRDROP` to a address `LIST` sends `AMOUNT` of `token` to each address on the list
-- `AIRDROP` to a `token` `LIST` sends `AMOUNT` of `token` to holders of each `token` on the list
-
+-  Use format `0` to send the same `AMOUNT`  of `token` to one or more `LIST`
+-  Use format `1` to send multiple `AMOUNT` of multiple `token` to different `LIST`
+- `AIRDROP` to `address` `LIST` sends `AMOUNT` of `token` to each address on the list
+- `AIRDROP` to `token` `LIST` sends `AMOUNT` of `token` to holders of each `token` on the list
+- `AIRDROP` to `ASSET` `LIST` sends `AMOUNT` of `token` to holders of each `ASSET` on the list
