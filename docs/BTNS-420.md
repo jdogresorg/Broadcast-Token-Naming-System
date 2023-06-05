@@ -49,8 +49,8 @@ Establishing a `VERSION` as the first field in every `ACTION` command, allows fo
 
 The default BTNS format version is `0` when no `VERSION` is given
 
-## `ACTION` and `PARAMS` commands
-By establishing pre-defined `broadcast` commands with `ACTION` and `PARAMS` for each, one is able to create `tokens` and perform various actions them.
+## `ACTION` commands and `PARAMS`
+By defining `ACTION` commands and `PARAMS` for each command, we standardize a way in which the `BTNS` `token` functionality can be extended.
 
 **Broadcast Format:**
 `bt:ACTION|PARAMS`
