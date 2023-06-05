@@ -12,7 +12,7 @@ This command pays a dividend to `token` holders of a `token`.
 ## Formats
 
 ### Version `0`
-- `DIVIDEND|VERSION|TICK|DIVIDEND_TICK|AMOUNT`
+- `VERSION|TICK|DIVIDEND_TICK|AMOUNT`
 
 ## Examples
 ```

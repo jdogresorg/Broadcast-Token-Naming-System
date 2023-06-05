@@ -10,7 +10,7 @@ This command performs a callback on a `token`.
 ## Formats
 
 ### Version `0`
-- `CALLBACK|VERSION|TICK`
+- `VERSION|TICK`
 
 ## Examples
 ```

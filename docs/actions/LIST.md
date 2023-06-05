@@ -12,7 +12,7 @@ This command creates a list of items for use in `BTNS` commands
 ## Formats
 
 ### Version `0`
-- `LIST|VERSION|TYPE|ITEM|ITEM|ITEM`
+- `VERSION|TYPE|ITEM|ITEM|ITEM`
 
 ## Examples
 ```

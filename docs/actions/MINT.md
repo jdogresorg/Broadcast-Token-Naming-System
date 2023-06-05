@@ -12,7 +12,7 @@ This command mints `BTNS` `token` supply
 ## Formats
 
 ### Version `0`
-- `MINT|VERSION|TICK|AMOUNT|DESTINATION`
+- `VERSION|TICK|AMOUNT|DESTINATION`
 
 ## Examples
 ```

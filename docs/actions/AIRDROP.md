@@ -12,10 +12,10 @@ This command airdrops `token` supply to one or more `BTNS` lists.
 ## Formats
 
 ### Version `0`
-- `AIRDROP|VERSION|TICK|AMOUNT|LIST|LIST`
+- `VERSION|TICK|AMOUNT|LIST|LIST`
 
 ### Version `1`
-- `AIRDROP|VERSION|TICK|AMOUNT|LIST|TICK|AMOUNT|LIST`
+- `VERSION|TICK|AMOUNT|LIST|TICK|AMOUNT|LIST`
 
 ## Examples
 ```
