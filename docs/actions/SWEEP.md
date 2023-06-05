@@ -13,7 +13,7 @@ This command transfers all `token` balances and/or ownerships to a destination a
 ## Formats
 
 ### Version `0`
-- `SWEEP|VERSION|DESTINATION|SWEEP_BALANCES|SWEEP_OWNERSHIP|MEMO`
+- `VERSION|DESTINATION|SWEEP_BALANCES|SWEEP_OWNERSHIP|MEMO`
 
 ## Examples
 ```

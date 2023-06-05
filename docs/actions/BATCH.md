@@ -10,7 +10,7 @@ This command batch executes multiple `BTNS` `ACTION` commands in a single transa
 ## Formats
 
 ### Version `0`
-- `BATCH|VERSION|COMMAND;COMMAND`
+- `VERSION|COMMAND;COMMAND`
 
 ## Examples
 ```

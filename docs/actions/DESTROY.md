@@ -11,7 +11,7 @@ This command permanently destroys `token` supply
 ## Formats
 
 ### Version `0`
-- `DESTROY|VERSION|TICK|AMOUNT|TICK|AMOUNT`
+- `VERSION|TICK|AMOUNT|TICK|AMOUNT`
 
 ## Examples
 ```

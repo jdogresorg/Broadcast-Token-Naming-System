@@ -10,7 +10,7 @@ This command performs a rug pull on a `token`
 ## Formats
 
 ### Version `0`
-- `RUG|VERSION|TICK`
+- `VERSION|TICK`
 
 ## Examples
 ```

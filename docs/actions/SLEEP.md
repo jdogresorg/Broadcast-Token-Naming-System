@@ -11,7 +11,7 @@ This command pauses all `token` `ACTIONS` until `RESUME_BLOCK` is reached
 ## Formats
 
 ### Version `0`
-- `SLEEP|VERSION|TICK|RESUME_BLOCK`
+- `VERSION|TICK|RESUME_BLOCK`
 
 ## Examples
 ```

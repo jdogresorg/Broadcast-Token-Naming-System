@@ -45,7 +45,7 @@ The default BTNS prefix which should be used for BTNS transactions is `BTNS` and
 The default BTNS version is `0` when no `broadcast` `value` is specified
 
 ## Format Versioning
-Establishing a `VERSION` in each BTNS `ACTION` command, allows for easier expansion and parsing of `PARAMS` in various standardized formats.
+Establishing a `VERSION` as the first field in every `ACTION` command, allows for easier expansion and parsing of `PARAMS` in various standardized formats.
 
 The default BTNS format version is `0` when no `VERSION` is given
 
