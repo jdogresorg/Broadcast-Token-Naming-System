@@ -1,13 +1,14 @@
 <?php
 /*********************************************************************
- * destroys.php - DESTROY command
+ * sleep.php - SLEEP command
  *
  * PARAMS:
- * - TICK    - 1 to 5 characters in length (required)
- * - COMMAND - Any valid BTNS ACTION with PARAMS
+ * VERSION      - Broadcast Format Version                    
+ * TICK         - 1 to 250 characters in length               
+ * RESUME_BLOCK - Block index to resume BTNS `ACTION` commands
  * 
  * FORMATS:
- * - bt:BATCH|COMMAND;COMMAND
+ * 0 = VERSION|TICK|RESUME_BLOCK
  ********************************************************************/
 function btnsSleep($params=null, $data=null, $error=null){
     global $mysqli;

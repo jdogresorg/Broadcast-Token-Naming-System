@@ -1,13 +1,13 @@
 <?php
 /*********************************************************************
- * batches.php - BATCH command
+ * batch.php - BATCH command
  *
  * PARAMS:
- * - TICK    - 1 to 5 characters in length (required)
+ * - VERSION - Broadcast Format Version
  * - COMMAND - Any valid BTNS ACTION with PARAMS
  * 
  * FORMATS:
- * - bt:BATCH|COMMAND;COMMAND
+ * 0 = VERSION|COMMAND;COMMAND
  ********************************************************************/
 function btnsBatch($params=null, $data=null, $error=null){
     global $mysqli;

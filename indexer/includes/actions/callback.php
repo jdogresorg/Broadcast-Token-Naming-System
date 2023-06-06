@@ -1,12 +1,13 @@
 <?php
 /*********************************************************************
- * callbacks.php - CALLBACK command
+ * callback.php - CALLBACK command
  *
  * PARAMS:
- * - TICK - 1 to 5 characters in length (required)
+ * - VERSION - Broadcast Format Version
+ * - TICK    - 1 to 250 characters in length
  * 
  * FORMATS:
- * - bt:CALLBACK|TICK
+ * 0 = VERSION|TICK
  ********************************************************************/
 function btnsCallback($params=null, $data=null, $error=null){
     global $mysqli;

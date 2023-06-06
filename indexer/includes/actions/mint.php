@@ -1,14 +1,15 @@
 <?php
 /*********************************************************************
- * mints.php - MINT command
+ * mint.php - MINT command
  *
  * PARAMS:
- * - TICK           - token name registered with ISSUE format (required)
- * - AMOUNT         - Amount of tokens to mint (required)
- * - DESTINATION    - Address to transfer tokens to
+ * - VERSION     - Broadcast Format Version
+ * - TICK        - 1 to 250 characters in length
+ * - AMOUNT      - Amount of tokens to mint
+ * - DESTINATION - Address to transfer tokens to
  * 
  * FORMATS:
- * - bt:MINT|TICK|AMOUNT|DESTINATION
+ * 0 = VERSION|TICK|AMOUNT|DESTINATION
  ********************************************************************/
 function btnsMint($params=null, $data=null, $error=null){
     global $mysqli;

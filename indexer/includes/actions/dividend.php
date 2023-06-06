@@ -1,14 +1,15 @@
 <?php
 /*********************************************************************
- * dividends.php - DIVIDEND command
+ * dividend.php - DIVIDEND command
  *
  * PARAMS:
- * - TICK           - The token that dividends are being rewarded on
- * - DIVIDEND_TICK  - The token that dividends are paid in
+ * - VERSION        - Broadcast Format Version
+ * - TICK           - 1 to 250 characters in length
+ * - DIVIDEND_TICK  - 1 to 250 characters in length
  * - AMOUNT         - The quantity of DIVIDEND_TICK rewarded per UNIT
  *  
  * FORMATS:
- * - bt:DIVIDEND|TICK|DIVIDEND_TICK|AMOUNT
+ * 0 = VERSION|TICK|DIVIDEND_TICK|AMOUNT
  ********************************************************************/
 function btnsDividend($params=null, $data=null, $error=null){
     global $mysqli;

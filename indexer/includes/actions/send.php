@@ -1,13 +1,17 @@
 <?php
 /*********************************************************************
- * destroys.php - DESTROY command
+ * send.php - SEND command
  *
  * PARAMS:
- * - TICK    - 1 to 5 characters in length (required)
- * - COMMAND - Any valid BTNS ACTION with PARAMS
+ * VERSION     - Broadcast Format Version        
+ * TICK        - 1 to 250 characters in length   
+ * AMOUNT      - Amount of `tokens` to send      
+ * DESTINATION - Address to transfer `tokens` to 
+ * MEMO        - An optional memo to include     
  * 
  * FORMATS:
- * - bt:BATCH|COMMAND;COMMAND
+ * 0 = VERSION|TICK|AMOUNT|DESTINATION|MEMO
+ * 1 = VERSION|TICK|AMOUNT|DESTINATION|TICK|AMOUNT|DESTINATION|MEMO
  ********************************************************************/
 function btnsSend($params=null, $data=null, $error=null){
     global $mysqli;

@@ -3,14 +3,14 @@
  * airdrops.php - AIRDROP command
  *
  * PARAMS:
- * - TICK   - 1 to 5 characters in length (required)
- * - AMOUNT - Amount of tokens to airdrop (required)
- * - LIST   - `TX_HASH` of a BTNS `LIST` command (required)
+ * - VERSION - Broadcast Format Version
+ * - TICK    - 1 to 250 characters in length
+ * - AMOUNT  - Amount of tokens to airdrop
+ * - LIST    - `TX_HASH` of a BTNS `LIST`
  * 
  * FORMATS:
- * - bt:AIRDROP|AMOUNT|LIST
- * - bt:AIRDROP|AMOUNT|LIST|LIST
- * - bt:AIRDROP|AMOUNT|LIST|AMOUNT|LIST
+ * 0 = VERSION|TICK|AMOUNT|LIST|LIST
+ * 1 = VERSION|TICK|AMOUNT|LIST|TICK|AMOUNT|LIST
  ********************************************************************/
 function btnsAirdrop($params=null, $data=null, $error=null){
     global $mysqli;

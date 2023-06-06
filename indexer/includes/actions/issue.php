@@ -1,9 +1,10 @@
 <?php
 /*********************************************************************
- * issuances.php - ISSUE command
+ * issue.php - ISSUE command
  *
  * PARAMS:
- * - TICK             - 1 to 250 characters in length (required)
+ * - VERSION          - Broadcast Format Version
+ * - TICK             - 1 to 250 characters in length
  * - MAX_SUPPLY       - Maximum token supply (max: 18,446,744,073,709,551,615 - commas not allowed)
  * - MAX_MINT         - Maximum amount of supply a `MINT` transaction can issue
  * - DECIMALS         - Number of decimal places token should have (max: 18, default: 0)
@@ -20,13 +21,27 @@
  * - CALLBACK_BLOCK   - Enable `CALLBACK` command after `CALLBACK_BLOCK` 
  * - CALLBACK_TICK    - `TICK` `token` users get when `CALLBACK` command is used
  * - CALLBACK_AMOUNT  - `TICK` `token` amount that users get when `CALLBACK` command is used
+ * - MINT_ALLOW_LIST  - `TX_HASH of a BTNS LIST of addresses to allow minting from
+ * - MINT_BLOCK_LIST  - `TX_HASH of a BTNS LIST of addresses to NOT allow minting from
  * 
  * FORMATS:
- * - bt:ISSUE|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT
+ * 0 = VERSION|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT|MINT_ALLOW_LIST|MINT_BLOCK_LIST
  ********************************************************************/
 function btnsIssue( $params=null, $data=null, $error=null){
     global $mysqli;
+
+    /*
+     * Broadcast Formats
+     */
+    $formats = array();
+    $formats[0] = 'ISSUE|VERSION|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT|MINT_ALLOW_LIST|MINT_BLOCK_LIST';
+
+    // Validate that broadcast format is 
+    $format = $params[0];
+
+
     // Add ACTION specific params to transaction data
+    $data->VERSION          = $params[0];            // Format version (default 0) 
     $data->TICK             = $params[1];           // 1 to 250 characters in length (see rules below ) (required)
     $data->MAX_SUPPLY       = (string) $params[2];  // Maximum token supply 
     $data->MAX_MINT         = (string) $params[3];  // Maximum amount of supply a MINT transaction can issue
@@ -48,6 +63,8 @@ function btnsIssue( $params=null, $data=null, $error=null){
     [$supply_int, $supply_sats] = explode('.',$data->MAX_SUPPLY);
     [$max_int,    $max_sats]    = explode('.',$data->MAX_MINT);
     [$mint_int,   $mint_sats]   = explode('.',$data->MINT_SUPPLY);
+
+
 
     /*
      * TICK Validations

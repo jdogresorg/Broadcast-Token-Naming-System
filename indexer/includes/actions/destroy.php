@@ -1,13 +1,14 @@
 <?php
 /*********************************************************************
- * destroys.php - DESTROY command
+ * destroy.php - DESTROY command
  *
  * PARAMS:
- * - TICK   - 1 to 5 characters in length (required)
- * - AMOUNT - Amount of tokens to destroy (required)
+ * - VERSION - Broadcast Format Version
+ * - TICK    - 1 to 250 characters in length
+ * - AMOUNT  - Amount of tokens to destroy
  * 
  * FORMATS:
- * - bt:DESTROY|TICK|AMOUNT
+ * 0 =VERSION|TICK|AMOUNT
  ********************************************************************/
 function btnsDestroy($params=null, $data=null, $error=null){
     global $mysqli;
