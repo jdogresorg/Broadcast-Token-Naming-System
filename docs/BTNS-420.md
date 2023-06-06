@@ -98,6 +98,7 @@ Below is a list of the BTNS `ACTION` commands and the `ACTIVATION_BLOCK` for eac
 
 
 ## BTNS Name Reservations
+- `BTC` is reserved (avoids confusion with `bitcoin` `BTC`)
 - `XCP` is reserved (avoids confusion with `counterparty` `XCP`)
 - `GAS` is reserved for future use (anti-spam mechanism)
 - Registered `counterparty` `ASSET` names are reserved within the BTNS for use by the `ASSET` owner
