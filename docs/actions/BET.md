@@ -8,9 +8,9 @@ This command bets a `token` on a `broadcast` oracle feed
 | `FEED_ADDRESS`        | String | The address that hosts the feed to be bet on.                                            |
 | `BET_TYPE`            | String | 0 for Bullish CFD, 1 for Bearish CFD, 2 for Equal, 3 for NotEqual.                       |
 | `DEADLINE`            | String | The time at which the bet should be decided/settled, in Unix time (seconds since epoch). |
-| `WAGER_TICK`          | String | 1 to 5 characters in length (required)                                                   |
+| `WAGER_TICK`          | String | 1 to 250 characters in length                                                            |
 | `WAGER_AMOUNT`        | String | The quantityof `token` to wager (integer, in satoshis).                                  |
-| `COUNTERWAGER_TICK`   | String | 1 to 5 characters in length (required)                                                   |
+| `COUNTERWAGER_TICK`   | String | 1 to 250 characters in length                                                            |
 | `COUNTERWAGER_AMOUNT` | String | The minimum quantity of `token` to be wagered against, for the bets to match.            |
 | `EXPIRATION`          | String | The number of blocks after which the bet expires if it remains unmatched.                |
 | `LEVERAGE`            | String | Leverage, as a fraction of 5040 (integer, default=5040)                                  |
