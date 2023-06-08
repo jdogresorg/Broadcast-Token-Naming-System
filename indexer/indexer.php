@@ -128,40 +128,31 @@ while($block <= $current){
                 b.block_index='{$block}' AND
                 b.status='valid' AND
                 (b.text LIKE 'bt:%' OR b.text LIKE 'btns:%')
-                -- AND b.text LIKE '%BRRR%'
             ORDER BY b.tx_index ASC";
     $results = $mysqli->query($sql);
     if($results){
         if($results->num_rows){
             while($row = $results->fetch_assoc()){
-                $row = (object) $row;
-                $version   = $row->version;
-                // Define list of allowable actions
-                $actions   = array('DEPLOY','ISSUE','MINT','TRANSFER','SEND');
+                // Assoc arrays to track address/ticker changes
+                $addresses = array();
+                $tickers   = array();
+                $error     = false;                  
+                $row       = (object) $row;
                 $prefixes  = array('/^bt:/','/^btns:/');
                 $params    = explode('|',preg_replace($prefixes,'',$row->text));
+
                 // Trim whitespace from any params
                 foreach($params as $idx => $value)
                     $params[$idx] = trim($value);
-                $action    = strtoupper($params[0]); // First param is always action
-                $ticker    = $params[1];             // Second param is always ticker (TICK)
-                $source    = $row->source;
-                $error     = false;
-                $addresses = array();    // Assoc array to hold address list (track addresses with changes)
-                $tickers   = array();    // Assoc array to hold ticker list (track tick changes)
-                $addresses[$source] = 1; // Add source address to list of addresses
 
-                // Decode any base64 tickers
-                if(strlen($ticker)>5 && isBase64($ticker))
-                    $ticker = base64_decode($ticker);
-
-                // Add tick to list of tickers (used to update all tickers touched by an ACTION)
-                $tickers[$ticker] = 1; 
+                $action  = strtoupper(array_shift($params)); // Extract ACTION from PARAMS
+                $format  = $params[0];     // Broadcast Format
+                $version = $row->version;  // Project Version
+                $source  = $row->source;   // Source address
 
                 // Create database records and get ids for ticker, tx_hash, and source address
                 $source_id  = createAddress($row->source);
                 $tx_hash_id = createTransaction($row->tx_hash);
-                $tick_id    = createTicker($ticker);
 
                 // Support old BRC20/SRC20 actions 
                 if($action=='TRANSFER') $action = 'SEND';
@@ -187,14 +178,14 @@ while($block <= $current){
                     $error = 'invalid: ACTIVATION_BLOCK';
 
                 // Handle processing the specific BTNS ACTION commands
-                // btnsAction($action, $params, $data, $error);
+                btnsAction($action, $params, $data, $error);
             }
 
             // Handle updating balances for any addresses used in this block (probably unneccessary since we update balances as we parse)
             // updateBalances($addresses);
 
             // Handle updating token data (amount minted, etc)
-            updateTokens($tickers);
+            // updateTokens($tickers);
         }
     } else {
         byeLog("Error while trying to lookup BTNS broadcasts");

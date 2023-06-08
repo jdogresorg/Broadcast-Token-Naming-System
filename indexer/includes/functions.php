@@ -62,7 +62,7 @@ function initDB($database=DB_DATA, $hostname=DB_HOST, $username=DB_USER, $passwo
     }
 }
 
-// Handle checking if a string is base64 encoded
+// Handle checking if a string is possibly base64 encoded
 function isBase64($str){
     $decoded_str = base64_decode($str);
     $Str1 = preg_replace('/[\x00-\x1F\x7F-\xFF]/', '', $decoded_str);
@@ -144,8 +144,8 @@ function createTicker( $tick=null ){
 }
 
 
-// Create record in `deploys` table
-function createDeploy( $data=null ){
+// Create record in `issuance` table
+function createIssuance( $data=null ){
     global $mysqli;
     // Convert supply amounts to integers
     $max_supply         = $data->MAX_SUPPLY;
@@ -171,12 +171,12 @@ function createDeploy( $data=null ){
     $transfer_supply_id = createAddress($data->TRANSFER_SUPPLY);
     $tx_hash_id         = createTransaction($data->TX_HASH);
     // Check if record already exists
-    $results = $mysqli->query("SELECT id FROM deploys WHERE tx_hash_id='{$tx_hash_id}'");
+    $results = $mysqli->query("SELECT id FROM issuances WHERE tx_hash_id='{$tx_hash_id}'");
     if($results){
         if($results->num_rows){
             // UPDATE record
             $sql = "UPDATE
-                        deploys
+                        issuances
                     SET
                         tick_id='{$tick_id}',
                         max_supply='{$max_supply}',
@@ -193,7 +193,7 @@ function createDeploy( $data=null ){
                         tx_hash_id='{$tx_hash_id}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO deploys (tick_id, max_supply, max_mint, decimals, icon, mint_supply, transfer_id, transfer_supply_id, source_id, tx_hash_id, block_index, status) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$icon}', '{$mint_supply}', '{$transfer_id}', '{$transfer_supply_id}', '{$source_id}', '{$tx_hash_id}', '{$block_index}', '{$status}')";
+            $sql = "INSERT INTO issuances (tick_id, max_supply, max_mint, decimals, icon, mint_supply, transfer_id, transfer_supply_id, source_id, tx_hash_id, block_index, status) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$icon}', '{$mint_supply}', '{$transfer_id}', '{$transfer_supply_id}', '{$source_id}', '{$tx_hash_id}', '{$block_index}', '{$status}')";
         }
         $results = $mysqli->query($sql);
         if(!$results)
@@ -207,7 +207,7 @@ function createDeploy( $data=null ){
 // Create record in `mints` table
 function createMint( $data=null ){
     global $mysqli;
-    $info         = getTokenInfo($data->NETWORK, $data->TICK);
+    $info         = getTokenInfo($data->TICK);
     $tick_id      = createTicker($data->TICK);
     $source_id    = createAddress($data->SOURCE);
     $transfer_id  = createAddress($data->TRANSFER);
@@ -248,7 +248,7 @@ function createMint( $data=null ){
 // Create record in `sends` table
 function createSend( $data=null ){
     global $mysqli;
-    $info         = getTokenInfo($data->NETWORK, $data->TICK);
+    $info         = getTokenInfo($data->TICK);
     $tick_id      = createTicker($data->TICK);
     $source_id    = createAddress($data->SOURCE);
     $tx_hash_id   = createTransaction($data->TX_HASH);
@@ -406,9 +406,10 @@ function createDebit( $action=null, $block_index=null, $event=null, $tick=null, 
 // Create record in `blocks` table
 function createBlock( $block=null ){
     global $mysqli;
-    $credits  = array();
-    $debits   = array();
-    $balances = array();
+    $credits      = array();
+    $debits       = array();
+    $balances     = array();
+    $transactions = array();
     // Get all data from credits table
     $results = $mysqli->query("SELECT * FROM credits WHERE block_index<='{$block}' ORDER BY block_index ASC, tick_id ASC, address_id ASC, quantity DESC");
     if($results){
@@ -439,18 +440,31 @@ function createBlock( $block=null ){
     } else {
         byeLog('Error while trying to lookup records in balances table');
     }
+    // Get all data from transactions table
+    $results = $mysqli->query("SELECT * FROM transactions WHERE tx_index IS NOT NULL ORDER BY tx_index ASC");
+    if($results){
+        if($results->num_rows){
+            while($row = $results->fetch_assoc())
+                array_push($transactions, (object) $row);
+        }
+    } else {
+        byeLog('Error while trying to lookup records in balances table');
+    }
     // Generate SHA256 hashes based on the json object
     // This is a rough/dirty way to get some sha256 hashes qucikly... def should revisit when not in a rush
-    $credits_hash        = hash('sha256', json_encode($credits));
-    $debits_hash         = hash('sha256', json_encode($debits));
-    $balances_hash       = hash('sha256', json_encode($balances));
-    $credits_hash_short  = substr($credits_hash,0,5);
-    $debits_hash_short   = substr($debits_hash,0,5);
-    $balances_hash_short = substr($balances_hash,0,5);
-    $credits_hash_id     = createTransaction($credits_hash);
-    $debits_hash_id      = createTransaction($debits_hash);
-    $balances_hash_id    = createTransaction($balances_hash);
-    print "\n\t [credits:{$credits_hash_short} debits={$debits_hash_short} balances={$balances_hash_short}]";
+    $credits_hash            = hash('sha256', json_encode($credits));
+    $debits_hash             = hash('sha256', json_encode($debits));
+    $balances_hash           = hash('sha256', json_encode($balances));
+    $transactions_hash       = hash('sha256', json_encode($transactions));
+    $credits_hash_short      = substr($credits_hash,0,5);
+    $debits_hash_short       = substr($debits_hash,0,5);
+    $balances_hash_short     = substr($balances_hash,0,5);
+    $transactions_hash_short = substr($transactions_hash,0,5);
+    $credits_hash_id         = createTransaction($credits_hash);
+    $debits_hash_id          = createTransaction($debits_hash);
+    $balances_hash_id        = createTransaction($balances_hash);
+    $txlist_hash_id          = createTransaction($transactions_hash);
+    print "\n\t [credits:{$credits_hash_short} debits:{$debits_hash_short} balances:{$balances_hash_short} txlist:{$transactions_hash_short}]";
     // Check if record already exists
     $results = $mysqli->query("SELECT id FROM blocks WHERE block_index='{$block}'");
     if($results){
@@ -461,12 +475,13 @@ function createBlock( $block=null ){
                     SET
                         credits_hash_id='{$credits_hash_id}',
                         debits_hash_id='{$debits_hash_id}',
-                        balances_hash_id='{$balances_hash_id}'
+                        balances_hash_id='{$balances_hash_id}',
+                        txlist_hash_id='{$txlist_hash_id}'
                     WHERE 
                         block_index='{$block}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO blocks (block_index, credits_hash_id, debits_hash_id, balances_hash_id) values ('{$block}', '{$credits_hash_id}', '{$debits_hash_id}', '{$balances_hash_id}')";
+            $sql = "INSERT INTO blocks (block_index, credits_hash_id, debits_hash_id, balances_hash_id, txlist_hash_id) values ('{$block}', '{$credits_hash_id}', '{$debits_hash_id}', '{$balances_hash_id}', '{$txlist_hash_id}')";
         }
         $results = $mysqli->query($sql);
         if(!$results)
@@ -476,7 +491,7 @@ function createBlock( $block=null ){
     }
 }
 
-// Handle getting decimal precision for a given tick
+// Handle getting token information for a given tick
 function getTokenInfo($tick=null){
     global $mysqli;
     $type = gettype($tick);
@@ -491,33 +506,114 @@ function getTokenInfo($tick=null){
                 t1.max_supply,
                 t1.max_mint,
                 t1.decimals,
-                t1.icon,
+                t1.description,
                 t1.supply,
+                t1.lock_supply,
+                t1.lock_mint,
+                t1.lock_description,
+                t1.lock_rug,
+                t1.lock_sleep,
+                t1.lock_callback,
+                t1.callback_block,
+                t3.tick as callback_tick,            
+                t1.callback_amount,
+                t4.hash as mint_allow_list,
+                t5.hash as mint_block_list,
                 a.address as owner
             FROM 
                 tokens t1,
                 index_tickers t2,
+                index_tickers t3,
+                index_transactions t4,
+                index_transactions t5,
                 index_addresses a
             WHERE 
                 t2.id=t1.tick_id AND
+                t3.id=t1.callback_tick_id AND
+                t4.id=t1.mint_allow_list_id AND
+                t5.id=t1.mint_block_list_id AND
                 a.id=t1.owner_id AND
                 t1.tick_id='{$tick_id}'";
+                // print $sql;
     $results = $mysqli->query($sql);
     if($results){
         if($results->num_rows){
             $row  = (object) $results->fetch_assoc();
             $data = (object) array(
-                'TICK'       => $row->tick,
-                'MAX_SUPPLY' => $row->max_supply,
-                'MAX_MINT'   => $row->max_mint,
-                'DECIMALS'   => $row->decimals,
-                'ICON'       => $row->icon,
-                'SUPPLY'     => $row->supply,
-                'OWNER'      => $row->owner
+                'TICK'              => $row->tick,
+                'MAX_SUPPLY'        => $row->max_supply,
+                'MAX_MINT'          => $row->max_mint,
+                'DECIMALS'          => $row->decimals,
+                'DESCRIPTION'       => $row->description,
+                'SUPPLY'            => $row->supply,
+                'OWNER'             => $row->owner,
+                'LOCK_SUPPLY'       => $row->lock_supply,
+                'LOCK_MINT'         => $row->lock_mint,
+                'LOCK_DESCRIPTION'  => $row->lock_description,
+                'LOCK_RUG'          => $row->lock_rug,
+                'LOCK_SLEEP'        => $row->lock_sleep,
+                'LOCK_CALLBACK'     => $row->lock_callback
             );
         } 
     } else {
         byeLog("Error while trying to lookup token info for : {$tick}");
+    }
+    return $data;
+}
+
+// Handle getting database id for a given asset
+function getAssetId($asset=null){
+    global $mysqli, $dbase;
+    $id    = false;
+    $asset = $mysqli->real_escape_string($asset);
+    $sql   = "SELECT id FROM {$dbase}.assets WHERE asset='{$asset}' OR asset_longname='{$asset}' LIMIT 1";
+    $results = $mysqli->query($sql);
+    if($results){
+        $row = $results->fetch_assoc();
+        $id  = $row['id'];
+    }
+    return $id;
+}
+
+// Handle getting asset information for an asset
+function getAssetInfo($asset=null){
+    global $mysqli, $dbase;
+    $type = gettype($tick);
+    $data = false;
+    if($type==='integer' || is_numeric($asset)){
+        $asset_id = $asset;
+    } else {
+        $asset_id = getAssetId($asset);
+    }
+    if($asset_id){
+        // Get data from assets table
+        $sql = "SELECT 
+                    a1.asset,
+                    a1.type,
+                    a1.asset_longname,
+                    a2.address as owner
+                FROM 
+                    {$dbase}.assets a1,
+                    {$dbase}.index_addresses a2
+                WHERE 
+                    a2.id=a1.owner_id AND
+                    a1.type IN (1,2,3) AND
+                    a1.id='{$asset_id}'";
+        // print $sql;
+        $results = $mysqli->query($sql);
+        if($results){
+            if($results->num_rows){
+                $row  = (object) $results->fetch_assoc();
+                $data = (object) array(
+                    'ASSET' => $row->asset,
+                    'TYPE'  => $row->type,
+                    'NAME'  => ($row->type==3) ? $row->asset_longname : $row->asset,
+                    'OWNER' => $row->owner
+                );
+            } 
+        } else {
+            byeLog("Error while trying to lookup asset info for : {$asset}");
+        }        
     }
     return $data;
 }
@@ -708,6 +804,7 @@ function updateTokens( $tickers=null){
 
 // Handle getting token info (supply, price, etc) and updating the `tokens` table
 function updateTokenInfo( $tick=null){
+    print "updateTokenInfo tick={$tick}\n";
     global $mysqli;
     $type = gettype($tick);
     if($type==='integer' || is_numeric($tick))
@@ -757,6 +854,7 @@ function getTokenSupply( $tick=null ){
     }
     $decimals = getTokenDecimalPrecision($tick_id);
     $supply   = bcsub($credits, $debits, $decimals);
+    var_dump($supply);
     return $supply;
 }
 
@@ -838,15 +936,15 @@ function createTxIndex( $data=null ){
     $tx_hash_id  = createTransaction($data->TX_HASH);
     $type_id     = createTxType($data->ACTION); 
     $tx_index    = getTxIndex(true);
-    $results  = $mysqli->query("SELECT type_id FROM transactions WHERE tx_index='{$tx_index}' LIMIT 1");
+    $results  = $mysqli->query("SELECT type_id FROM transactions WHERE tx_hash_id='{$tx_hash_id}' LIMIT 1");
     if($results){
         if($results->num_rows==0){
-            $results = $mysqli->query("INSERT INTO index_tx (tx_index, block_index, tx_hash_id, type_id) values ('{$tx_index}','{$block_index}','{$tx_hash_id}', '{$type_id}')");
+            $results = $mysqli->query("INSERT INTO transactions (tx_index, block_index, tx_hash_id, type_id) values ('{$tx_index}','{$block_index}','{$tx_hash_id}', '{$type_id}')");
             if(!$results)
-                byeLog('Error while trying to create record in index_tx table');
+                byeLog('Error while trying to create record in transactions table');
         }
     } else {
-        byeLog('Error while trying to lookup record in index_tx table');
+        byeLog('Error while trying to lookup record in transactions table');
     }
 }
 
@@ -900,5 +998,65 @@ function isEnabled($name=null, $network=null, $block_index=null){
     return false;
 }
 
+// Handle returning integer format version
+function getFormatVersion($format=null){
+    $type = gettype($format);
+    if($type=='integer')
+        return $format;
+    // Default to format 0 if none is given
+    if($type=='NULL')
+        return 0;
+    if($type=='string'){
+        // Default to format 0 if none is given
+        if($format=='')
+            return 0;
+        // Strip out any quotes and double-quotes
+        $format = preg_replace(array('/\"/','/\'/'),'',$format);
+    }
+    // Convert any numeric strings to integers
+    if(is_numeric($format) && !is_float($format))
+        return (int) $format;
+    // Return NULL if not able to identify format version
+    return NULL;
+}  
+
+// Handle validating amount format
+function isValidAmountFormat($divisible=null, $amount=null){
+    [$int, $sats] = explode('.',$amount);
+    if(!$divisible && is_numeric($int))
+        return true;
+    if($divisible && is_numeric($int) && (is_null($sats) || is_numeric($sats)))
+        return true;
+    return false;
+}
+
+// Validate if a lock flag value evaluates to 0 (unlocked) or 1 (locked)
+function isValidLockValue($value=null){
+    $type  = gettype($value);
+    $valid = array(0,1);
+    // Convert any numeric strings to integer value
+    if($type=='string' && is_numeric($value))
+        $value = (int) $value;
+    // Only return true for 0/1 values
+    if(in_array($value, $valid))
+        return true;
+    return false;
+}
+
+// Handle validating lock status
+function isValidLock($btInfo=null, $data=null, $lock=null){
+    // Get lock VALUE
+    $value = $data->{$lock};
+    // If we dont have any info on the token, it hasn't been created yet, so all flags are valid
+    if(!isset($btInfo))
+        return true;
+    // If lock value is not changing, its valid
+    if(isset($value) && $btInfo->{$lock}==$value)
+        return true;
+    // If lock is unlocked and we are locking, its valid
+    if(isset($value) && $btInfo->{$lock}==0 && in_array($value,array(0,1)))
+        return true;
+    return false;
+}
 
 ?>

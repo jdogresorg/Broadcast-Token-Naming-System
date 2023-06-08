@@ -31,8 +31,20 @@ define("VERSION_MINOR", 10);
 define("VERSION_REVISION",0);
 define("VERSION_STRING", VERSION_MAJOR . '.' . VERSION_MINOR . '.' . VERSION_REVISION);
 
+// TICK constants
+define("MIN_TICK_LENGTH",1);
+define("MAX_TICK_LENGTH",250);
+
+// Reserved BTNS TICK names
+$reserved = array('BTC','XCP','GAS');
+define("RESERVED_TICKS",$reserved);
+
 // First block with BTNS transaction
 define("FIRST_BLOCK",789742);
+
+// BTNS Address 
+define('BURN_ADDRESS', "1Muhahahahhahahahahahhahahauxh9QX");
+define('GAS_ADDRESS', "1BTNSGAS... vanitygen working...");
 
 // General functions
 require_once('functions.php');

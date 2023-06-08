@@ -44,21 +44,7 @@ define("PROTOCOL_CHANGES", $protocol_changes);
 // Examples
 // 
 // Validate that feature is active
-// $enabled = isEnabled('AIRDROP','mainnet', 0);
-//
-// BTNS Format
-// addProtocolChange("numeric_asset_names",9,47,1,333500,0);
-//
-// Counterparty format (JSON)
-// {
-//   "numeric_asset_names": {
-//     "minimum_version_major": 9,
-//     "minimum_version_minor": 47,
-//     "minimum_version_revision": 1,
-//     "block_index": 333500,
-//     "testnet_block_index": 0
-//   }
-// }
-
+// isEnabled($name=null, $network=null, $block_index=null);
+// $enabled = isEnabled('AIRDROP','mainnet', 123456);
 
 ?>
