@@ -25,6 +25,7 @@ BTNS-420 `ACTION` `PARAMS` will not be considered finalized until `ACTIVATION_BL
 - `ACTIVATION_BLOCK` - A specific block height when a BTNS `ACTION` becomes usable
 - `ACTION` - A specific type of command performed on a `token`
 - `ASSET` - A token created via `issuance` transactions on the `counterparty` platform
+- `SUBASSET` - A specific token type on the `counterparty` platform, which is linked to an `ASSET`
 - `VERSION` - A specific `ACTION` command `broadcast` format version
 - `JSON` - A text-based way of representing JavaScript object literals, arrays, and scalar data
 - `PARAMS` - Parameters specified along with an `ACTION` command

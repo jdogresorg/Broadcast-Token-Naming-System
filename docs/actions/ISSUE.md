@@ -5,8 +5,8 @@ This command creates or issues a `BTNS` `token`
 | Name               | Type   | Description                                                                                 |
 | ------------------ | ------ | ------------------------------------------------------------------------------------------- |
 | `VERSION`          | String | Broadcast Format Version                                                                    |
-| `TICK`             | String | 1 to 250 characters in length (see rules below )                                            |
-| `MAX_SUPPLY`       | String | Maximum token supply (max: 18,446,744,073,709,551,615 - commas not allowed)                 |
+| `TICK`             | String | 1 to 250 characters in length                                                               |
+| `MAX_SUPPLY`       | String | Maximum token supply                                                                        |
 | `MAX_MINT`         | String | Maximum amount of supply a `MINT` transaction can issue                                     |
 | `DECIMALS`         | String | Number of decimal places token should have (max: 18, default: 0)                            |
 | `DESCRIPTION`      | String | Description of token (250 chars max)                                                        |
@@ -85,30 +85,35 @@ This example issues a TEST token with a max supply of 100, and a maximum mint of
 ```
 
 ## Rules
-- First `TICK` `ISSUE` will be considered as valid.
-- `token` may be issued if `counterparty` `ASSET` of same name does not exist
-- `token` may be issued if issuing address is the owner of the `counterparty` `ASSET` of the same name
-- Additional `TICK` `ISSUE` transactions after first valid `TICK` `ISSUE`, will be considered invalid and ignored, unless broadcast from `token` owners address
-- `DECIMALS` can not be changed after `token` supply is issued
-- If `TICK` contains any unicode characters, then `TICK` should be `base64` encoded
-- Allowed characters in `TICK`:
+- `TICK` must be 1 to 250 characters in length
+- `TICK` characters allowed are :
    - Any word character (alphanumeric characters and underscores)
    - Special characters: ~!@#$%^&*()_+\-={}[\]\\:<>.?/
    - Most printable emojis in U+1F300 to U+1F5FF
-- Special characters pipe `|` and semicolon `;` are **NOT** to be used in `TICK` names 
-- `TEXT` can contain a URL to a an icon to use for this token (48x48 standard size)
-- `TEXT` can contain a URL to a JSON file with additional information
+- `TICK` characters **NOT** allowed are :
+   - pipe `|` (used as field separator)
+   - semicolon `;` (used as command separator)
+- `ISSUE` will be considered `invalid` if `counterparty` `ASSET` of same name exists
+- `ISSUE` will be considered `invalid` if `counterparty` `SUBASSET` of same name exists, or is possible
+- `ISSUE` may be considered `valid` if issuing address is the owner of the `counterparty` `ASSET` or `SUBASSET` of the same name
+- First `TICK` `ISSUE` with `valid` status will be the owner of the `token`
+- Additional `TICK` `ISSUE` transactions after first valid `TICK` `ISSUE`, will be considered invalid and ignored, unless broadcast from `token` owners address
+- `DECIMALS` can not be changed after `token` supply is issued and/or minted
+- `MAX_SUPPLY` max value is 1,000,000,000,000,000,000,000 (1 Sextillion)
 
 ## Notes
-- `ISSUE` `TICK` with `MAX_SUPPLY` set to `0` to reserve the `token` name (reserve name)
 - `ISSUE` `TICK` with `MAX_SUPPLY` and `MINT_SUPPLY` set to any non `0` value, to mint supply until `MAX_SUPPLY` is reached (owner can mint beyond `MAX_MINT`)
 - `ISSUE` `TICK` with `MAX_SUPPLY` and `MAX_MINT` set to any non `0` value, to enable user minting (fair minting)
-- `ISSUE` `TICK` with `LOCK_SUPPLY` set to `1` to permanently lock `MAX_SUPPLY` (irreversible)
-- `ISSUE` `TICK` with `LOCK_MINT` set to `1` to permanently lock `MAX_MINT` (irreversible)
+- `ISSUE` `TICK` with `LOCK_SUPPLY` set to `1` to permanently lock `MAX_SUPPLY`
+- `ISSUE` `TICK` with `LOCK_MINT` set to `1` to permanently lock `MAX_MINT`
 - `ISSUE` `TICK` with `LOCK_RUG` set to `1` to permanently prevent use of the `RUG` command
 - `ISSUE` `TICK` with `LOCK_SLEEP` set to `1` to permanently prevent use of the `SLEEP` command
-- `ISSUE` `TICK` with `LOCK_CALLBACK` set to `1` to permanently lock `CALLBACK_BLOCK`, `CALLBACK_TICK`, and `CALLBACK_AMOUNT` (irreversible)
+- `ISSUE` `TICK` with `LOCK_CALLBACK` set to `1` to permanently lock `CALLBACK_BLOCK`, `CALLBACK_TICK`, and `CALLBACK_AMOUNT`
+- `DESCRIPTION` can contain a URL to a an icon to use for this token (48x48 standard size)
+- `DESCRIPTION` can contain a URL to a JSON file with additional information
+- `DESCRIPTION` can NOT contain any pipe `|` or semi-colon `;` characters, as these are reserved
 - `CALLBACK_BLOCK`, `CALLBACK_TICK`, and `CALLBACK_AMOUNT` can be edited via `ISSUE` action until `LOCK_CALLBACK` is set to `1`
 - `DEPLOY` `ACTION` can be used for backwards-compatability with BRC20/SRC20 `DEPLOY`
-- `DESCRIPTION` field can not contain any pipe `|` or semi-colon `;` characters, as these are reserved
 - By default any address can `MINT`, to change this behavior use `MINT_ALLOW_LIST` and `MINT_BLOCK_LIST`
+- If `TICK` contains any unicode characters, then `TICK` should be `base64` encoded
+- `counterparty` `ASSET` and `SUBASSET` names are reserved within the BTNS for use by the `counterparty` owner
