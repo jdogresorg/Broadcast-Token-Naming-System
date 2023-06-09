@@ -5,7 +5,7 @@ This command creates a list of items for use in `BTNS` commands
 | Name      | Type   | Description                            |
 | --------- | ------ | ---------------------------------------|
 | `VERSION` | String | Broadcast Format Version               |
-| `TYPE`    | String | List type (1=address, 2=TICK, 3=ASSET) |
+| `TYPE`    | String | List type (1=TICK, 2=ASSET, 3=address) |
 | `ITEM`    | String | Any valid `TICK`, `ASSET`, or address  |
 
 
