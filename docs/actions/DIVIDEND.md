@@ -23,7 +23,7 @@ This example pays a dividend of 1 BACON token to every holder of 1 BRRR token
 
 ```
 bt:DIVIDEND|0|2|TEST|BACON|1
-This example pays a dividend of 1 BACON token to every holder of 1 BACON ASSET
+This example pays a dividend of 1 BACON token to every holder of 1 TEST ASSET
 ```
 
 ## Rules
