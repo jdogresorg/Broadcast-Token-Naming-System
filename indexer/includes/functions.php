@@ -1059,4 +1059,27 @@ function isValidLock($btInfo=null, $data=null, $lock=null){
     return false;
 }
 
+// Handle determining if first param is TICK or VERSION
+function isLegacyBTNSFormat($params){
+    $version = $params[0]; // VERSION or TICK
+    // VERSION will max out at 99 (2 chars)
+    if(strlen($version)>2)
+        return true;
+    // VERSION should be NULL or integer
+    if(is_string($version))
+        return true;
+    // Add more rules here if ppl keep using old BTNS format...
+    return false;
+}
+
+// Handle setting ACTION PARAMS based on format VERSION (updates BTNS transaction data object)
+function setActionParams($data=null, $params=null, $format=null){
+    $fields = explode('|',$format);
+    foreach($fields as $idx => $field){
+        $value = trim($params[$idx]);
+        $data->{$field} = (strlen($value)!=0) ? $value : NULL;
+    }
+    return $data;
+}
+
 ?>

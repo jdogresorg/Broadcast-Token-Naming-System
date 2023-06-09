@@ -140,19 +140,23 @@ while($block <= $current){
                 $row       = (object) $row;
                 $prefixes  = array('/^bt:/','/^btns:/');
                 $params    = explode('|',preg_replace($prefixes,'',$row->text));
+                $version   = $row->version;  // Project Version
+                $source    = $row->source;   // Source address
 
-                // Trim whitespace from any params
+                // Create database records and get ids for tx_hash and source address
+                $source_id  = createAddress($row->source);
+                $tx_hash_id = createTransaction($row->tx_hash);
+
+                // Trim whitespace from any PARAMS
                 foreach($params as $idx => $value)
                     $params[$idx] = trim($value);
 
-                $action  = strtoupper(array_shift($params)); // Extract ACTION from PARAMS
-                $format  = $params[0];     // Broadcast Format
-                $version = $row->version;  // Project Version
-                $source  = $row->source;   // Source address
+                // Extract ACTION from PARAMS
+                $action = strtoupper(array_shift($params)); 
 
-                // Create database records and get ids for ticker, tx_hash, and source address
-                $source_id  = createAddress($row->source);
-                $tx_hash_id = createTransaction($row->tx_hash);
+                // Support legacy BTNS format with no VERSION on DEPLOY/MINT actions (default to VERSION 0)
+                if(in_array($action,array('DEPLOY','MINT')) && isLegacyBTNSFormat($params))
+                    array_splice($params, 0, 0, 0);
 
                 // Support old BRC20/SRC20 actions 
                 if($action=='TRANSFER') $action = 'SEND';
