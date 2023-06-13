@@ -22,6 +22,9 @@ This command sends/transfers one or more `token`s between addresses
 ### Version `2`
 - `VERSION|TICK|AMOUNT|DESTINATION|TICK|AMOUNT|DESTINATION|MEMO`
 
+### Version `3`
+- `VERSION|TICK|AMOUNT|DESTINATION|MEMO|TICK|AMOUNT|DESTINATION|MEMO`
+
 
 ## Examples
 ```
@@ -53,6 +56,9 @@ This example sends 5 BRRR tokens to 1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev and 1 TES
 
 ## Notes
 - `TRANSFER` `ACTION` can be used for backwards-compatability with BRC20/SRC20 `TRANSFER`
-- Format version `0` allows for repeating `AMOUNT` and `DESTINATION` params to enable multiple transfers in a single transaction
-- Format version `1` allows for repeating `TICK`, `AMOUNT` and `DESTINATION` params to enable multiple transfers in a single transaction
-- `MEMO` field is optional, and if included, is always the last PARAM on a `SEND` command
+- Format version `0` allows for a single send
+- Format version `1` allows for repeating `AMOUNT` and `DESTINATION` params to enable multiple transfers
+- Format version `2` allows for repeating `TICK`, `AMOUNT` and `DESTINATION` params to enable multiple transfers
+- Format version `3` allows for repeating `TICK`, `AMOUNT`, `DESTINATION`, and `MEMO` params to enable multiple transfers
+- Format version `0`, `1`, and `2` allow for a single optional `MEMO` field to be included as the last PARAM
+
