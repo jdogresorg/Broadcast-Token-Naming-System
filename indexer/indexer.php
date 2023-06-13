@@ -65,7 +65,7 @@ if($rollback){
         'blocks',
         'credits',
         'debits',
-        'issuances',
+        'issues',
         'mints',
         'sends',
         'tokens',
@@ -173,6 +173,9 @@ while($block <= $current){
                 // Create a record of this transaction in the transactions table
                 createTxIndex($data);
 
+                // Get tx_index of record using tx_hash
+                $data->TX_INDEX = getTxIndex($data->TX_HASH);
+
                 // Validate Action
                 if(!array_key_exists($action,PROTOCOL_CHANGES))
                     $error = 'invalid: Unknown ACTION';
@@ -189,7 +192,7 @@ while($block <= $current){
             // updateBalances($addresses);
 
             // Handle updating token data (amount minted, etc)
-            // updateTokens($tickers);
+            updateTokens($tickers);
         }
     } else {
         byeLog("Error while trying to lookup BTNS broadcasts");

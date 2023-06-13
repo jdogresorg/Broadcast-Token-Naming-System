@@ -99,7 +99,7 @@ function createAddress( $address=null ){
 function createTransaction( $hash=null ){
     global $mysqli;
     if(!isset($hash) || $hash=='')
-        return;
+        return 0;
     $hash    = $mysqli->real_escape_string($hash);
     $results = $mysqli->query("SELECT id FROM index_transactions WHERE `hash`='{$hash}' LIMIT 1");
     if($results){
@@ -144,57 +144,110 @@ function createTicker( $tick=null ){
 }
 
 
-// Create record in `issuance` table
-function createIssuance( $data=null ){
+// Create records in the 'index_statuses' table and return record id
+function createStatus( $status=null ){
+    global $mysqli;
+    $status  = $mysqli->real_escape_string($status);
+    $results = $mysqli->query("SELECT id FROM index_statuses WHERE `status`='{$status}' LIMIT 1");
+    if($results){
+        if($results->num_rows){
+            $row = $results->fetch_assoc();
+            return $row['id'];
+        } else {
+            $results = $mysqli->query("INSERT INTO index_statuses (`status`) values ('{$status}')");
+            if($results){
+                return $mysqli->insert_id;
+            } else {
+                byeLog('Error while trying to create record in index_statuses table');
+            }
+        }
+    } else {
+        byeLog('Error while trying to lookup record in index_statuses table');
+    }
+}
+
+// Create record in `issues` table
+function createIssue( $data=null ){
     global $mysqli;
     // Convert supply amounts to integers
-    $max_supply         = $data->MAX_SUPPLY;
-    $max_mint           = $data->MAX_MINT;
-    $mint_supply        = $data->MINT_SUPPLY;
-    $decimals           = $data->DECIMALS;
+    $max_supply         = (isset($data->MAX_SUPPLY) && is_numeric($data->MAX_SUPPLY)) ? $data->MAX_SUPPLY : 0;
+    $max_mint           = (isset($data->MAX_MINT) && is_numeric($data->MAX_MINT)) ? $data->MAX_MINT : 0;
+    $mint_supply        = (isset($data->MINT_SUPPLY) && is_numeric($data->MINT_SUPPLY)) ? $data->MINT_SUPPLY : 0;
+    $callback_amount    = (isset($data->CALLBACK_AMOUNT) && is_numeric($data->CALLBACK_AMOUNT)) ? $data->CALLBACK_AMOUNT : 0;
+    $decimals           = (isset($data->DECIMALS)) ? $data->DECIMALS : 0;
     // If we have a valid decimal value, store amounts as satoshis (integers)
     if(is_numeric($decimals) && $decimals>=0 && $decimals<=18){
-        $max_supply     = bcmul($data->MAX_SUPPLY,  '1' . str_repeat('0',$decimals),0);
-        $max_mint       = bcmul($data->MAX_MINT,    '1' . str_repeat('0',$decimals),0);
-        $mint_supply    = bcmul($data->MINT_SUPPLY, '1' . str_repeat('0',$decimals),0);
+        $max_supply      = bcmul($max_supply,  '1' . str_repeat('0',$decimals),0);
+        $max_mint        = bcmul($max_mint,    '1' . str_repeat('0',$decimals),0);
+        $mint_supply     = bcmul($mint_supply, '1' . str_repeat('0',$decimals),0);
+        $callback_amount = bcmul($callback_amount, '1' . str_repeat('0',$decimals),0);
     }
     $max_supply         = $mysqli->real_escape_string($max_supply);
     $max_mint           = $mysqli->real_escape_string($max_mint);
     $mint_supply        = $mysqli->real_escape_string($mint_supply);
     $decimals           = $mysqli->real_escape_string($decimals);
-    $icon               = $mysqli->real_escape_string($data->ICON);
+    $description        = $mysqli->real_escape_string($data->DESCRIPTION);
     $block_index        = $mysqli->real_escape_string($data->BLOCK_INDEX);
+    $tx_index           = $mysqli->real_escape_string($data->TX_INDEX);
     $status             = $mysqli->real_escape_string($data->STATUS);
+    // Force lock fields to integer values 
+    $lock_supply        = ($data->LOCK_SUPPLY==1) ? 1 : 0;
+    $lock_supply        = ($data->LOCK_SUPPLY==1) ? 1 : 0;
+    $lock_mint          = ($data->LOCK_MINT==1) ? 1 : 0;
+    $lock_description   = ($data->LOCK_DESCRIPTION==1) ? 1 : 0;
+    $lock_rug           = ($data->LOCK_RUG==1) ? 1 : 0;
+    $lock_sleep         = ($data->LOCK_SLEEP==1) ? 1 : 0;
+    $lock_callback      = ($data->LOCK_CALLBACK==1) ? 1 : 0;
+    $callback_block     = ($data->CALLBACK_BLOCK>0) ? $data->CALLBACK_BLOCK : 0;
+    $callback_amount    = $mysqli->real_escape_string($callback_amount);
+    $callback_tick_id   = createTicker($data->CALLBACK_TICK);
     $tick_id            = createTicker($data->TICK);
     $source_id          = createAddress($data->SOURCE);
     $transfer_id        = createAddress($data->TRANSFER);
     $transfer_supply_id = createAddress($data->TRANSFER_SUPPLY);
     $tx_hash_id         = createTransaction($data->TX_HASH);
+    $mint_allow_list_id = createTransaction($data->MINT_ALLOW_LIST);
+    $mint_block_list_id = createTransaction($data->MINT_BLOCK_LIST);
+    $tx_index           = $data->TX_INDEX;
+    $status_id          = createStatus($data->STATUS);
     // Check if record already exists
-    $results = $mysqli->query("SELECT id FROM issuances WHERE tx_hash_id='{$tx_hash_id}'");
+    $results = $mysqli->query("SELECT tx_index FROM issues WHERE tx_hash_id='{$tx_hash_id}'");
     if($results){
         if($results->num_rows){
             // UPDATE record
             $sql = "UPDATE
-                        issuances
+                        issues
                     SET
                         tick_id='{$tick_id}',
                         max_supply='{$max_supply}',
                         max_mint='{$max_mint}',
                         decimals='{$decimals}',
-                        icon='{$icon}',
+                        description='{$description}',
                         mint_supply='{$mint_supply}',
                         transfer_id='{$transfer_id}',
                         transfer_supply_id='{$transfer_supply_id}',
+                        lock_supply='{$lock_supply}',
+                        lock_mint='{$lock_mint}',
+                        lock_description='{$lock_description}',
+                        lock_rug='{$lock_rug}',
+                        lock_sleep='{$lock_sleep}',
+                        lock_callback='{$lock_callback}',
+                        callback_block='{$callback_block}',
+                        callback_tick_id='{$callback_tick_id}',
+                        callback_amount='{$callback_amount}',
+                        mint_allow_list_id='{$mint_allow_list_id}',
+                        mint_block_list_id='{$mint_block_list_id}',
                         source_id='{$source_id}',
                         block_index='{$block_index}',
-                        status='{$status}'
+                        tx_index='{$tx_index}',
+                        status_id='{$status_id}'
                     WHERE 
                         tx_hash_id='{$tx_hash_id}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO issuances (tick_id, max_supply, max_mint, decimals, icon, mint_supply, transfer_id, transfer_supply_id, source_id, tx_hash_id, block_index, status) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$icon}', '{$mint_supply}', '{$transfer_id}', '{$transfer_supply_id}', '{$source_id}', '{$tx_hash_id}', '{$block_index}', '{$status}')";
+            $sql = "INSERT INTO issues (tick_id, max_supply, max_mint, decimals, description, mint_supply, transfer_id, transfer_supply_id, lock_supply, lock_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, mint_allow_list_id, mint_block_list_id, source_id, tx_hash_id, block_index, tx_index, status_id) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$mint_supply}', '{$transfer_id}', '{$transfer_supply_id}', '{$lock_supply}', '{$lock_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$mint_allow_list_id}', '{$mint_block_list_id}','{$source_id}', '{$tx_hash_id}', '{$block_index}', '{$tx_index}', '{$status_id}')";
         }
+        // print $sql;
         $results = $mysqli->query($sql);
         if(!$results)
             byeLog('Error while trying to create / update a record in the deploys table');
@@ -212,12 +265,13 @@ function createMint( $data=null ){
     $source_id    = createAddress($data->SOURCE);
     $transfer_id  = createAddress($data->TRANSFER);
     $tx_hash_id   = createTransaction($data->TX_HASH);
+    $tx_index     = $mysqli->real_escape_string($data->TX_INDEX);
+    $status_id    = createStatus($data->STATUS);
     $amount       = $mysqli->real_escape_string($data->AMOUNT);
     $block_index  = $mysqli->real_escape_string($data->BLOCK_INDEX);
-    $status       = $mysqli->real_escape_string($data->STATUS);
     $amount       = $mysqli->real_escape_string($data->AMOUNT);
     // Check if record already exists
-    $results = $mysqli->query("SELECT id FROM mints WHERE tx_hash_id='{$tx_hash_id}'");
+    $results = $mysqli->query("SELECT tx_index FROM mints WHERE tx_hash_id='{$tx_hash_id}'");
     if($results){
         if($results->num_rows){
             // UPDATE record
@@ -229,12 +283,13 @@ function createMint( $data=null ){
                         destination_id='{$transfer_id}',
                         source_id='{$source_id}',
                         block_index='{$block_index}',
-                        status='{$status}'
+                        tx_index='{$tx_index}',
+                        status_id='{$status_id}'
                     WHERE 
                         tx_hash_id='{$tx_hash_id}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO mints (tick_id, amount, source_id, destination_id, tx_hash_id, block_index, status) values ('{$tick_id}', '{$amount}', '{$source_id}', '{$transfer_id}', '{$tx_hash_id}', '{$block_index}', '{$status}')";
+            $sql = "INSERT INTO mints (tx_index, tick_id, amount, source_id, destination_id, tx_hash_id, block_index, status_id) values ('{$tx_index}','{$tick_id}', '{$amount}', '{$source_id}', '{$transfer_id}', '{$tx_hash_id}', '{$block_index}', '{$status_id}')";
         }
         $results = $mysqli->query($sql);
         if(!$results)
@@ -280,28 +335,44 @@ function createSend( $data=null ){
     }
 }
 
-
 // Create / Update record in `tokens` table
 function createToken( $data=null ){
     global $mysqli;
     // Convert supply amounts to integers
-    $supply     = $data->SUPPLY;
-    $max_supply = $data->MAX_SUPPLY;
-    $max_mint   = $data->MAX_MINT;
-    $decimals   = $data->DECIMALS;
+    $supply             = (isset($data->SUPPLY) && is_numeric($data->SUPPLY)) ? $data->SUPPLY : 0;
+    $max_supply         = (isset($data->MAX_SUPPLY) && is_numeric($data->MAX_SUPPLY)) ? $data->MAX_SUPPLY : 0;
+    $max_mint           = (isset($data->MAX_MINT) && is_numeric($data->MAX_MINT)) ? $data->MAX_MINT : 0;
+    $mint_supply        = (isset($data->MINT_SUPPLY) && is_numeric($data->MINT_SUPPLY)) ? $data->MINT_SUPPLY : 0;
+    $callback_amount    = (isset($data->CALLBACK_AMOUNT) && is_numeric($data->CALLBACK_AMOUNT)) ? $data->CALLBACK_AMOUNT : 0;
+    $decimals           = (isset($data->DECIMALS)) ? $data->DECIMALS : 0;
     // If we have a valid decimal value, store amounts as satoshis (integers)
     if(is_numeric($decimals) && $decimals>=0 && $decimals<=18){
-        $supply     = bcmul($data->SUPPLY,     '1' . str_repeat('0',$decimals),0);
-        $max_supply = bcmul($data->MAX_SUPPLY, '1' . str_repeat('0',$decimals),0);
-        $max_mint   = bcmul($data->MAX_MINT,   '1' . str_repeat('0',$decimals),0);
+        $max_supply      = bcmul($max_supply,  '1' . str_repeat('0',$decimals),0);
+        $max_mint        = bcmul($max_mint,    '1' . str_repeat('0',$decimals),0);
+        $mint_supply     = bcmul($mint_supply, '1' . str_repeat('0',$decimals),0);
+        $callback_amount = bcmul($callback_amount, '1' . str_repeat('0',$decimals),0);
     }
-    $max_supply  = $mysqli->real_escape_string($max_supply);
-    $max_mint    = $mysqli->real_escape_string($max_mint);
-    $decimals    = $mysqli->real_escape_string($decimals);
-    $icon        = $mysqli->real_escape_string($data->ICON);
-    $tick_id     = createTicker($data->TICK);
-    $owner_id    = createAddress($data->OWNER);
-    $block_index = $data->BLOCK_INDEX;
+    $supply             = $mysqli->real_escape_string($supply);
+    $max_supply         = $mysqli->real_escape_string($max_supply);
+    $max_mint           = $mysqli->real_escape_string($max_mint);
+    $decimals           = $mysqli->real_escape_string($decimals);
+    $description        = $mysqli->real_escape_string($data->DESCRIPTION);
+    $block_index        = $mysqli->real_escape_string($data->BLOCK_INDEX);
+    // Force lock fields to integer values 
+    $lock_supply        = ($data->LOCK_SUPPLY==1) ? 1 : 0;
+    $lock_supply        = ($data->LOCK_SUPPLY==1) ? 1 : 0;
+    $lock_mint          = ($data->LOCK_MINT==1) ? 1 : 0;
+    $lock_description   = ($data->LOCK_DESCRIPTION==1) ? 1 : 0;
+    $lock_rug           = ($data->LOCK_RUG==1) ? 1 : 0;
+    $lock_sleep         = ($data->LOCK_SLEEP==1) ? 1 : 0;
+    $lock_callback      = ($data->LOCK_CALLBACK==1) ? 1 : 0;
+    $callback_block     = ($data->CALLBACK_BLOCK>0) ? $data->CALLBACK_BLOCK : 0;
+    $callback_amount    = $mysqli->real_escape_string($callback_amount);
+    $callback_tick_id   = createTicker($data->CALLBACK_TICK);
+    $tick_id            = createTicker($data->TICK);
+    $owner_id           = createAddress($data->OWNER);
+    $mint_allow_list_id = createTransaction($data->MINT_ALLOW_LIST);
+    $mint_block_list_id = createTransaction($data->MINT_BLOCK_LIST);
     // Check if record already exists
     $results = $mysqli->query("SELECT id FROM tokens WHERE tick_id='{$tick_id}'");
     if($results){
@@ -313,23 +384,38 @@ function createToken( $data=null ){
                         max_supply='{$max_supply}',
                         max_mint='{$max_mint}',
                         decimals='{$decimals}',
-                        icon='{$icon}',
+                        description='{$description}',
+                        lock_supply='{$lock_supply}',
+                        lock_mint='{$lock_mint}',
+                        lock_description='{$lock_description}',
+                        lock_rug='{$lock_rug}',
+                        lock_sleep='{$lock_sleep}',
+                        lock_callback='{$lock_callback}',
+                        callback_block='{$callback_block}',
+                        callback_tick_id='{$callback_tick_id}',
+                        callback_amount='{$callback_amount}',
+                        mint_allow_list_id='{$mint_allow_list_id}',
+                        mint_block_list_id='{$mint_block_list_id}',
+                        block_index='{$block_index}',
                         supply='{$supply}',
-                        owner_id='{$owner_id}',
-                        block_index='{$block_index}'
+                        owner_id='{$owner_id}'
                     WHERE 
                         tick_id='{$tick_id}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO tokens (tick_id, max_supply, max_mint, decimals, icon, supply, owner_id, block_index) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$icon}', '{$supply}', '{$owner_id}','{$block_index}')";
+            $sql = "INSERT INTO tokens (tick_id, max_supply, max_mint, decimals, description, lock_supply, lock_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, mint_allow_list_id, mint_block_list_id, owner_id, supply, block_index) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$lock_supply}', '{$lock_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$mint_allow_list_id}', '{$mint_block_list_id}', '{$owner_id}','{$supply}', '{$block_index}')";
         }
+        // print $sql;
         $results = $mysqli->query($sql);
         if(!$results)
-            byeLog('Error while trying to create / update a record in the deploys table');
+            byeLog('Error while trying to create / update a record in the tokens table');
     } else {
-        byeLog('Error while trying to lookup record in deploys table');
+        byeLog('Error while trying to lookup record in tokens table');
     }
 }
+
+
+
 
 // Create record in `credits` table
 function createCredit( $action=null, $block_index=null, $event=null, $tick=null, $quantity=null, $address=null ){
@@ -507,6 +593,7 @@ function getTokenInfo($tick=null){
                 t1.max_mint,
                 t1.decimals,
                 t1.description,
+                t1.block_index,
                 t1.supply,
                 t1.lock_supply,
                 t1.lock_mint,
@@ -521,17 +608,14 @@ function getTokenInfo($tick=null){
                 t5.hash as mint_block_list,
                 a.address as owner
             FROM 
-                tokens t1,
+                tokens t1
+                LEFT JOIN index_tickers t3 on (t3.id=t1.callback_tick_id)
+                LEFT JOIN index_transactions t4 on (t4.id=t1.mint_allow_list_id)
+                LEFT JOIN index_transactions t5 on (t5.id=t1.mint_block_list_id),
                 index_tickers t2,
-                index_tickers t3,
-                index_transactions t4,
-                index_transactions t5,
                 index_addresses a
             WHERE 
                 t2.id=t1.tick_id AND
-                t3.id=t1.callback_tick_id AND
-                t4.id=t1.mint_allow_list_id AND
-                t5.id=t1.mint_block_list_id AND
                 a.id=t1.owner_id AND
                 t1.tick_id='{$tick_id}'";
                 // print $sql;
@@ -541,6 +625,7 @@ function getTokenInfo($tick=null){
             $row  = (object) $results->fetch_assoc();
             $data = (object) array(
                 'TICK'              => $row->tick,
+                'BLOCK_INDEX'       => $row->block_index,
                 'MAX_SUPPLY'        => $row->max_supply,
                 'MAX_MINT'          => $row->max_mint,
                 'DECIMALS'          => $row->decimals,
@@ -552,7 +637,12 @@ function getTokenInfo($tick=null){
                 'LOCK_DESCRIPTION'  => $row->lock_description,
                 'LOCK_RUG'          => $row->lock_rug,
                 'LOCK_SLEEP'        => $row->lock_sleep,
-                'LOCK_CALLBACK'     => $row->lock_callback
+                'LOCK_CALLBACK'     => $row->lock_callback,
+                'CALLBACK_TICK'     => $row->callback_tick,
+                'CALLBACK_BLOCK'    => $row->callback_block,
+                'CALLBACK_AMOUNT'   => $row->callback_amount,
+                'MINT_ALLOW_LIST'   => $row->mint_allow_list,
+                'MINT_BLOCK_LIST'   => $row->mint_block_list
             );
         } 
     } else {
@@ -854,7 +944,6 @@ function getTokenSupply( $tick=null ){
     }
     $decimals = getTokenDecimalPrecision($tick_id);
     $supply   = bcsub($credits, $debits, $decimals);
-    var_dump($supply);
     return $supply;
 }
 
@@ -914,7 +1003,7 @@ function createTxType( $type=null ){
 }
 
 // Handles returning the highest tx_index from transactions table
-function getTxIndex($next=null){
+function getNextTxIndex(){
     global $mysqli;
     $idx = 0;
     $results = $mysqli->query("SELECT tx_index FROM transactions ORDER BY tx_index DESC LIMIT 1");
@@ -922,11 +1011,25 @@ function getTxIndex($next=null){
         $row = (object) $results->fetch_assoc();
         $idx = (integer) $row->tx_index;
     } 
-    // Increase by 1 if request wants next available index
-    if($next)
-        $idx++;
+    $idx++;
     return $idx;
 }
+
+// Handles returning index_tx for a specific tx_hash from the transactions table
+function getTxIndex($tx_hash=null){
+    global $mysqli;
+    $tx_hash_id = createTransaction($tx_hash);
+    $results = $mysqli->query("SELECT tx_index FROM transactions WHERE tx_hash_id='{$tx_hash_id}'");
+    if($results){
+        if($results->num_rows){
+            $row = (object) $results->fetch_assoc();
+            return $row->tx_index;
+        }
+    } else {
+        bye('Error while trying to lookup tx_index in the transactions table');
+    }
+}
+
 
 // Create records in the 'transactions' table
 function createTxIndex( $data=null ){
@@ -935,7 +1038,7 @@ function createTxIndex( $data=null ){
     $block_index = $data->BLOCK_INDEX;
     $tx_hash_id  = createTransaction($data->TX_HASH);
     $type_id     = createTxType($data->ACTION); 
-    $tx_index    = getTxIndex(true);
+    $tx_index    = getNextTxIndex();
     $results  = $mysqli->query("SELECT type_id FROM transactions WHERE tx_hash_id='{$tx_hash_id}' LIMIT 1");
     if($results){
         if($results->num_rows==0){
@@ -1081,5 +1184,71 @@ function setActionParams($data=null, $params=null, $format=null){
     }
     return $data;
 }
+
+// Handle getting a list of holders
+// @param {tick}  string   TICK or ASSET name
+// @param {type}  integer  Holder Type (1=TICK, 2=ASSET)
+function getHolders( $tick=null, $type=null){
+    global $mysqli, $dbase;
+    $holders = [];
+    $type = ($type>1) ? $type : 1;
+    $tick = $mysqli->real_escape_string($tick);
+    // Query TICK Holders
+    if($type==1){
+        $sql = "SELECT
+                    a.address,
+                    b.quantity
+                FROM
+                    balances b,
+                    index_tickers t,
+                    index_addresses a
+                WHERE
+                    t.id=b.tick_id AND
+                    a.id=b.address_id AND
+                    t.tick='{$tick}'";
+    }
+    // Query ASSET holders
+    if($type==2){
+        // Handle CP ASSETS here... coming soon
+    }
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows){
+            while($row = $results->fetch_assoc()){
+                $row = (object) $row;
+                $holders[$row->address] = $row->quantity;
+            }
+        }
+    } else {
+        byeLog("Error while trying to lookup holders of : {$tick}");
+    }
+    return $holders;
+}
+
+// Determine if an ticker is distributed to users (held by more than owner)
+function isDistributed($tick=null){
+    $info    = getTokenInfo($tick);
+    $holders = ($info) ? getHolders($data->TICK) : [];
+    // More than one holder
+    if(count($holders)>1)
+        return true;
+    // Holder that is not OWNER
+    foreach($holders as $address => $quantity)
+        if($address!=$info->OWNER)
+            return true;
+    return false;
+}
+
+// Validate if a list is a valid type
+// @param {tx_hash}  string   TX_HASH to a list
+// @param {type}     string   List Type (1=TICK, 2=ASSET, 3=ADDRESS)
+function isValidList($tx_hash=null, $type=null){
+    global $mysqli;
+    // Coming soon... gotta get list functionality written first... lol
+    return false;
+
+}
+
+
 
 ?>

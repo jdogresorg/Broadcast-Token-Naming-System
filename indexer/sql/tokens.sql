@@ -3,7 +3,7 @@ CREATE TABLE tokens (
     id                 INTEGER UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     tick_id            INTEGER UNSIGNED,                     -- id of record in index_ticks table
     block_index        INTEGER UNSIGNED,                     -- block index of ISSUE transaction (used in rollbacks)
-    supply             BIGINT UNSIGNED,                      -- Current supply
+    supply             VARCHAR(250),                         -- Current supply
     max_supply         VARCHAR(250),                         -- Maximum Supply
     max_mint           VARCHAR(250),                         -- Supply minted
     decimals           TINYINT(2),                           -- 0=non-divisible, 1-18=divisible

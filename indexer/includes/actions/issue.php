@@ -5,7 +5,7 @@
  * PARAMS:
  * - VERSION          - Broadcast Format Version
  * - TICK             - 1 to 250 characters in length
- * - MAX_SUPPLY       - Maximum token supply (max: 18,446,744,073,709,551,615 - commas not allowed)
+ * - MAX_SUPPLY       - Maximum token supply 
  * - MAX_MINT         - Maximum amount of supply a `MINT` transaction can issue
  * - DECIMALS         - Number of decimal places token should have (max: 18, default: 0)
  * - DESCRIPTION      - Description of token (250 chars max) 
@@ -33,7 +33,7 @@
  * 
  ********************************************************************/
 function btnsIssue( $params=null, $data=null, $error=null){
-    global $mysqli;
+    global $mysqli, $tickers, $addresses;
 
     // Define list of known FORMATS
     $formats = array(
@@ -53,21 +53,18 @@ function btnsIssue( $params=null, $data=null, $error=null){
     /*****************************************************************
      * DEBUGGING - Force params
      ****************************************************************/
-    $str = "0|JDOG|1000||18";
-    $params = explode('|',$str);
-    $data->SOURCE = BURN_ADDRESS;
+    // $str = "0|JDOG|1000||18";
+    // $params = explode('|',$str);
+    // $data->SOURCE = BURN_ADDRESS;
 
     // Validate that broadcast format is known
     $format = getFormatVersion($params[0]);
     if(!$error && ($format===NULL || !in_array($format,array_keys($formats))))
         $error = 'invalid: VERSION (unknown)';
 
-    // Parse `PARAMS` using given format and update BTNS transaction data object
-    if(!$error){
-        $fields = explode('|',$formats[$format]);
-        foreach($fields as $idx => $field)
-            $data->{$field} = (strlen($params[$idx])!=0) ? $params[$idx] : NULL;
-    }
+    // Parse PARAMS using given VERSION format and update BTNS transaction data object
+    if(!$error)
+        $data = setActionParams($data, $params, $formats[$format]);
 
     // Decode any base64 tickers (come back through and clean this up)
     // if(isBase64($data->TICK))
@@ -93,8 +90,9 @@ function btnsIssue( $params=null, $data=null, $error=null){
     if(!$error && in_array($data->TICK,RESERVED_TICKS))        
         $error = 'invalid: TICK (reserved)';
 
-    // Get BTNS information on ticker
-    $btInfo = getTokenInfo($data->TICK);
+    // Get information on BTNS token
+    $btInfo        = getTokenInfo($data->TICK);
+    $isDistributed = isDistributed($data->TICK);
 
     // If BTNS Token does not exist yet, do some additional validations
     if(!$btInfo){
@@ -152,79 +150,118 @@ function btnsIssue( $params=null, $data=null, $error=null){
     }
 
     // Verify MAX_SUPPLY min/max
-
-    // Verify no SUPPLY has been issued if trying to change DECIMALS
+    if(!$error && isset($data->MAX_SUPPLY) && ($data->MAX_SUPPLY < MIN_TOKEN_SUPPLY || $data->MAX_SUPPLY > MAX_TOKEN_SUPPLY))
+        $error = 'invalid: MAX_SUPPLY (min/max)';
 
     // Verify DECIMAL min/max
-    // if(!$error && isset($data->DECIMALS)){
-    //     $dec = $data->DECIMALS;
-    //     if($dec<0||$dec>18)
-    //         $error = 'invalid: DECIMALS (min/max)';
-    // }
+    if(!$error && isset($data->DECIMALS) && ($data->DECIMALS < MIN_TOKEN_DECIMALS || $data->DECIMALS > MAX_TOKEN_DECIMALS))
+        $error = 'invalid: DECIMALS (min/max)';
 
-    // // Verify TRANSFER addresses
-    // $len = strlen($data->TRANSFER);
-    // if(!$error && (($len>=26 && $len<=35)||$len==42))
-    //     $error = 'invalid: TRANSFER (bad address)';
-    // // Verify TRANSFER_SUPPLY addresses
-    // $len = strlen($data->TRANSFER_SUPPLY);
-    // if(!$error && (($len>=26 && $len<=35)||$len==42))
-    //     $error = 'invalid: TRANSFER_SUPPLY (bad address)';
-    // // Verify MAX_SUPPLY is within limits (0-18,446,744,073,709,551,615)
-    // if(!$error && ($supply_int<1 || $supply_int>18446744073709551615))
-    //     $error = 'invalid: MAX_SUPPLY (min/max)';
-    // // Verify MINT_SUPPLY is less than MAX_SUPPLY
-    // if(!$error && ($data->MINT_SUPPLY > $data->MAX_SUPPLY))
-    //     $error = 'invalid: MINT_SUPPLY > MAX_SUPPLY';
-    // // Verify TICK DEPLOY is new, or done by current owner
-    // if(!$error){
-    //     $tx_hash_id = createTransaction($data->TX_HASH);
-    //     $results2 = $mysqli->query("SELECT id FROM tokens WHERE tick_id='{$tick_id}' AND owner_id!='{$source_id}'");
-    //     if($results2 && $results2->num_rows)
-    //         $error = 'invalid: issued by another address';
-    // }
-    // // Verify MAX_SUPPLY can not be changed if LOCK_SUPPLY is enabled
-    // // Verify MINT_SUPPLY can not be changed if LOCK_MINT is enabled
-    // // Verify DECIMALS can not be changed after supply is issued
-    // // Verify DESCRIPTION can not be changed if LOCK_DESCRIPTION is enabled
+    // Verify DECIMALS cannot be changed after supply has been issued
+    if(!$error && isset($data->DECIMALS) && $btnInfo->SUPPLY > 0 && $data->DECIMALS!=$btnInfo->DECIMALS)
+        $error = 'invalid: DECIMALS (locked)';
 
-    // // Verify CALLBACK_TICK can not be changed if supply has been distributed
-    // // Verify CALLBACK_AMOUNT can not be changed if supply has been distributed
+    // Verify TRANSFER addresses
+    if(!$error && isset($data->TRANSFER) && !isCryptoAddress($data->TRANSFER))
+        $error = 'invalid: TRANSFER (bad address)';
 
-    // // Verify CALLBACK_BLOCK is greater than current block
-    // // Verify CALLBACK_BLOCK only increases in value
+    // Verify TRANSFER_SUPPLY addresses
+    if(!$error && isset($data->TRANSFER_SUPPLY) && !isCryptoAddress($data->TRANSFER_SUPPLY))
+        $error = 'invalid: TRANSFER_SUPPLY (bad address)';
 
-// Debug 
-if($error)
-    bye($error);
+    // Verify MINT_SUPPLY is less than MAX_SUPPLY
+    if(!$error && isset($data->MINT_SUPPLY) && $data->MINT_SUPPLY > $data->MAX_SUPPLY)
+        $error = 'invalid: MINT_SUPPLY > MAX_SUPPLY';
 
-    // // Determine final status
-    // $data->STATUS = $status = ($error) ? $error : 'valid';
-    // // Print status message 
-    // print "\n\t ISSUE : {$data->TICK} : {$data->STATUS}";
-    // // Create record in issuances table
-    // createIssuance($data);
-    // // If this was a valid transaction, then create the token record, and perform any additional actions
-    // if($status=='valid'){
-    //     // Add any addresses to the addresses array
-    //     if($data->TRANSFER)
-    //         $addresses[$data->TRANSFER] = 1;
-    //     if($data->TRANSFER_SUPPLY)
-    //         $addresses[$data->TRANSFER_SUPPLY] = 1;
-    //     // Set some properties before we create the token
-    //     $data->SUPPLY = ($data->MINT_SUPPLY) ? $data->MINT_SUPPLY : 0;
-    //     $data->OWNER  = ($transfer) ? $transfer : $data->SOURCE;
-    //     // Create record in tokens table
-    //     createToken($data);
-    //     // Credit MINT_SUPPLY to source address
-    //     if($data->MINT_SUPPLY)
-    //         createCredit('DEPLOY', $data->BLOCK_INDEX, $data->TX_HASH, $data->TICK, $data->MINT_SUPPLY, $data->SOURCE);
-    //     // Transfer MINT_SUPPLY to TRANSFER_SUPPLY address
-    //     if($data->TRANSFER_SUPPLY){
-    //         createDebit('DEPLOY', $data->BLOCK_INDEX, $data->TX_HASH, $data->TICK, $data->MINT_SUPPLY, $data->TRANSFER);
-    //         createCredit('DEPLOY', $data->BLOCK_INDEX, $data->TX_HASH, $data->TICK, $data->MINT_SUPPLY, $data->TRANSFER_SUPPLY);
-    //     }
-    //     // Update balances for addresses
-    //     updateBalances([$data->SOURCE, $data->TRANSFER_SUPPLY]);
-    // }    
+    // Verify MAX_SUPPLY can not be changed if LOCK_SUPPLY is enabled
+    if(!$error && $btInfo && $btnInfo->LOCK_SUPPLY && isset($data->MAX_SUPPLY) && $data->MAX_SUPPLY!=$btnInfo->MAX_SUPPLY)
+        $error = 'invalid: MAX_SUPPLY (locked)';
+
+    // Verify MAX_MINT can not be changed if LOCK_MINT is enabled
+    if(!$error && $btInfo && $btnInfo->LOCK_MINT && isset($data->MAX_MINT) && $data->MAX_MINT!=$btnInfo->MAX_MINT)
+        $error = 'invalid: MAX_MINT (locked)';
+
+    // Verify DESCRIPTION can not be changed if LOCK_DESCRIPTION is enabled
+    if(!$error && $btInfo && $btnInfo->LOCK_DESCRIPTION && isset($data->MAX_MINT) && $data->MAX_MINT!=$btnInfo->MAX_MINT)
+        $error = 'invalid: MAX_MINT (locked)';
+
+    // Verify CALLBACK_BLOCK can not be changed if LOCK_CALLBACK is enabled
+    if(!$error && $btInfo && $btnInfo->LOCK_CALLBACK && isset($data->CALLBACK_BLOCK) && $data->CALLBACK_BLOCK!=$btnInfo->CALLBACK_BLOCK)
+        $error = 'invalid: CALLBACK_BLOCK (locked)';
+
+    // Verify CALLBACK_TICK can not be changed if LOCK_CALLBACK is enabled
+    if(!$error && $btInfo && $btnInfo->LOCK_CALLBACK && isset($data->CALLBACK_TICK) && $data->CALLBACK_TICK!=$btnInfo->CALLBACK_TICK)
+        $error = 'invalid: CALLBACK_TICK (locked)';
+
+    // Verify CALLBACK_TICK can not be changed if LOCK_CALLBACK is enabled
+    if(!$error && $btInfo && $btnInfo->LOCK_CALLBACK && isset($data->CALLBACK_AMOUNT) && $data->CALLBACK_AMOUNT!=$btnInfo->CALLBACK_AMOUNT)
+        $error = 'invalid: CALLBACK_AMOUNT (locked)';
+
+    // Verify CALLBACK_BLOCK only increases in value
+    if(!$error && $btInfo && isset($data->CALLBACK_BLOCK) && $data->CALLBACK_BLOCK < $btnInfo->CALLBACK_BLOCK)
+        $error = 'invalid: CALLBACK_BLOCK (decreased)';
+
+    // Verify CALLBACK_BLOCK is greater than current block index
+    if(!$error && $btInfo && isset($data->CALLBACK_BLOCK) && $data->CALLBACK_BLOCK > $data->BLOCK_INDEX)
+        $error = 'invalid: CALLBACK_BLOCK (block index)';
+
+    // Verify CALLBACK_TICK can not be changed if supply is distributed
+    if(!$error && isset($data->CALLBACK_TICK) && $data->CALLBACK_TICK!=$btnInfo->CALLBACK_TICK && $isDistributed)
+        $error = 'invalid: CALLBACK_TICK (supply distributed)';
+
+    // Verify CALLBACK_AMOUNT can not be changed if supply is distributed
+    if(!$error && isset($data->CALLBACK_AMOUNT) && $data->CALLBACK_AMOUNT!=$btnInfo->CALLBACK_AMOUNT && $isDistributed)
+        $error = 'invalid: CALLBACK_AMOUNT (supply distributed)';
+
+    // Verify MINT_ALLOW_LIST is a valid list of addresses
+    if(!$error && isset($data->MINT_ALLOW_LIST) && !isValidList($data->MINT_ALLOW_LIST,3))
+        $error = 'invalid: MINT_ALLOW_LIST (bad list)';
+
+    // Verify MINT_BLOCK_LIST is a valid list of addresses
+    if(!$error && isset($data->MINT_BLOCK_LIST) && !isValidList($data->MINT_BLOCK_LIST,3))
+        $error = 'invalid: MINT_BLOCK_LIST (bad list)';
+
+    // Determine final status
+    $data->STATUS = $status = ($error) ? $error : 'valid';
+
+    // Print status message 
+    print "\n\t ISSUE : {$data->TICK} : {$data->STATUS}";
+
+    // Create record in issues table
+    createIssue($data);
+
+    // If this was a valid transaction, then create the token record, and perform any additional actions
+    if($status=='valid'){
+
+        // Add the ticker to the tickers array
+        $tickers[$data->TICK] = 1;
+
+        // Add any addresses to the addresses array
+        $addresses[$data->SOURCE] = 1;
+        if($data->TRANSFER)
+            $addresses[$data->TRANSFER] = 1;
+        if($data->TRANSFER_SUPPLY)
+            $addresses[$data->TRANSFER_SUPPLY] = 1;
+
+        // Set some properties before we create the token
+        $data->SUPPLY = ($data->MINT_SUPPLY) ? $data->MINT_SUPPLY : 0;
+        $data->OWNER  = ($transfer) ? $transfer : $data->SOURCE;
+
+        // Create/Update record in tokens table
+        createToken($data);
+
+        // Credit MINT_SUPPLY to source address
+        if($data->MINT_SUPPLY)
+            createCredit('ISSUE', $data->BLOCK_INDEX, $data->TX_HASH, $data->TICK, $data->MINT_SUPPLY, $data->SOURCE);
+
+        // Transfer MINT_SUPPLY to TRANSFER_SUPPLY address
+        if($data->TRANSFER_SUPPLY){
+            createDebit('ISSUE', $data->BLOCK_INDEX, $data->TX_HASH, $data->TICK, $data->MINT_SUPPLY, $data->TRANSFER);
+            createCredit('ISSUE', $data->BLOCK_INDEX, $data->TX_HASH, $data->TICK, $data->MINT_SUPPLY, $data->TRANSFER_SUPPLY);
+        }
+
+        // Update balances for addresses
+        updateBalances([$data->SOURCE, $data->TRANSFER_SUPPLY]);
+    }    
+
 }

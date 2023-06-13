@@ -44,7 +44,15 @@ define("FIRST_BLOCK",789742);
 
 // BTNS Address 
 define('BURN_ADDRESS', "1Muhahahahhahahahahahhahahauxh9QX");
-define('GAS_ADDRESS', "1BTNSGAS... vanitygen working...");
+define('GAS_ADDRESS', "1BTNSGASK5En7rFurDJ79LQ8CVYo2ecLC8");
+
+// Min/Max MAX_SUPPLY
+define('MIN_TOKEN_SUPPLY',0);
+define('MAX_TOKEN_SUPPLY',1000000000000000000000);
+
+// Min/Max DECIMALS
+define('MIN_TOKEN_DECIMALS',0);
+define('MAX_TOKEN_DECIMALS',18);
 
 // General functions
 require_once('functions.php');
