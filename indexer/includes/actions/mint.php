@@ -52,6 +52,10 @@ function btnsMint($params=null, $data=null, $error=null){
         $data->MAX_MINT   = ($btInfo) ? $btInfo->MAX_MINT : 0;
     }
 
+    /*****************************************************************
+     * FORMAT Validations
+     ****************************************************************/
+
     // Verify AMOUNT format
     if(!$error && isset($data->AMOUNT) && !isValidAmountFormat($divisible, $data->AMOUNT))
         $error = "invalid: AMOUNT (format)";
@@ -59,6 +63,10 @@ function btnsMint($params=null, $data=null, $error=null){
     // Verify DESTINATION address format
     if(!$error && isset($data->DESTINATION) && !isCryptoAddress($data->DESTINATION))
         $error = "invalid: DESTINATION (format)";
+
+    /*****************************************************************
+     * General Validations
+     ****************************************************************/
 
     // Verify AMOUNT is less than MAX_MINT
     if(!$error && isset($data->AMOUNT)  && $data->AMOUNT > $data->MAX_MINT)
