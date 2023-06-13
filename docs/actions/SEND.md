@@ -52,7 +52,9 @@ This example sends 5 BRRR tokens to 1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev and 1 TES
 - A `token` transfer that does _not_ have `AMOUNT` in the broadcasting address shall be considered invalid and ignored.
 - A valid `token` transfer will deduct the `token` `AMOUNT` from the broadcasting addresses balances
 - A valid `token` tranfer will credit the `token` `AMOUNT` to the `DESTINATION` address or addresses
-
+- `MEMO` characters **NOT** allowed are :
+   - pipe `|` (used as field separator)
+   - semicolon `;` (used as command separator)
 
 ## Notes
 - `TRANSFER` `ACTION` can be used for backwards-compatability with BRC20/SRC20 `TRANSFER`
