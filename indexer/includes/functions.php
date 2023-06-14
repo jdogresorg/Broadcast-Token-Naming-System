@@ -166,6 +166,50 @@ function createStatus( $status=null ){
     }
 }
 
+// Create records in the 'index_memos' table and return record id
+function createMemo( $memo=null ){
+    global $mysqli;
+    $memo  = $mysqli->real_escape_string($memo);
+    $results = $mysqli->query("SELECT id FROM index_memos WHERE memo='{$memo}' LIMIT 1");
+    if($results){
+        if($results->num_rows){
+            $row = $results->fetch_assoc();
+            return $row['id'];
+        } else {
+            $results = $mysqli->query("INSERT INTO index_memos (memo) values ('{$memo}')");
+            if($results){
+                return $mysqli->insert_id;
+            } else {
+                byeLog('Error while trying to create record in index_memos table');
+            }
+        }
+    } else {
+        byeLog('Error while trying to lookup record in index_memos table');
+    }
+}
+
+// Create records in the 'index_actions' table and return record id
+function createAction( $action=null ){
+    global $mysqli;
+    $action  = $mysqli->real_escape_string($action);
+    $results = $mysqli->query("SELECT id FROM index_actions WHERE action='{$action}' LIMIT 1");
+    if($results){
+        if($results->num_rows){
+            $row = $results->fetch_assoc();
+            return $row['id'];
+        } else {
+            $results = $mysqli->query("INSERT INTO index_actions (action) values ('{$action}')");
+            if($results){
+                return $mysqli->insert_id;
+            } else {
+                byeLog('Error while trying to create record in index_actions table');
+            }
+        }
+    } else {
+        byeLog('Error while trying to lookup record in index_actions table');
+    }
+}
+
 // Create record in `issues` table
 function createIssue( $data=null ){
     global $mysqli;
@@ -260,13 +304,12 @@ function createIssue( $data=null ){
 // Create record in `mints` table
 function createMint( $data=null ){
     global $mysqli;
-    $info         = getTokenInfo($data->TICK);
     $tick_id      = createTicker($data->TICK);
     $source_id    = createAddress($data->SOURCE);
     $transfer_id  = createAddress($data->TRANSFER);
     $tx_hash_id   = createTransaction($data->TX_HASH);
-    $tx_index     = $mysqli->real_escape_string($data->TX_INDEX);
     $status_id    = createStatus($data->STATUS);
+    $tx_index     = $mysqli->real_escape_string($data->TX_INDEX);
     $amount       = $mysqli->real_escape_string($data->AMOUNT);
     $block_index  = $mysqli->real_escape_string($data->BLOCK_INDEX);
     $amount       = $mysqli->real_escape_string($data->AMOUNT);
@@ -299,39 +342,55 @@ function createMint( $data=null ){
     }
 }
 
-
 // Create record in `sends` table
 function createSend( $data=null ){
     global $mysqli;
-    $info         = getTokenInfo($data->TICK);
-    $tick_id      = createTicker($data->TICK);
-    $source_id    = createAddress($data->SOURCE);
-    $tx_hash_id   = createTransaction($data->TX_HASH);
-    $block_index  = $mysqli->real_escape_string($data->BLOCK_INDEX);
-    $status       = $mysqli->real_escape_string($data->STATUS);
+    $tick_id        = createTicker($data->TICK);
+    $source_id      = createAddress($data->SOURCE);
+    $destination_id = createAddress($data->DESTINATION);
+    $tx_hash_id     = createTransaction($data->TX_HASH);
+    $memo_id        = createMemo($data->MEMO);
+    $status_id      = createStatus($data->STATUS);
+    $tx_index       = $mysqli->real_escape_string($data->TX_INDEX);
+    $amount         = $mysqli->real_escape_string($data->AMOUNT);
+    $block_index    = $mysqli->real_escape_string($data->BLOCK_INDEX);
+    $amount         = $mysqli->real_escape_string($data->AMOUNT);
     // Check if record already exists
-    $results = $mysqli->query("SELECT id FROM sends WHERE tx_hash_id='{$tx_hash_id}'");
+    $sql = "SELECT
+                tx_index
+            FROM
+                sends
+            WHERE
+                tick_id='{$tick_id}' AND
+                source_id='{$source_id}' AND
+                destination_id='{$destination_id}' AND
+                amount='{$amount}' AND
+                tx_hash_id='{$tx_hash_id}'";
+    $results = $mysqli->query($sql);
     if($results){
         if($results->num_rows){
             // UPDATE record
             $sql = "UPDATE
                         sends
                     SET
-                        tick_id='{$tick_id}',
-                        source_id='{$source_id}',
+                        tx_index='{$tx_index}',
                         block_index='{$block_index}',
-                        status='{$status}'
+                        status_id='{$status_id}'
                     WHERE 
+                        tick_id='{$tick_id}' AND
+                        source_id='{$source_id}' AND
+                        destination_id='{$destination_id}' AND
+                        amount='{$amount}' AND
                         tx_hash_id='{$tx_hash_id}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO sends (tick_id, source_id, tx_hash_id, block_index, status) values ('{$tick_id}', '{$source_id}', '{$tx_hash_id}', '{$block_index}', '{$status}')";
+            $sql = "INSERT INTO sends (tx_index, tick_id, source_id, destination_id, amount, memo_id, tx_hash_id, block_index, status_id) values ('{$tx_index}','{$tick_id}', '{$source_id}', '{$destination_id}', '{$amount}','{$memo_id}', '{$tx_hash_id}', '{$block_index}', '{$status_id}')";
         }
         $results = $mysqli->query($sql);
         if(!$results)
-            byeLog('Error while trying to create / update a record in the transfers table');
+            byeLog('Error while trying to create / update a record in the sends table');
     } else {
-        byeLog('Error while trying to lookup record in transfers table');
+        byeLog('Error while trying to lookup record in sends table');
     }
 }
 
@@ -418,32 +477,43 @@ function createToken( $data=null ){
 
 
 // Create record in `credits` table
-function createCredit( $action=null, $block_index=null, $event=null, $tick=null, $quantity=null, $address=null ){
+function createCredit( $action=null, $block_index=null, $event=null, $tick=null, $amount=null, $address=null ){
     global $mysqli;
     $action      = $mysqli->real_escape_string($action);
-    $quantity    = $mysqli->real_escape_string($quantity);
+    $amount      = $mysqli->real_escape_string($amount);
     $block_index = $mysqli->real_escape_string($block_index);
     $tick_id     = createTicker($tick);
     $address_id  = createAddress($address);
     $event_id    = createTransaction($event);
+    $action_id   = createAction($action);
     // Check if record already exists
-    $results = $mysqli->query("SELECT event_id FROM credits WHERE address_id='{$address_id}' AND event_id='{$event_id}'");
+    $sql = "SELECT
+                event_id
+            FROM
+                credits
+            WHERE
+                address_id='{$address_id}' AND 
+                tick_id='{$tick_id}' AND
+                amount='{$amount}' AND
+                action_id='{$action_id}' AND
+                event_id='{$event_id}'";
+    $results = $mysqli->query($sql);
     if($results){
         if($results->num_rows){
             // UPDATE record
             $sql = "UPDATE
                         credits
                     SET
-                        action='{$action}',
-                        quantity='{$quantity}',
-                        block_index='{$block_index}',
-                        tick_id='{$tick_id}'
+                        block_index='{$block_index}'
                     WHERE 
-                        address_id='{$address_id}' AND
+                        address_id='{$address_id}' AND 
+                        tick_id='{$tick_id}' AND
+                        amount='{$amount}' AND
+                        action_id='{$action_id}' AND
                         event_id='{$event_id}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO credits (block_index, address_id, tick_id, quantity, action, event_id) values ('{$block_index}', '{$address_id}', '{$tick_id}', '{$quantity}', '{$action}', '{$event_id}')";
+            $sql = "INSERT INTO credits (block_index, address_id, tick_id, amount, action_id, event_id) values ('{$block_index}', '{$address_id}', '{$tick_id}', '{$amount}', '{$action_id}', '{$event_id}')";
         }
         $results = $mysqli->query($sql);
         if(!$results)
@@ -454,32 +524,43 @@ function createCredit( $action=null, $block_index=null, $event=null, $tick=null,
 }
 
 // Create record in `debits` table
-function createDebit( $action=null, $block_index=null, $event=null, $tick=null, $quantity=null, $address=null ){
+function createDebit( $action=null, $block_index=null, $event=null, $tick=null, $amount=null, $address=null ){
     global $mysqli;
     $action      = $mysqli->real_escape_string($action);
-    $quantity    = $mysqli->real_escape_string($quantity);
+    $amount      = $mysqli->real_escape_string($amount);
     $block_index = $mysqli->real_escape_string($block_index);
     $tick_id     = createTicker($tick);
     $address_id  = createAddress($address);
     $event_id    = createTransaction($event);
+    $action_id   = createAction($action);
     // Check if record already exists
-    $results = $mysqli->query("SELECT event_id FROM debits WHERE address_id='{$address_id}' AND event_id='{$event_id}'");
+    $sql = "SELECT
+                event_id
+            FROM
+                debits
+            WHERE
+                address_id='{$address_id}' AND 
+                tick_id='{$tick_id}' AND
+                amount='{$amount}' AND
+                action_id='{$action_id}' AND
+                event_id='{$event_id}'";
+    $results = $mysqli->query($sql);
     if($results){
         if($results->num_rows){
             // UPDATE record
             $sql = "UPDATE
                         debits
                     SET
-                        action='{$action}',
-                        quantity='{$quantity}',
-                        block_index='{$block_index}',
-                        tick_id='{$tick_id}'
+                        block_index='{$block_index}'
                     WHERE 
-                        address_id='{$address_id}' AND
+                        address_id='{$address_id}' AND 
+                        tick_id='{$tick_id}' AND
+                        amount='{$amount}' AND
+                        action_id='{$action_id}' AND
                         event_id='{$event_id}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO debits (block_index, address_id, tick_id, quantity, action, event_id) values ('{$block_index}', '{$address_id}', '{$tick_id}', '{$quantity}', '{$action}', '{$event_id}')";
+            $sql = "INSERT INTO debits (block_index, address_id, tick_id, amount, action_id, event_id) values ('{$block_index}', '{$address_id}', '{$tick_id}', '{$amount}', '{$action_id}', '{$event_id}')";
         }
         $results = $mysqli->query($sql);
         if(!$results)
@@ -497,7 +578,7 @@ function createBlock( $block=null ){
     $balances     = array();
     $transactions = array();
     // Get all data from credits table
-    $results = $mysqli->query("SELECT * FROM credits WHERE block_index<='{$block}' ORDER BY block_index ASC, tick_id ASC, address_id ASC, quantity DESC");
+    $results = $mysqli->query("SELECT * FROM credits WHERE block_index<='{$block}' ORDER BY block_index ASC, tick_id ASC, address_id ASC, amount DESC");
     if($results){
         if($results->num_rows){
             while($row = $results->fetch_assoc())
@@ -507,7 +588,7 @@ function createBlock( $block=null ){
         byeLog('Error while trying to lookup records in credits table');
     }
     // Get all data from debits table
-    $results = $mysqli->query("SELECT * FROM debits WHERE block_index<='{$block}' ORDER BY block_index ASC, tick_id ASC, address_id ASC, quantity DESC");
+    $results = $mysqli->query("SELECT * FROM debits WHERE block_index<='{$block}' ORDER BY block_index ASC, tick_id ASC, address_id ASC, amount DESC");
     if($results){
         if($results->num_rows){
             while($row = $results->fetch_assoc())
@@ -517,7 +598,7 @@ function createBlock( $block=null ){
         byeLog('Error while trying to lookup records in debits table');
     }
     // Get all data from balances table
-    $results = $mysqli->query("SELECT * FROM balances WHERE id IS NOT NULL ORDER BY tick_id ASC, address_id ASC, quantity DESC");
+    $results = $mysqli->query("SELECT * FROM balances WHERE id IS NOT NULL ORDER BY tick_id ASC, address_id ASC, amount DESC");
     if($results){
         if($results->num_rows){
             while($row = $results->fetch_assoc())
@@ -725,13 +806,13 @@ function getAddressCredits($address=null){
     if($type==='string' && !is_numeric($address))
         $address_id = createAddress($address);
     // Get Credits
-    $sql = "SELECT tick_id, sum(quantity) as quantity FROM credits WHERE address_id='{$address_id}' GROUP BY tick_id";
+    $sql = "SELECT tick_id, sum(amount) as amount FROM credits WHERE address_id='{$address_id}' GROUP BY tick_id";
     $results = $mysqli->query($sql);
     if($results){
         if($results->num_rows){
             while($row = $results->fetch_assoc()){
                 $row = (object) $row;
-                $data[$row->tick_id] = $row->quantity;
+                $data[$row->tick_id] = $row->amount;
             }
         }
     } else {
@@ -750,12 +831,12 @@ function getAddressDebits($address=null){
     if($type==='string' && !is_numeric($address))
         $address_id = createAddress($address);
     // Get Debits
-    $results = $mysqli->query("SELECT tick_id, sum(quantity) as quantity FROM debits WHERE address_id='{$address_id}' GROUP BY tick_id");
+    $results = $mysqli->query("SELECT tick_id, sum(amount) as amount FROM debits WHERE address_id='{$address_id}' GROUP BY tick_id");
     if($results){
         if($results->num_rows){
             while($row = $results->fetch_assoc()){
                 $row = (object) $row;
-                $data[$row->tick_id] = $row->quantity;
+                $data[$row->tick_id] = $row->amount;
             }
         }
     } else {
@@ -775,11 +856,11 @@ function getAddressBalances($address=null){
     $debits   = getAddressDebits($address_id);
     $decimals = array(); // Assoc array to store tick/decimals
     $balances = array(); // Assoc array to store tick/balance
-    foreach($credits as $tick_id => $quantity)
+    foreach($credits as $tick_id => $amount)
         $decimals[$tick_id] = getTokenDecimalPrecision($tick_id);
     // Build out balances (credits - debits)
-    foreach($credits as $tick_id => $quantity){
-        $credit  = $quantity;
+    foreach($credits as $tick_id => $amount){
+        $credit  = $amount;
         $debit   = (isset($debits[$tick_id])) ? $debits[$tick_id] : 0;
         $decimal = $decimals[$tick_id];
         try {
@@ -811,9 +892,9 @@ function updateAddressBalance( $address=null){
             if($results){
                 $update = ($results->num_rows) ? true : false;
                 if($update){
-                    $sql = "UPDATE balances SET quantity='{$balance}' WHERE address_id='{$address_id}' AND tick_id='{$tick_id}'";
+                    $sql = "UPDATE balances SET amount='{$balance}' WHERE address_id='{$address_id}' AND tick_id='{$tick_id}'";
                 } else {
-                    $sql = "INSERT INTO balances (tick_id, address_id, quantity) values ('{$tick_id}','{$address_id}','{$balance}')";
+                    $sql = "INSERT INTO balances (tick_id, address_id, amount) values ('{$tick_id}','{$address_id}','{$balance}')";
                 }
                 // Create/Update balances records
                 if($update||(!$update && $balance)){
@@ -921,7 +1002,7 @@ function getTokenSupply( $tick=null ){
     if($type==='string' && !is_numeric($tick))
         $tick_id = createTicker($tick);
     // Get Credits
-    $sql = "SELECT SUM(quantity) as credits FROM credits WHERE tick_id='{$tick_id}'";
+    $sql = "SELECT SUM(amount) as credits FROM credits WHERE tick_id='{$tick_id}'";
     $results = $mysqli->query($sql);
     if($results){
         if($results->num_rows){
@@ -932,7 +1013,7 @@ function getTokenSupply( $tick=null ){
         byeLog('Error while trying to get list of credits');
     }
     // Get Debits
-    $sql = "SELECT SUM(quantity) as debits FROM debits WHERE tick_id='{$tick_id}'";
+    $sql = "SELECT SUM(amount) as debits FROM debits WHERE tick_id='{$tick_id}'";
     $results = $mysqli->query($sql);
     if($results){
         if($results->num_rows){
@@ -1197,7 +1278,7 @@ function getHolders( $tick=null, $type=null){
     if($type==1){
         $sql = "SELECT
                     a.address,
-                    b.quantity
+                    b.amount
                 FROM
                     balances b,
                     index_tickers t,
@@ -1216,7 +1297,7 @@ function getHolders( $tick=null, $type=null){
         if($results->num_rows){
             while($row = $results->fetch_assoc()){
                 $row = (object) $row;
-                $holders[$row->address] = $row->quantity;
+                $holders[$row->address] = $row->amount;
             }
         }
     } else {
@@ -1233,7 +1314,7 @@ function isDistributed($tick=null){
     if(count($holders)>1)
         return true;
     // Holder that is not OWNER
-    foreach($holders as $address => $quantity)
+    foreach($holders as $address => $amount)
         if($address!=$info->OWNER)
             return true;
     return false;
@@ -1250,5 +1331,18 @@ function isValidList($tx_hash=null, $type=null){
 }
 
 
+// Validate if a balances array holds a certain amount of a tick token
+function hasBalance($balances=null, $tick=null, $amount=null){
+    $balance = (isset($balances[$tick])) ? $balances[$tick] : 0;
+    if($balance >= $amount)
+        return true;
+    return false;
+}
 
+// Handle deducting TICK AMOUNT from balances and return updated balances array
+function debitBalances($balances=null, $tick=null, $amount=null){
+    $balance = (isset($balances[$tick])) ? $balances[$tick] : 0;
+    $balances[$tick] = $balance - $amount;
+    return $balances;
+}
 ?>

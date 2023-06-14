@@ -211,7 +211,7 @@ while($block <= $current){
         break;
     } else {
         // Save block# to state file (so we can resume from this block next run)
-        // file_put_contents(LASTFILE, $block);
+        file_put_contents(LASTFILE, $block);
     }
 
     // Increase block before next loop

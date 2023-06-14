@@ -4,14 +4,14 @@ CREATE TABLE sends (
     tx_hash_id     INTEGER UNSIGNED, -- id of record in index_transactions
     block_index    INTEGER UNSIGNED, -- block index of TRANSFER transaction
     tick_id        INTEGER UNSIGNED, -- id of record in index_ticks table
-    source_id      INTEGER UNSIGNED, -- id of record in index_addresses table (address that did MINT)
-    destination_id INTEGER UNSIGNED, -- id of record in index_addresses table (address that did MINT)
-    quantity       VARCHAR(250),     -- Quantity of token in send
-    memo           LONGTEXT,         -- Memo included with send (optional)
+    source_id      INTEGER UNSIGNED, -- id of record in index_addresses table
+    destination_id INTEGER UNSIGNED, -- id of record in index_addresses table
+    amount         VARCHAR(250),     -- Amount of token in send
+    memo_id        INTEGER UNSIGNED, -- id of record in index_memos table 
     status_id      INTEGER UNSIGNED  -- id of record in index_statuses table
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE UNIQUE INDEX tx_index       ON mints (tx_index);
+CREATE        INDEX tx_index       ON sends (tx_index);
 CREATE        INDEX tick_id        ON sends (tick_id);
 CREATE        INDEX tx_hash_id     ON sends (tx_hash_id);
 CREATE        INDEX source_id      ON sends (source_id);
