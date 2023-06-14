@@ -3,17 +3,18 @@
  * send.php - SEND command
  *
  * PARAMS:
- * VERSION     - Broadcast Format Version        
- * TICK        - 1 to 250 characters in length   
- * AMOUNT      - Amount of `tokens` to send      
- * DESTINATION - Address to transfer `tokens` to 
- * MEMO        - An optional memo to include     
+ * - VERSION     - Broadcast Format Version        
+ * - TICK        - 1 to 250 characters in length   
+ * - AMOUNT      - Amount of `tokens` to send      
+ * - DESTINATION - Address to transfer `tokens` to 
+ * - MEMO        - An optional memo to include     
  * 
  * FORMATS:
- * 0 - Single Send
- * 1 - Multi-Send (Brief)
- * 2 - Multi-Send (Full)
- * 3 - Multi-Send (Full) with Multiple Memos
+ * - 0 = Single Send
+ * - 1 = Multi-Send (Brief)
+ * - 2 = Multi-Send (Full)
+ * - 3 = Multi-Send (Full) with Multiple Memos
+ * 
  ********************************************************************/
 function btnsSend($params=null, $data=null, $error=null){
     global $mysqli, $tickers, $addresses;

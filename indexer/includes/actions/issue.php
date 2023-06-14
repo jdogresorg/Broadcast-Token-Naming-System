@@ -25,11 +25,11 @@
  * - MINT_BLOCK_LIST  - `TX_HASH` of a BTNS LIST of addresses to NOT allow minting from
  * 
  * FORMATS :
- * - 0 - Full
- * - 1 - Brief
- * - 2 - Edit MINT PARAMS
- * - 3 - Edit LOCK PARAMS
- * - 4 - Edit CALLBACK PARAMS
+ * - 0 = Full
+ * - 1 = Brief
+ * - 2 = Edit MINT PARAMS
+ * - 3 = Edit LOCK PARAMS
+ * - 4 = Edit CALLBACK PARAMS
  * 
  ********************************************************************/
 function btnsIssue( $params=null, $data=null, $error=null){

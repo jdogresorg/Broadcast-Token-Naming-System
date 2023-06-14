@@ -9,7 +9,8 @@
  * - DESTINATION - Address to transfer tokens to
  * 
  * FORMATS:
- * - 0 - Full
+ * - 0 = Full
+ * 
  ********************************************************************/
 function btnsMint($params=null, $data=null, $error=null){
     global $mysqli, $tickers, $addresses;
