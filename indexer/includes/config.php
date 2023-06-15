@@ -14,6 +14,13 @@ if(NETWORK=='mainnet'){
     define("DB_PASS", "mysql_password");
     define("DB_DATA", "BTNS_Counterparty"); // Database where BTNS data is stored
     define("CP_DATA", "Counterparty");      // Database where Counterparty data is stored 
+
+    // First block with BTNS transaction
+    define("FIRST_BLOCK",789742);
+
+    // BTNS Address 
+    define('BURN_ADDRESS', "1Muhahahahhahahahahahhahahauxh9QX");
+    define('GAS_ADDRESS', "1BTNSGASK5En7rFurDJ79LQ8CVYo2ecLC8");
 }
 
 // Testnet config
@@ -23,6 +30,13 @@ if(NETWORK=='testnet'){
     define("DB_PASS", "mysql_password");
     define("DB_DATA", "BTNS_Counterparty_Testnet"); // Database where BTNS data is stored
     define("CP_DATA", "Counterparty_Testnet");      // Database where Counterparty data is stored 
+
+    // First block with BTNS transaction
+    define("FIRST_BLOCK",789742);
+
+    // BTNS Address 
+    define('BURN_ADDRESS', "1Muhahahahhahahahahahhahahauxh9QX");
+    define('GAS_ADDRESS', "1BTNSGASK5En7rFurDJ79LQ8CVYo2ecLC8");
 }
 
 // BTNS Indexer Version
@@ -38,13 +52,6 @@ define("MAX_TICK_LENGTH",250);
 // Reserved BTNS TICK names
 $reserved = array('BTC','XCP','GAS');
 define("RESERVED_TICKS",$reserved);
-
-// First block with BTNS transaction
-define("FIRST_BLOCK",789742);
-
-// BTNS Address 
-define('BURN_ADDRESS', "1Muhahahahhahahahahahhahahauxh9QX");
-define('GAS_ADDRESS', "1BTNSGASK5En7rFurDJ79LQ8CVYo2ecLC8");
 
 // Min/Max MAX_SUPPLY
 define('MIN_TOKEN_SUPPLY',0);
