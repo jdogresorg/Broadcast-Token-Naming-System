@@ -7,7 +7,7 @@ This command creates a list of items for use in `BTNS` commands
 | `VERSION`      | String | Broadcast Format Version               |
 | `TYPE`         | String | List type (1=TICK, 2=ASSET, 3=ADDRESS) |
 | `ITEM`         | String | Any valid `TICK`, `ASSET`, or address  |
-| `ACT`          | String | Act to perform (1=ADD, 2=REMOVE)       |
+| `EDIT`         | String | Edit action (1=ADD, 2=REMOVE)          |
 | `LIST_TX_HASH` | String | `TX_HASH` of existing BTNS `LIST`      |
 
 
@@ -17,7 +17,7 @@ This command creates a list of items for use in `BTNS` commands
 - `VERSION|TYPE|ITEM`
 
 ### Version `1` 
-- `VERSION|ACT|LIST_TX_HASH|ITEM`
+- `VERSION|EDIT|LIST_TX_HASH|ITEM`
 
 
 ## Examples
