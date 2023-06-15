@@ -2,13 +2,13 @@
 This command creates a list of items for use in `BTNS` commands
 
 ## PARAMS
-| Name      | Type   | Description                            |
-| --------- | ------ | ---------------------------------------|
-| `VERSION` | String | Broadcast Format Version               |
-| `TYPE`    | String | List type (1=TICK, 2=ASSET, 3=ADDRESS) |
-| `ITEM`    | String | Any valid `TICK`, `ASSET`, or address  |
-| `ACT`     | String | Act to perform (1=ADD, 2=REMOVE)       |
-| `TX_HASH` | String | `TX_HASH` of existing BTNS `LIST`      |
+| Name           | Type   | Description                            |
+| -------------- | ------ | ---------------------------------------|
+| `VERSION`      | String | Broadcast Format Version               |
+| `TYPE`         | String | List type (1=TICK, 2=ASSET, 3=ADDRESS) |
+| `ITEM`         | String | Any valid `TICK`, `ASSET`, or address  |
+| `ACT`          | String | Act to perform (1=ADD, 2=REMOVE)       |
+| `LIST_TX_HASH` | String | `TX_HASH` of existing BTNS `LIST`      |
 
 
 ## Formats
@@ -17,7 +17,7 @@ This command creates a list of items for use in `BTNS` commands
 - `VERSION|TYPE|ITEM`
 
 ### Version `1` 
-- `VERSION|ACT|TX_HASH|ITEM`
+- `VERSION|ACT|LIST_TX_HASH|ITEM`
 
 
 ## Examples
@@ -54,6 +54,6 @@ This example creates a new list from an existing list and removes 2 addresses to
 
 ## Notes
 - Format version `0` allows for creating a list of `TYPE`
-- Format version `1` allows for editing of a list via `TX_HASH` and `ACT`
+- Format version `1` allows for editing of a list via `LIST_TX_HASH` and `ACT`
 - `ITEM` can be repeated many times in a `LIST` request
 - `ITEM` values should be unique
