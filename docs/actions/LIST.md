@@ -14,26 +14,26 @@ This command creates a list of items for use in `BTNS` commands
 ## Formats
 
 ### Version `0` 
-- `VERSION|TYPE|ITEM|ITEM|ITEM`
+- `VERSION|TYPE|ITEM`
 
 ### Version `1` 
-- `VERSION|ACT|TX_HASH|ITEM|ITEM|ITEM`
+- `VERSION|ACT|TX_HASH|ITEM`
 
 
 ## Examples
 ```
 bt:LIST|0|1|JDOG|BRRR|TEST
-This example creates a list of BTNS token tickers
+This example creates a list of 3 BTNS token tickers
 ```
 
 ```
 bt:LIST|0|2|XCP|RAREPEPE|JPMCHASE|A4211151421115130001
-This example creates a list of counterparty assets
+This example creates a list of 3 counterparty assets
 ```
 
 ```
 bt:LIST|0|3|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev|1FWDonkMbC6hL64JiysuggHnUAw2CKWszs|1BTNSGASK5En7rFurDJ79LQ8CVYo2ecLC8
-This example creates a list of addresses
+This example creates a list of 3 addresses
 ```
 
 ```
@@ -55,3 +55,5 @@ This example creates a new list from an existing list and removes 2 addresses to
 ## Notes
 - Format version `0` allows for creating a list of `TYPE`
 - Format version `1` allows for editing of a list via `TX_HASH` and `ACT`
+- `ITEM` can be repeated many times in a `LIST` request
+- `ITEM` values should be unique
