@@ -54,6 +54,6 @@ This example creates a new list from an existing list and removes 2 addresses to
 
 ## Notes
 - Format version `0` allows for creating a list of `TYPE`
-- Format version `1` allows for editing of a list via `LIST_TX_HASH` and `ACT`
+- Format version `1` allows for creating a list from an existing list via `LIST_TX_HASH` and `EDIT`
 - `ITEM` can be repeated many times in a `LIST` request
 - `ITEM` values should be unique
