@@ -572,11 +572,23 @@ function createDebit( $action=null, $block_index=null, $event=null, $tick=null, 
 
 // Create record in `blocks` table
 function createBlock( $block=null ){
-    global $mysqli;
+    global $mysqli, $dbase;
     $credits      = array();
     $debits       = array();
     $balances     = array();
     $transactions = array();
+    $block_time   = 0;
+    // Get timestamp of Block from main database 
+    $results = $mysqli->query("SELECT block_time FROM {$dbase}.blocks WHERE block_index='{$block}' LIMIT 1");
+    if($results){
+        if($results->num_rows){
+            $row = (object) $results->fetch_assoc();
+            $block_time = $row->block_time;
+        }
+    } else {
+        byeLog('Error while trying to lookup records in credits table');
+    }
+
     // Get all data from credits table
     $results = $mysqli->query("SELECT * FROM credits WHERE block_index<='{$block}' ORDER BY block_index ASC, tick_id ASC, address_id ASC, amount DESC");
     if($results){
@@ -640,6 +652,7 @@ function createBlock( $block=null ){
             $sql = "UPDATE
                         blocks
                     SET
+                        block_time='{$block_time}',
                         credits_hash_id='{$credits_hash_id}',
                         debits_hash_id='{$debits_hash_id}',
                         balances_hash_id='{$balances_hash_id}',
@@ -648,7 +661,7 @@ function createBlock( $block=null ){
                         block_index='{$block}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO blocks (block_index, credits_hash_id, debits_hash_id, balances_hash_id, txlist_hash_id) values ('{$block}', '{$credits_hash_id}', '{$debits_hash_id}', '{$balances_hash_id}', '{$txlist_hash_id}')";
+            $sql = "INSERT INTO blocks (block_index, block_time, credits_hash_id, debits_hash_id, balances_hash_id, txlist_hash_id) values ('{$block}', '{$block_time}', '{$credits_hash_id}', '{$debits_hash_id}', '{$balances_hash_id}', '{$txlist_hash_id}')";
         }
         $results = $mysqli->query($sql);
         if(!$results)
