@@ -1,43 +1,11 @@
 <?php
 /*********************************************************************
- * config.php - Config info / Credentials
+ * config.php - Config info
  ********************************************************************/
 
 // Network (mainnet/testnet)
 $network = ($network!='mainnet') ? $network : 'mainnet';
 define("NETWORK", $network);
-
-// Mainnet config
-if(NETWORK=='mainnet'){
-    define("DB_HOST", "localhost");
-    define("DB_USER", "mysql_username");
-    define("DB_PASS", "mysql_password");
-    define("DB_DATA", "BTNS_Counterparty"); // Database where BTNS data is stored
-    define("CP_DATA", "Counterparty");      // Database where Counterparty data is stored 
-
-    // First block with BTNS transaction
-    define("FIRST_BLOCK",789742);
-
-    // BTNS Address 
-    define('BURN_ADDRESS', "1Muhahahahhahahahahahhahahauxh9QX");
-    define('GAS_ADDRESS', "1BTNSGASK5En7rFurDJ79LQ8CVYo2ecLC8");
-}
-
-// Testnet config
-if(NETWORK=='testnet'){
-    define("DB_HOST", "localhost");
-    define("DB_USER", "mysql_username");
-    define("DB_PASS", "mysql_password");
-    define("DB_DATA", "BTNS_Counterparty_Testnet"); // Database where BTNS data is stored
-    define("CP_DATA", "Counterparty_Testnet");      // Database where Counterparty data is stored 
-
-    // First block with BTNS transaction
-    define("FIRST_BLOCK",789742);
-
-    // BTNS Address 
-    define('BURN_ADDRESS', "1Muhahahahhahahahahahhahahauxh9QX");
-    define('GAS_ADDRESS', "1BTNSGASK5En7rFurDJ79LQ8CVYo2ecLC8");
-}
 
 // BTNS Indexer Version
 define("VERSION_MAJOR", 0);
@@ -60,6 +28,29 @@ define('MAX_TOKEN_SUPPLY',1000000000000000000000);
 // Min/Max DECIMALS
 define('MIN_TOKEN_DECIMALS',0);
 define('MAX_TOKEN_DECIMALS',18);
+
+// Mainnet config
+if(NETWORK=='mainnet'){
+    // First block with BTNS transaction
+    define("FIRST_BLOCK",789742);
+
+    // BTNS Address 
+    define('BURN_ADDRESS', "1Muhahahahhahahahahahhahahauxh9QX");
+    define('GAS_ADDRESS', "1BTNSGASK5En7rFurDJ79LQ8CVYo2ecLC8");
+}
+
+// Testnet config
+if(NETWORK=='testnet'){
+    // First block with BTNS transaction (none yet, so just picking block)
+    define("FIRST_BLOCK",2466000);
+
+    // BTNS Address 
+    define('BURN_ADDRESS', "mvCounterpartyXXXXXXXXXXXXXXW24Hef");
+    define('GAS_ADDRESS', "mvCounterpartyXXXXXXXXXXXXXXW24Hef");
+}
+
+// Database Credentials
+require_once('db-config.php');
 
 // General functions
 require_once('functions.php');
