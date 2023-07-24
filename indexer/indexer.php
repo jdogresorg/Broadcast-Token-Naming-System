@@ -78,6 +78,8 @@ if($rollback){
     }
     // Add code here update balances table using credits/debits to get back to sane balances after rollback
     // ... coming soon
+    // Add code here to handle deleting items from list_{items,edits} tables using 
+    // ... coming soon
     byeLog("Rollback to block {$block_index} complete.");
 }
 

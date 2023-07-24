@@ -671,6 +671,143 @@ function createBlock( $block=null ){
     }
 }
 
+// Create record in `lists` table
+function createList( $data=null ){
+    global $mysqli;
+    $source_id       = createAddress($data->SOURCE);
+    $tx_hash_id      = createTransaction($data->TX_HASH);
+    $list_tx_hash_id = createTransaction($data->LIST_TX_HASH);
+    $status_id       = createStatus($data->STATUS);
+    $tx_index        = $mysqli->real_escape_string($data->TX_INDEX);
+    $list_type       = $mysqli->real_escape_string($data->TYPE);
+    $list_edit       = $mysqli->real_escape_string($data->EDIT);
+    $block_index     = $mysqli->real_escape_string($data->BLOCK_INDEX);
+    // Check if record already exists
+    $results = $mysqli->query("SELECT tx_index FROM lists WHERE tx_hash_id='{$tx_hash_id}'");
+    if($results){
+        if($results->num_rows){
+            // UPDATE record
+            $sql = "UPDATE
+                        lists
+                    SET
+                        type='{$list_type}',
+                        edit='{$list_edit}',
+                        source_id='{$source_id}',
+                        block_index='{$block_index}',
+                        list_tx_hash_id='{$list_tx_hash_id}',
+                        tx_index='{$tx_index}',
+                        status_id='{$status_id}'
+                    WHERE 
+                        tx_hash_id='{$tx_hash_id}'";
+        } else {
+            // INSERT record
+            $sql = "INSERT INTO lists (tx_index, type, edit, source_id, list_tx_hash_id, tx_hash_id, block_index, status_id) values ('{$tx_index}','{$list_type}', '{$list_edit}', '{$source_id}', '{$list_tx_hash_id}', '{$tx_hash_id}', '{$block_index}', '{$status_id}')";
+        }
+        // print $sql;
+        $results = $mysqli->query($sql);
+        if(!$results)
+            byeLog('Error while trying to create / update a record in the lists table');
+    } else {
+        byeLog('Error while trying to lookup record in lists table');
+    }
+}
+
+// Return a list given a tx_hash
+function getList($tx_hash=null){
+    global $mysqli, $dbase;
+    $list_id    = (is_numeric($tx_hash)) ? $tx_hash : createTransaction($tx_hash);
+    $list_type  = getListType($list_id);
+    $list       = array();
+    $sql        = false;
+    if($list_type==1)
+        $sql = "SELECT t.tick as item FROM list_items l, index_tickers t WHERE l.item_id=t.id AND l.list_id='{$list_id}'";
+    // Asset
+    if($list_type==2)
+        $sql = "SELECT a.asset as item FROM list_items l, {$dbase}.assets a WHERE l.item_id=a.id AND l.list_id='{$list_id}'";
+    // Address
+    if($list_type==3)
+        $sql = "SELECT a.address as item FROM list_items l, index_addresses a WHERE l.item_id=a.id AND l.list_id='{$list_id}'";
+    // Check if record already exists
+    if($sql){
+        $results = $mysqli->query($sql);
+        if($results){
+            while($row = $results->fetch_assoc()){
+                $row = (object) $row;
+                array_push($list, $row->item);
+            }
+        }
+    }
+    return $list;
+}
+
+// Return a list type given a tx_hash
+function getListType($tx_hash=null){
+    global $mysqli;
+    $list_id = (is_numeric($tx_hash)) ? $tx_hash : createTransaction($tx_hash);
+    $type = false;
+    // Check if record already exists
+    $sql = "SELECT type FROM lists WHERE tx_hash_id='{$list_id}'";
+    $results = $mysqli->query($sql);
+    if($results && $results->num_rows==1){
+        $row  = (object) $results->fetch_assoc();
+        $type = (int) $row->type;
+    }
+    return $type;
+}
+
+// Create record in `list_edits` table
+function createListEdit($data=null, $item=null, $status=null ){
+    global $mysqli;
+    $list_id   = (is_numeric($data->TX_HASH)) ? $data->TX_HASH : createTransaction($data->TX_HASH);
+    $status_id = createStatus($status);
+    if($data->TYPE==1)
+        $item_id = createTicker($item);
+    if($data->TYPE==2)
+        $item_id = getAssetId($item);
+    if($data->TYPE==3)
+        $item_id = createAddress($item);
+    // Check if record already exists
+    $results = $mysqli->query("SELECT item_id FROM list_edits WHERE list_id='{$list_id}' AND item_id='{$item_id}' AND status_id='{$status_id}'");
+    if($results){
+        if($results->num_rows==0){
+            // INSERT record
+            $sql = "INSERT INTO list_edits (list_id, item_id, status_id) values ('{$list_id}','{$item_id}', '{$status_id}')";
+            $results = $mysqli->query($sql);
+        }
+        if(!$results)
+            byeLog('Error while trying to create / update a record in the list_edits table');
+    } else {
+        byeLog('Error while trying to lookup record in list_edits table');
+    }
+}
+
+
+// Create record in `list_items` table
+function createListItem($data=null, $item=null){
+    global $mysqli;
+    $list_id   = createTransaction($data->TX_HASH);
+    if($data->TYPE==1)
+        $item_id = createTicker($item);
+    if($data->TYPE==2)
+        $item_id = getAssetId($item);
+    if($data->TYPE==3)
+        $item_id = createAddress($item);
+    // Check if record already exists
+    $results = $mysqli->query("SELECT item_id FROM list_items WHERE list_id='{$list_id}' AND item_id='{$item_id}'");
+    if($results){
+        if($results->num_rows==0){
+            // INSERT record
+            $sql = "INSERT INTO list_items (list_id, item_id) values ('{$list_id}','{$item_id}')";
+            $results = $mysqli->query($sql);
+        }
+        if(!$results)
+            byeLog('Error while trying to create / update a record in the list_edits table');
+    } else {
+        byeLog('Error while trying to lookup record in list_edits table');
+    }
+}
+
+
 // Handle getting token information for a given tick
 function getTokenInfo($tick=null){
     global $mysqli;
@@ -777,10 +914,9 @@ function getAssetInfo($asset=null){
                     a1.asset_longname,
                     a2.address as owner
                 FROM 
-                    {$dbase}.assets a1,
-                    {$dbase}.index_addresses a2
+                    {$dbase}.assets a1 LEFT JOIN 
+                    {$dbase}.index_addresses a2 on (a2.id=a1.owner_id)
                 WHERE 
-                    a2.id=a1.owner_id AND
                     a1.type IN (1,2,3) AND
                     a1.id='{$asset_id}'";
         // print $sql;
@@ -988,7 +1124,7 @@ function updateTokens( $tickers=null){
 
 // Handle getting token info (supply, price, etc) and updating the `tokens` table
 function updateTokenInfo( $tick=null){
-    print "updateTokenInfo tick={$tick}\n";
+    // print "updateTokenInfo tick={$tick}\n";
     global $mysqli;
     $type = gettype($tick);
     if($type==='integer' || is_numeric($tick))
