@@ -1,33 +1,18 @@
 # Broadcast Token Name System (BTNS) Indexer
 
-This is a very basic BTNS indexer which supports the following BTNS specs:
+This is a basic BTNS indexer written in PHP which supports indexing BTNS broadcasts, determining statis of transactions, and populating a mysql database with the indexed data.
 
-- BTNS (version `0` - `DEPLOY`, `MINT`, `TRANSFER`)
-- BTNS-69    (coming soon)
-- BTNS-420   (coming soon)
-- BTNS-442   (coming soon)
-- BTNS-l33t  (coming soon)
-- BTNS-80085 (coming soon)
+# DISCLAIMER
 
-BTNS actions (`DEPLOY`, `MINT`, `TRANSFER`)
+`BTNS` is a bleeding-edge experimental protocol to play around with token functionality on **`Bitcoin`** and **`Counterparty`**. This is a hobby project, and  I am **NOT** responsible for any losses, financial or otherwise, incurred from using this experimental protocol and its functionality. 
 
-- add database tables
+Science is messy sometimes... _**DO NOT**_ put in funds your not willing to lose!
 
-We include block_index in every tx, so we can rollback
-- add rollback functionality
+# Requires
+- PHP 8
+- php-bcmath
+- MySQL / MariaDB
+- counterparty2mysql
 
- * DISCLAIMER: This is cutting-edge / experimental technology and BTNS
- * is something I wrote out of necessity. This first BTNS indexer is 
- * meant as a BASE framework to determine what BTNS actions are valid
- * and which are considered invalid (and ignored). While the BTNS rules
- * are strightforward, the code to interpret those rules always needs
- * refining as time goes on. BTNS Transactions that are considered valid 
- * one day may be considered invalid the next day after further review.
- * 
- * TLDR: We are doing science, it can be messy, please bear with us.
- * 
- * Author: Jeremy Johnson <j-dog@j-dog.net>
-
-Requires BCMATH
-
-Note: This indexer requires the usage of [counterparty2mysql](https://github.com/jdogresorg/counterparty2mysql) which pulls Counterparty data into a MySQL database. Counteparty2mysql includes some additional database optimizations, such as indexing all addresses, transactions, and assets for faster queries.
+# Notes: 
+- This indexer requires the usage of [counterparty2mysql](https://github.com/jdogresorg/counterparty2mysql) which pulls Counterparty data into a MySQL database. Counteparty2mysql includes some additional database optimizations, such as indexing all addresses, transactions, and assets for faster queries.
