@@ -22,14 +22,14 @@ This command creates or issues a `BTNS` `token`
 | `CALLBACK_BLOCK`   | String | Enable `CALLBACK` command after `CALLBACK_BLOCK`                                            |
 | `CALLBACK_TICK`    | String | `TICK` `token` users get when `CALLBACK` command is used                                    |
 | `CALLBACK_AMOUNT`  | String | `TICK` `token` amount that users get when `CALLBACK` command is used                        |
-| `MINT_ALLOW_LIST`  | String | `TX_HASH` of a BTNS `LIST` of addresses to allow minting from                               |
-| `MINT_BLOCK_LIST`  | String | `TX_HASH` of a BTNS `LIST` of addresses to NOT allow minting from                           |
+| `ALLOW_LIST`       | String | `TX_HASH` of a BTNS `LIST` of addresses allowed to interact with this token                 |
+| `BLOCK_LIST`       | String | `TX_HASH` of a BTNS `LIST` of addresses NOT allowed to interact with this token             |
 
 
 ## Formats
 
 ### Version `0`
-- `VERSION|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT|MINT_ALLOW_LIST|MINT_BLOCK_LIST`
+- `VERSION|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT|ALLOW_LIST|BLOCK_LIST`
 
 ### Version `1` - Edit `DESCRIPTION`
 - `VERSION|TICK|DESCRIPTION`
@@ -114,6 +114,6 @@ This example issues a TEST token with a max supply of 100, and a maximum mint of
 - `DESCRIPTION` can NOT contain any pipe `|` or semi-colon `;` characters, as these are reserved
 - `CALLBACK_BLOCK`, `CALLBACK_TICK`, and `CALLBACK_AMOUNT` can be edited via `ISSUE` action until `LOCK_CALLBACK` is set to `1`
 - `DEPLOY` `ACTION` can be used for backwards-compatability with BRC20/SRC20 `DEPLOY`
-- By default any address can `MINT`, to change this behavior use `MINT_ALLOW_LIST` and `MINT_BLOCK_LIST`
+- By default any address can interact with a BTNS token, to change this behavior use `ALLOW_LIST` and `BLOCK_LIST`
 - If `TICK` contains any unicode characters, then `TICK` should be `base64` encoded
 - `counterparty` `ASSET` and `SUBASSET` names are reserved within the BTNS for use by the `counterparty` owner
