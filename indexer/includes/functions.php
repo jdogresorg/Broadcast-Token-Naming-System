@@ -250,8 +250,8 @@ function createIssue( $data=null ){
     $transfer_id        = createAddress($data->TRANSFER);
     $transfer_supply_id = createAddress($data->TRANSFER_SUPPLY);
     $tx_hash_id         = createTransaction($data->TX_HASH);
-    $mint_allow_list_id = createTransaction($data->MINT_ALLOW_LIST);
-    $mint_block_list_id = createTransaction($data->MINT_BLOCK_LIST);
+    $allow_list_id      = createTransaction($data->ALLOW_LIST);
+    $block_list_id      = createTransaction($data->BLOCK_LIST);
     $tx_index           = $data->TX_INDEX;
     $status_id          = createStatus($data->STATUS);
     // Check if record already exists
@@ -279,8 +279,8 @@ function createIssue( $data=null ){
                         callback_block='{$callback_block}',
                         callback_tick_id='{$callback_tick_id}',
                         callback_amount='{$callback_amount}',
-                        mint_allow_list_id='{$mint_allow_list_id}',
-                        mint_block_list_id='{$mint_block_list_id}',
+                        allow_list_id='{$allow_list_id}',
+                        block_list_id='{$block_list_id}',
                         source_id='{$source_id}',
                         block_index='{$block_index}',
                         tx_index='{$tx_index}',
@@ -289,7 +289,7 @@ function createIssue( $data=null ){
                         tx_hash_id='{$tx_hash_id}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO issues (tick_id, max_supply, max_mint, decimals, description, mint_supply, transfer_id, transfer_supply_id, lock_supply, lock_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, mint_allow_list_id, mint_block_list_id, source_id, tx_hash_id, block_index, tx_index, status_id) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$mint_supply}', '{$transfer_id}', '{$transfer_supply_id}', '{$lock_supply}', '{$lock_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$mint_allow_list_id}', '{$mint_block_list_id}','{$source_id}', '{$tx_hash_id}', '{$block_index}', '{$tx_index}', '{$status_id}')";
+            $sql = "INSERT INTO issues (tick_id, max_supply, max_mint, decimals, description, mint_supply, transfer_id, transfer_supply_id, lock_supply, lock_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, allow_list_id, block_list_id, source_id, tx_hash_id, block_index, tx_index, status_id) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$mint_supply}', '{$transfer_id}', '{$transfer_supply_id}', '{$lock_supply}', '{$lock_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$allow_list_id}', '{$block_list_id}','{$source_id}', '{$tx_hash_id}', '{$block_index}', '{$tx_index}', '{$status_id}')";
         }
         // print $sql;
         $results = $mysqli->query($sql);
