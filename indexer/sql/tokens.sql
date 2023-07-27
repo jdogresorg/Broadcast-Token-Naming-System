@@ -19,7 +19,8 @@ CREATE TABLE tokens (
     callback_amount    BIGINT UNSIGNED,                      -- AMOUNT users get if CALLBACK
     mint_allow_list_id INTEGER UNSIGNED NOT NULL default 0,  -- id of record in index_transactions table
     mint_block_list_id INTEGER UNSIGNED NOT NULL default 0,  -- id of record in index_transactions table
-    owner_id           INTEGER UNSIGNED                      -- id of record in index_addresses table
+    owner_id           INTEGER UNSIGNED,                     -- id of record in index_addresses table
+    btc_price          VARCHAR(250)                          -- last price of BTC purchase of 1 token
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE        INDEX tick_id            ON tokens (tick_id);
