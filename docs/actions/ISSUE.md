@@ -43,6 +43,9 @@ This command creates or issues a `BTNS` `token`
 ### Version `4` - Edit `CALLBACK` `PARAMS`
 - `VERSION|TICK|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK`
 
+### Version `5` - Edit `LIST` `PARAMS`
+- `VERSION|TICK|ALLOW_LIST|BLOCK_LIST`
+
 ## Examples
 ```
 bt:ISSUE|0|JDOG
