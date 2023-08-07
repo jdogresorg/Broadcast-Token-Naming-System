@@ -430,8 +430,8 @@ function createToken( $data=null ){
     $callback_tick_id   = createTicker($data->CALLBACK_TICK);
     $tick_id            = createTicker($data->TICK);
     $owner_id           = createAddress($data->OWNER);
-    $mint_allow_list_id = createTransaction($data->MINT_ALLOW_LIST);
-    $mint_block_list_id = createTransaction($data->MINT_BLOCK_LIST);
+    $allow_list_id      = createTransaction($data->ALLOW_LIST);
+    $block_list_id      = createTransaction($data->BLOCK_LIST);
     // Check if record already exists
     $results = $mysqli->query("SELECT id FROM tokens WHERE tick_id='{$tick_id}'");
     if($results){
@@ -453,8 +453,8 @@ function createToken( $data=null ){
                         callback_block='{$callback_block}',
                         callback_tick_id='{$callback_tick_id}',
                         callback_amount='{$callback_amount}',
-                        mint_allow_list_id='{$mint_allow_list_id}',
-                        mint_block_list_id='{$mint_block_list_id}',
+                        allow_list_id='{$allow_list_id}',
+                        block_list_id='{$block_list_id}',
                         block_index='{$block_index}',
                         supply='{$supply}',
                         owner_id='{$owner_id}'
@@ -462,7 +462,7 @@ function createToken( $data=null ){
                         tick_id='{$tick_id}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO tokens (tick_id, max_supply, max_mint, decimals, description, lock_supply, lock_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, mint_allow_list_id, mint_block_list_id, owner_id, supply, block_index) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$lock_supply}', '{$lock_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$mint_allow_list_id}', '{$mint_block_list_id}', '{$owner_id}','{$supply}', '{$block_index}')";
+            $sql = "INSERT INTO tokens (tick_id, max_supply, max_mint, decimals, description, lock_supply, lock_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, allow_list_id, block_list_id, owner_id, supply, block_index) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$lock_supply}', '{$lock_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$allow_list_id}', '{$block_list_id}', '{$owner_id}','{$supply}', '{$block_index}')";
         }
         // print $sql;
         $results = $mysqli->query($sql);
@@ -835,14 +835,14 @@ function getTokenInfo($tick=null){
                 t1.callback_block,
                 t3.tick as callback_tick,            
                 t1.callback_amount,
-                t4.hash as mint_allow_list,
-                t5.hash as mint_block_list,
+                t4.hash as allow_list,
+                t5.hash as block_list,
                 a.address as owner
             FROM 
                 tokens t1
                 LEFT JOIN index_tickers t3 on (t3.id=t1.callback_tick_id)
-                LEFT JOIN index_transactions t4 on (t4.id=t1.mint_allow_list_id)
-                LEFT JOIN index_transactions t5 on (t5.id=t1.mint_block_list_id),
+                LEFT JOIN index_transactions t4 on (t4.id=t1.allow_list_id)
+                LEFT JOIN index_transactions t5 on (t5.id=t1.block_list_id),
                 index_tickers t2,
                 index_addresses a
             WHERE 
@@ -872,8 +872,8 @@ function getTokenInfo($tick=null){
                 'CALLBACK_TICK'     => $row->callback_tick,
                 'CALLBACK_BLOCK'    => $row->callback_block,
                 'CALLBACK_AMOUNT'   => $row->callback_amount,
-                'MINT_ALLOW_LIST'   => $row->mint_allow_list,
-                'MINT_BLOCK_LIST'   => $row->mint_block_list
+                'ALLOW_LIST'        => $row->allow_list,
+                'BLOCK_LIST'        => $row->block_list
             );
         } 
     } else {
@@ -1399,7 +1399,7 @@ function isLegacyBTNSFormat($params){
     if(strlen($version)>2)
         return true;
     // VERSION should be NULL or integer
-    if(is_string($version))
+    if(is_string($version) && !is_numeric($version))
         return true;
     // Add more rules here if ppl keep using old BTNS format...
     return false;
@@ -1473,10 +1473,9 @@ function isDistributed($tick=null){
 // @param {tx_hash}  string   TX_HASH to a list
 // @param {type}     string   List Type (1=TICK, 2=ASSET, 3=ADDRESS)
 function isValidList($tx_hash=null, $type=null){
-    global $mysqli;
-    // Coming soon... gotta get list functionality written first... lol
+    if(getListType($tx_hash)==$type)
+        return true;
     return false;
-
 }
 
 
@@ -1494,4 +1493,17 @@ function debitBalances($balances=null, $tick=null, $amount=null){
     $balances[$tick] = $balance - $amount;
     return $balances;
 }
+
+// Check if an address is allowed to perform an action on a token (allow/block list)
+function isActionAllowed($tick=null, $address=null){
+    $info  = getTokenInfo($tick);
+    // False if we have an ALLOW_LIST and user is NOT on it
+    if($info->ALLOW_LIST && !in_array($address,getList($info->ALLOW_LIST)))
+        return false;
+    // False if we have an BLOCK_LIST and user IS on it
+    if($info->BLOCK_LIST && in_array($address,getList($info->BLOCK_LIST)))
+        return false;
+    return true;
+}
+
 ?>

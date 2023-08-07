@@ -156,8 +156,8 @@ while($block <= $current){
                 // Extract ACTION from PARAMS
                 $action = strtoupper(array_shift($params)); 
 
-                // Support legacy BTNS format with no VERSION on DEPLOY/MINT actions (default to VERSION 0)
-                if(in_array($action,array('DEPLOY','MINT')) && isLegacyBTNSFormat($params))
+                // Support legacy BTNS format with no VERSION on DEPLOY/MINT/TRANSFER actions (default to VERSION 0)
+                if(in_array($action,array('DEPLOY','MINT','TRANSFER')) && isLegacyBTNSFormat($params))
                     array_splice($params, 0, 0, 0);
 
                 // Support old BRC20/SRC20 actions 

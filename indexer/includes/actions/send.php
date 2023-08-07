@@ -145,10 +145,18 @@ function btnsSend($params=null, $data=null, $error=null){
         if(!$error && strpos($send->MEMO,';')!==false)
             $error = 'invalid: MEMO (semicolon)';
 
+        // Verify action is allowed from SOURCE (ALLOW_LIST & BLOCK_LIST)
+        if(!$error && !isActionAllowed($send->TICK, $send->SOURCE))
+            $error = 'invalid: SOURCE (not authorized)';
+
+        // Verify action is allowed to DESTINATION (ALLOW_LIST & BLOCK_LIST)
+        if(!$error && !isActionAllowed($send->TICK, $send->DESTINATION))
+            $error = 'invalid: DESTINATION (not authorized)';
+
         // Verify SOURCE has enough balances to cover send AMOUNT
         if(!$error && !hasBalance($balances, $send->TICK, $send->AMOUNT))
             $error = 'invalid: insufficient funds';
-
+    
         // Adjust balances to reduce by SEND AMOUNT
         if(!$error)
             $balances = debitBalances($balances, $send->TICK, $send->AMOUNT);

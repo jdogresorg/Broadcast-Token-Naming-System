@@ -213,11 +213,11 @@ function btnsIssue( $params=null, $data=null, $error=null){
     if(!$error && isset($data->CALLBACK_AMOUNT) && $data->CALLBACK_AMOUNT!=$btnInfo->CALLBACK_AMOUNT && $isDistributed)
         $error = 'invalid: CALLBACK_AMOUNT (supply distributed)';
 
-    // Verify MINT_ALLOW_LIST is a valid list of addresses
+    // Verify ALLOW_LIST is a valid list of addresses
     if(!$error && isset($data->ALLOW_LIST) && !isValidList($data->ALLOW_LIST,3))
         $error = 'invalid: ALLOW_LIST (bad list)';
 
-    // Verify MINT_BLOCK_LIST is a valid list of addresses
+    // Verify BLOCK_LIST is a valid list of addresses
     if(!$error && isset($data->BLOCK_LIST) && !isValidList($data->BLOCK_LIST,3))
         $error = 'invalid: BLOCK_LIST (bad list)';
 
