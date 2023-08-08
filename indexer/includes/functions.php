@@ -997,6 +997,7 @@ function getAddressDebits($address=null){
 // Handle getting address balances for a given address
 function getAddressBalances($address=null){
     global $mysqli;
+    $type = gettype($address);
     if($type==='integer' || is_numeric($address))
         $address_id = $address;
     if($type==='string' && !is_numeric($address))
@@ -1483,7 +1484,12 @@ function isValidList($tx_hash=null, $type=null){
 
 // Validate if a balances array holds a certain amount of a tick token
 function hasBalance($balances=null, $tick=null, $amount=null){
-    $balance = (isset($balances[$tick])) ? $balances[$tick] : 0;
+    $type = gettype($tick);
+    if($type==='integer' || is_numeric($tick))
+        $tick_id = $tick;
+    if($type==='string' && !is_numeric($tick))
+        $tick_id = createTicker($tick);
+    $balance = (isset($balances[$tick_id])) ? $balances[$tick_id] : 0;
     if($balance >= $amount)
         return true;
     return false;
