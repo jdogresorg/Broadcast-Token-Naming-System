@@ -1094,8 +1094,8 @@ function updateBalances( $address=null ){
 
 // Handle updating token information (supply, price, etc)
 // @param {tickers} boolean Full update
-// @param {tickers} string  Ticker string
-// @param {tickers} array   Array of address strings
+// @param {tickers} string  Ticker 
+// @param {tickers} array   Array of Tickers
 function updateTokens( $tickers=null){
     global $mysqli;
     $tokens = [];
@@ -1133,10 +1133,12 @@ function updateTokenInfo( $tick=null){
         $tick_id = createTicker($tick);
     // Lookup current token information
     $data = getTokenInfo($tick);
-    // Get current token supply (current token supply)
-    $data->SUPPLY = getTokenSupply($tick);
-    // Update the record in `tokens` table
-    createToken($data);
+    if($data){
+        // Get current token supply (current token supply)
+        $data->SUPPLY = getTokenSupply($tick);
+        // Update the record in `tokens` table
+        createToken($data);
+    }
 }
 
 // Get token supply from credits/debits table (credits - debits = supply)

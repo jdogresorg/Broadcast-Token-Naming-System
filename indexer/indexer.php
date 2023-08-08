@@ -194,7 +194,7 @@ while($block <= $current){
             // updateBalances($addresses);
 
             // Handle updating token data (amount minted, etc)
-            updateTokens($tickers);
+            // updateTokens($tickers);
         }
     } else {
         byeLog("Error while trying to lookup BTNS broadcasts");

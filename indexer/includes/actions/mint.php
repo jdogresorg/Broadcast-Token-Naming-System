@@ -120,6 +120,9 @@ function btnsMint($params=null, $data=null, $error=null){
 
         // Update balances for addresses
         updateBalances([$data->SOURCE, $data->DESTINATION]);
+
+        // Update supply for token
+        updateTokenInfo($data->TICK);
     }
 }
 

@@ -243,9 +243,8 @@ function btnsIssue( $params=null, $data=null, $error=null){
         if($data->TRANSFER_SUPPLY)
             $addresses[$data->TRANSFER_SUPPLY] = 1;
 
-        // Set some properties before we create the token
-        $data->SUPPLY = ($data->MINT_SUPPLY) ? $data->MINT_SUPPLY : 0;
-        $data->OWNER  = ($transfer) ? $transfer : $data->SOURCE;
+        // Support token ownership transfers
+        $data->OWNER  = (isset($data->TRANSFER)) ? $data->TRANSFER : $data->SOURCE;
 
         // Create/Update record in tokens table
         createToken($data);
@@ -255,13 +254,16 @@ function btnsIssue( $params=null, $data=null, $error=null){
             createCredit('ISSUE', $data->BLOCK_INDEX, $data->TX_HASH, $data->TICK, $data->MINT_SUPPLY, $data->SOURCE);
 
         // Transfer MINT_SUPPLY to TRANSFER_SUPPLY address
-        if($data->TRANSFER_SUPPLY){
-            createDebit('ISSUE', $data->BLOCK_INDEX, $data->TX_HASH, $data->TICK, $data->MINT_SUPPLY, $data->TRANSFER);
+        if($data->MINT_SUPPLY && $data->TRANSFER_SUPPLY){
+            createDebit('ISSUE', $data->BLOCK_INDEX, $data->TX_HASH, $data->TICK, $data->MINT_SUPPLY, $data->SOURCE);
             createCredit('ISSUE', $data->BLOCK_INDEX, $data->TX_HASH, $data->TICK, $data->MINT_SUPPLY, $data->TRANSFER_SUPPLY);
         }
 
         // Update balances for addresses
         updateBalances([$data->SOURCE, $data->TRANSFER_SUPPLY]);
-    }    
 
+        // Update supply for token
+        updateTokenInfo($data->TICK);
+
+    }    
 }
