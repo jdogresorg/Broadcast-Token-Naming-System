@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS mints;
 CREATE TABLE mints (
     tx_index       INTEGER UNSIGNED, -- Unique transaction index
     tick_id        INTEGER UNSIGNED, -- id of record in index_ticks table
-    amount         BIGINT,           -- Amount of token to transfer
+    amount         VARCHAR(250),     -- Amount of token to mint
     source_id      INTEGER UNSIGNED, -- id of record in index_addresses table (address that did MINT)
     destination_id INTEGER UNSIGNED, -- id of record in index_addresses table (optional, mint and transfer)
     tx_hash_id     INTEGER UNSIGNED, -- id of record in index_transactions

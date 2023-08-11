@@ -77,6 +77,14 @@ function btnsMint($params=null, $data=null, $error=null){
     if(!$error && (bcadd($data->SUPPLY,$data->AMOUNT,$data->DECIMALS) > bcadd($data->MAX_SUPPLY,0,$data->DECIMALS)))
         $error = 'invalid: mint exceeds MAX_SUPPLY';
 
+    // Verify action is allowed from SOURCE (ALLOW_LIST & BLOCK_LIST)
+    if(!$error && !isActionAllowed($data->TICK, $data->SOURCE))
+        $error = 'invalid: SOURCE (not authorized)';
+
+    // Verify action is allowed to DESTINATION (ALLOW_LIST & BLOCK_LIST)
+    if(!$error && isset($data->DESTINATION) && !isActionAllowed($data->TICK, $data->DESTINATION))
+        $error = 'invalid: DESTINATION (not authorized)';
+
     // Determine final status
     $data->STATUS = $status = ($error) ? $error : 'valid';
 
@@ -112,6 +120,9 @@ function btnsMint($params=null, $data=null, $error=null){
 
         // Update balances for addresses
         updateBalances([$data->SOURCE, $data->DESTINATION]);
+
+        // Update supply for token
+        updateTokenInfo($data->TICK);
     }
 }
 

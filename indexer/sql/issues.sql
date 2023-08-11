@@ -18,8 +18,8 @@ CREATE TABLE issues (
     callback_block      INTEGER UNSIGNED,                     -- block_index after which CALLBACK cand be used
     callback_tick_id    INTEGER UNSIGNED,                     -- id of record in index_tickers table
     callback_amount     VARCHAR(250),                         -- AMOUNT users get if CALLBACK
-    mint_allow_list_id  INTEGER UNSIGNED NOT NULL default 0,  -- id of record in index_transactions table
-    mint_block_list_id  INTEGER UNSIGNED NOT NULL default 0,  -- id of record in index_transactions table
+    allow_list_id       INTEGER UNSIGNED NOT NULL default 0,  -- id of record in index_transactions table
+    block_list_id       INTEGER UNSIGNED NOT NULL default 0,  -- id of record in index_transactions table
     source_id           INTEGER UNSIGNED,                     -- id of record in index_addresses table (address that did DEPLOY)
     tx_hash_id          INTEGER UNSIGNED,                     -- id of record in index_transactions
     block_index         INTEGER UNSIGNED,                     -- block index of DEPLOY transaction
@@ -34,5 +34,5 @@ CREATE        INDEX transfer_supply_id ON issues (transfer_supply_id);
 CREATE        INDEX status_id          ON issues (status_id);
 CREATE        INDEX tx_hash_id         ON issues (tx_hash_id);
 CREATE        INDEX callback_tick_id   ON issues (callback_tick_id);
-CREATE        INDEX mint_allow_list_id ON issues (mint_allow_list_id);
-CREATE        INDEX mint_block_list_id ON issues (mint_block_list_id);
+CREATE        INDEX allow_list_id      ON issues (allow_list_id);
+CREATE        INDEX block_list_id      ON issues (block_list_id);

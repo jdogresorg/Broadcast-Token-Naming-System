@@ -58,6 +58,9 @@ require_once('functions.php');
 // Tracks Execution Time
 require_once('profiler.php');
 
+// Rollback code
+require_once('rollback.php');
+
 // Protocol Changes / Activation blocks
 require_once('protocol_changes.php');
 

@@ -145,10 +145,18 @@ function btnsSend($params=null, $data=null, $error=null){
         if(!$error && strpos($send->MEMO,';')!==false)
             $error = 'invalid: MEMO (semicolon)';
 
+        // Verify action is allowed from SOURCE (ALLOW_LIST & BLOCK_LIST)
+        if(!$error && !isActionAllowed($send->TICK, $send->SOURCE))
+            $error = 'invalid: SOURCE (not authorized)';
+
+        // Verify action is allowed to DESTINATION (ALLOW_LIST & BLOCK_LIST)
+        if(!$error && !isActionAllowed($send->TICK, $send->DESTINATION))
+            $error = 'invalid: DESTINATION (not authorized)';
+
         // Verify SOURCE has enough balances to cover send AMOUNT
         if(!$error && !hasBalance($balances, $send->TICK, $send->AMOUNT))
             $error = 'invalid: insufficient funds';
-
+    
         // Adjust balances to reduce by SEND AMOUNT
         if(!$error)
             $balances = debitBalances($balances, $send->TICK, $send->AMOUNT);
@@ -172,10 +180,10 @@ function btnsSend($params=null, $data=null, $error=null){
             $addresses[$send->DESTINATION] = 1;
 
             // Debit AMOUNT from SOURCE address
-            createDebit('SEND', $send->BLOCK_INDEX, $send->TX_HASH, $send->TICK, $send->AMOUNT, $data->SOURCE);
+            createDebit('SEND', $send->BLOCK_INDEX, $send->TX_HASH, $send->TICK, $send->AMOUNT, $send->SOURCE);
 
             // Credit AMOUNT to DESTINATION address
-            createCredit('SEND', $send->BLOCK_INDEX, $send->TX_HASH, $send->TICK, $send->AMOUNT, $data->DESTINATION);
+            createCredit('SEND', $send->BLOCK_INDEX, $send->TX_HASH, $send->TICK, $send->AMOUNT, $send->DESTINATION);
 
             // Update balances for SOURCE and DESTINATION addresses
             updateBalances([$send->SOURCE, $send->DESTINATION]);

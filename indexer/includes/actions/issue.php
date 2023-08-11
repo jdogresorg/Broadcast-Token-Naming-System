@@ -21,8 +21,8 @@
  * - CALLBACK_BLOCK   - Enable `CALLBACK` command after `CALLBACK_BLOCK` 
  * - CALLBACK_TICK    - `TICK` `token` users get when `CALLBACK` command is used
  * - CALLBACK_AMOUNT  - `TICK` `token` amount that users get when `CALLBACK` command is used
- * - MINT_ALLOW_LIST  - `TX_HASH` of a BTNS LIST of addresses to allow minting from
- * - MINT_BLOCK_LIST  - `TX_HASH` of a BTNS LIST of addresses to NOT allow minting from
+ * - ALLOW_LIST       - `TX_HASH` of a BTNS LIST of addresses allowed to interact with this token
+ * - BLOCK_LIST       - `TX_HASH` of a BTNS LIST of addresses NOT allowed to interact with this token
  * 
  * FORMATS :
  * - 0 = Full
@@ -37,7 +37,7 @@ function btnsIssue( $params=null, $data=null, $error=null){
 
     // Define list of known FORMATS
     $formats = array(
-        0 => 'VERSION|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT|MINT_ALLOW_LIST|MINT_BLOCK_LIST',
+        0 => 'VERSION|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT|ALLOW_LIST|BLOCK_LIST',
         1 => 'VERSION|TICK|DESCRIPTION',
         2 => 'VERSION|TICK|MAX_MINT|MINT_SUPPLY|TRANSFER_SUPPLY',
         3 => 'VERSION|TICK|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK',
@@ -213,13 +213,13 @@ function btnsIssue( $params=null, $data=null, $error=null){
     if(!$error && isset($data->CALLBACK_AMOUNT) && $data->CALLBACK_AMOUNT!=$btnInfo->CALLBACK_AMOUNT && $isDistributed)
         $error = 'invalid: CALLBACK_AMOUNT (supply distributed)';
 
-    // Verify MINT_ALLOW_LIST is a valid list of addresses
-    if(!$error && isset($data->MINT_ALLOW_LIST) && !isValidList($data->MINT_ALLOW_LIST,3))
-        $error = 'invalid: MINT_ALLOW_LIST (bad list)';
+    // Verify ALLOW_LIST is a valid list of addresses
+    if(!$error && isset($data->ALLOW_LIST) && !isValidList($data->ALLOW_LIST,3))
+        $error = 'invalid: ALLOW_LIST (bad list)';
 
-    // Verify MINT_BLOCK_LIST is a valid list of addresses
-    if(!$error && isset($data->MINT_BLOCK_LIST) && !isValidList($data->MINT_BLOCK_LIST,3))
-        $error = 'invalid: MINT_BLOCK_LIST (bad list)';
+    // Verify BLOCK_LIST is a valid list of addresses
+    if(!$error && isset($data->BLOCK_LIST) && !isValidList($data->BLOCK_LIST,3))
+        $error = 'invalid: BLOCK_LIST (bad list)';
 
     // Determine final status
     $data->STATUS = $status = ($error) ? $error : 'valid';
@@ -243,9 +243,8 @@ function btnsIssue( $params=null, $data=null, $error=null){
         if($data->TRANSFER_SUPPLY)
             $addresses[$data->TRANSFER_SUPPLY] = 1;
 
-        // Set some properties before we create the token
-        $data->SUPPLY = ($data->MINT_SUPPLY) ? $data->MINT_SUPPLY : 0;
-        $data->OWNER  = ($transfer) ? $transfer : $data->SOURCE;
+        // Support token ownership transfers
+        $data->OWNER  = (isset($data->TRANSFER)) ? $data->TRANSFER : $data->SOURCE;
 
         // Create/Update record in tokens table
         createToken($data);
@@ -255,13 +254,16 @@ function btnsIssue( $params=null, $data=null, $error=null){
             createCredit('ISSUE', $data->BLOCK_INDEX, $data->TX_HASH, $data->TICK, $data->MINT_SUPPLY, $data->SOURCE);
 
         // Transfer MINT_SUPPLY to TRANSFER_SUPPLY address
-        if($data->TRANSFER_SUPPLY){
-            createDebit('ISSUE', $data->BLOCK_INDEX, $data->TX_HASH, $data->TICK, $data->MINT_SUPPLY, $data->TRANSFER);
+        if($data->MINT_SUPPLY && $data->TRANSFER_SUPPLY){
+            createDebit('ISSUE', $data->BLOCK_INDEX, $data->TX_HASH, $data->TICK, $data->MINT_SUPPLY, $data->SOURCE);
             createCredit('ISSUE', $data->BLOCK_INDEX, $data->TX_HASH, $data->TICK, $data->MINT_SUPPLY, $data->TRANSFER_SUPPLY);
         }
 
         // Update balances for addresses
         updateBalances([$data->SOURCE, $data->TRANSFER_SUPPLY]);
-    }    
 
+        // Update supply for token
+        updateTokenInfo($data->TICK);
+
+    }    
 }

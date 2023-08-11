@@ -250,8 +250,8 @@ function createIssue( $data=null ){
     $transfer_id        = createAddress($data->TRANSFER);
     $transfer_supply_id = createAddress($data->TRANSFER_SUPPLY);
     $tx_hash_id         = createTransaction($data->TX_HASH);
-    $mint_allow_list_id = createTransaction($data->MINT_ALLOW_LIST);
-    $mint_block_list_id = createTransaction($data->MINT_BLOCK_LIST);
+    $allow_list_id      = createTransaction($data->ALLOW_LIST);
+    $block_list_id      = createTransaction($data->BLOCK_LIST);
     $tx_index           = $data->TX_INDEX;
     $status_id          = createStatus($data->STATUS);
     // Check if record already exists
@@ -279,8 +279,8 @@ function createIssue( $data=null ){
                         callback_block='{$callback_block}',
                         callback_tick_id='{$callback_tick_id}',
                         callback_amount='{$callback_amount}',
-                        mint_allow_list_id='{$mint_allow_list_id}',
-                        mint_block_list_id='{$mint_block_list_id}',
+                        allow_list_id='{$allow_list_id}',
+                        block_list_id='{$block_list_id}',
                         source_id='{$source_id}',
                         block_index='{$block_index}',
                         tx_index='{$tx_index}',
@@ -289,7 +289,7 @@ function createIssue( $data=null ){
                         tx_hash_id='{$tx_hash_id}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO issues (tick_id, max_supply, max_mint, decimals, description, mint_supply, transfer_id, transfer_supply_id, lock_supply, lock_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, mint_allow_list_id, mint_block_list_id, source_id, tx_hash_id, block_index, tx_index, status_id) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$mint_supply}', '{$transfer_id}', '{$transfer_supply_id}', '{$lock_supply}', '{$lock_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$mint_allow_list_id}', '{$mint_block_list_id}','{$source_id}', '{$tx_hash_id}', '{$block_index}', '{$tx_index}', '{$status_id}')";
+            $sql = "INSERT INTO issues (tick_id, max_supply, max_mint, decimals, description, mint_supply, transfer_id, transfer_supply_id, lock_supply, lock_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, allow_list_id, block_list_id, source_id, tx_hash_id, block_index, tx_index, status_id) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$mint_supply}', '{$transfer_id}', '{$transfer_supply_id}', '{$lock_supply}', '{$lock_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$allow_list_id}', '{$block_list_id}','{$source_id}', '{$tx_hash_id}', '{$block_index}', '{$tx_index}', '{$status_id}')";
         }
         // print $sql;
         $results = $mysqli->query($sql);
@@ -430,8 +430,8 @@ function createToken( $data=null ){
     $callback_tick_id   = createTicker($data->CALLBACK_TICK);
     $tick_id            = createTicker($data->TICK);
     $owner_id           = createAddress($data->OWNER);
-    $mint_allow_list_id = createTransaction($data->MINT_ALLOW_LIST);
-    $mint_block_list_id = createTransaction($data->MINT_BLOCK_LIST);
+    $allow_list_id      = createTransaction($data->ALLOW_LIST);
+    $block_list_id      = createTransaction($data->BLOCK_LIST);
     // Check if record already exists
     $results = $mysqli->query("SELECT id FROM tokens WHERE tick_id='{$tick_id}'");
     if($results){
@@ -453,8 +453,8 @@ function createToken( $data=null ){
                         callback_block='{$callback_block}',
                         callback_tick_id='{$callback_tick_id}',
                         callback_amount='{$callback_amount}',
-                        mint_allow_list_id='{$mint_allow_list_id}',
-                        mint_block_list_id='{$mint_block_list_id}',
+                        allow_list_id='{$allow_list_id}',
+                        block_list_id='{$block_list_id}',
                         block_index='{$block_index}',
                         supply='{$supply}',
                         owner_id='{$owner_id}'
@@ -462,7 +462,7 @@ function createToken( $data=null ){
                         tick_id='{$tick_id}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO tokens (tick_id, max_supply, max_mint, decimals, description, lock_supply, lock_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, mint_allow_list_id, mint_block_list_id, owner_id, supply, block_index) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$lock_supply}', '{$lock_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$mint_allow_list_id}', '{$mint_block_list_id}', '{$owner_id}','{$supply}', '{$block_index}')";
+            $sql = "INSERT INTO tokens (tick_id, max_supply, max_mint, decimals, description, lock_supply, lock_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, allow_list_id, block_list_id, owner_id, supply, block_index) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$lock_supply}', '{$lock_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$allow_list_id}', '{$block_list_id}', '{$owner_id}','{$supply}', '{$block_index}')";
         }
         // print $sql;
         $results = $mysqli->query($sql);
@@ -808,6 +808,37 @@ function createListItem($data=null, $item=null){
 }
 
 
+// Delete records in lists, list_items, and list_edits tables
+function deleteLists($list=null, $rollback=null){
+    global $mysqli;
+    $lists = array();
+    $type  = gettype($list);
+    if($type==='array')
+        $lists = $list;
+    if($type==='string'||is_numeric($list))
+        array_push($lists, $list);
+    // Loop through lists and convert any transaction hashes to database ids
+    foreach($lists as $idx => $list){
+        $type = getType($list);
+        if($type=="string" && !is_numeric($list))
+            $lists[$idx] = createTransaction($list);
+    }
+    $tables = ['list_items', 'list_edits'];
+    foreach($lists as $list_id){
+        // Delete item from lists table
+        $results = $mysqli->query("DELETE FROM lists WHERE tx_hash_id='{$list_id}'");
+        if(!$results)
+            byeLog('Error while trying to delete records from the lists table');
+        // Deletes item from list_items and list_edits tables
+        foreach($tables as $table){
+            $results = $mysqli->query("DELETE FROM {$table} WHERE list_id='{$list_id}'");
+            if(!$results)
+                byeLog('Error while trying to delete records from the ' . $table . ' table');
+        }
+    }
+}
+
+
 // Handle getting token information for a given tick
 function getTokenInfo($tick=null){
     global $mysqli;
@@ -835,14 +866,14 @@ function getTokenInfo($tick=null){
                 t1.callback_block,
                 t3.tick as callback_tick,            
                 t1.callback_amount,
-                t4.hash as mint_allow_list,
-                t5.hash as mint_block_list,
+                t4.hash as allow_list,
+                t5.hash as block_list,
                 a.address as owner
             FROM 
                 tokens t1
                 LEFT JOIN index_tickers t3 on (t3.id=t1.callback_tick_id)
-                LEFT JOIN index_transactions t4 on (t4.id=t1.mint_allow_list_id)
-                LEFT JOIN index_transactions t5 on (t5.id=t1.mint_block_list_id),
+                LEFT JOIN index_transactions t4 on (t4.id=t1.allow_list_id)
+                LEFT JOIN index_transactions t5 on (t5.id=t1.block_list_id),
                 index_tickers t2,
                 index_addresses a
             WHERE 
@@ -872,8 +903,8 @@ function getTokenInfo($tick=null){
                 'CALLBACK_TICK'     => $row->callback_tick,
                 'CALLBACK_BLOCK'    => $row->callback_block,
                 'CALLBACK_AMOUNT'   => $row->callback_amount,
-                'MINT_ALLOW_LIST'   => $row->mint_allow_list,
-                'MINT_BLOCK_LIST'   => $row->mint_block_list
+                'ALLOW_LIST'        => $row->allow_list,
+                'BLOCK_LIST'        => $row->block_list
             );
         } 
     } else {
@@ -994,9 +1025,10 @@ function getAddressDebits($address=null){
     return $data;
 }
 
-// Handle getting address balances for a given address
+// Get address balances using credits/debits table data
 function getAddressBalances($address=null){
     global $mysqli;
+    $type = gettype($address);
     if($type==='integer' || is_numeric($address))
         $address_id = $address;
     if($type==='string' && !is_numeric($address))
@@ -1017,55 +1049,99 @@ function getAddressBalances($address=null){
         } catch(Exception $e){
             $balance = number_format(0,$decimal,'.','');
         }
-        if(is_numeric($balance) && $balance>0)
+        // Pass forward any numeric values (including 0 balance)
+        if(is_numeric($balance))
             $balances[$tick_id] = $balance;
     }
     return $balances;
 }
 
-// Create/Update records in the 'balances' table
-function updateAddressBalance( $address=null){
+// Get address balances using balances table data
+function getAddressTableBalances($address=null){
     global $mysqli;
     $type = gettype($address);
     if($type==='integer' || is_numeric($address))
         $address_id = $address;
     if($type==='string' && !is_numeric($address))
         $address_id = createAddress($address);
+    // Assoc array to store tick/balance
+    $balances = array(); 
+    $results = $mysqli->query("SELECT tick_id, amount FROM balances WHERE address_id='{$address_id}'");
+    if($results){
+        if($results->num_rows){
+            while($row = $results->fetch_assoc()){
+                $row = (object) $row;
+                $balances[$row->tick_id] = $row->amount;
+            }
+        }
+    } else {
+        byeLog('Error while trying to lookup balances record for address=' . $address);
+    }
+    return $balances;
+}
+
+
+// Create/Update/Delete records in the 'balances' table
+function updateAddressBalance( $address=null, $rollback=false){
+    global $mysqli;
+    // print "updateAddressBalance address={$address}\n";
+    $type = gettype($address);
+    if($type==='integer' || is_numeric($address))
+        $address_id = $address;
+    if($type==='string' && !is_numeric($address))
+        $address_id = createAddress($address);
+    // Get list of address balances based on credits/debits tables
     $balances = getAddressBalances($address_id);
     if(count($balances)){
         foreach($balances as $tick_id => $balance){
-            // print "processing balance tick={$tick_id} balance={$balance}\n";
+            // print "processing balance address_id={$address_id} tick={$tick_id} balance={$balance}\n";
+            $whereSql = "address_id='{$address_id}' AND tick_id='{$tick_id}'";
             // Check if we already have a record for this address/tick_id
-            $sql     = "SELECT id FROM balances WHERE address_id='{$address_id}' AND tick_id='{$tick_id}' LIMIT 1";
+            $sql     = "SELECT id FROM balances WHERE {$whereSql} LIMIT 1";
             $results = $mysqli->query($sql);
             if($results){
-                $update = ($results->num_rows) ? true : false;
-                if($update){
-                    $sql = "UPDATE balances SET amount='{$balance}' WHERE address_id='{$address_id}' AND tick_id='{$tick_id}'";
-                } else {
+                $action = ($results->num_rows) ? 'update' : 'insert';
+                if($balance==0)
+                    $action = 'delete';
+                // print "action={$action}\n";
+                if($action=='delete'){
+                    $sql = "DELETE FROM balances WHERE {$whereSql}";
+                } else if($action=='update'){
+                    $sql = "UPDATE balances SET amount='{$balance}' WHERE {$whereSql}";
+                } else if($action=='insert'){
                     $sql = "INSERT INTO balances (tick_id, address_id, amount) values ('{$tick_id}','{$address_id}','{$balance}')";
                 }
-                // Create/Update balances records
-                if($update||(!$update && $balance)){
-                    $results = $mysqli->query($sql);
-                    if(!$results){
-                        $action = ($update) ? 'update' : 'created';
-                        byeLog('Error while trying to ' . $action  . ' balance record for address=' . $address . ' tick_id=' . $tick_id);
-                    }
-                }
+                $results = $mysqli->query($sql);
+                if(!$results)
+                    byeLog('Error while trying to ' . $action  . ' balance record for address=' . $address . ' tick_id=' . $tick_id);
             } else {
                 byeLog('Error while trying to lookup balances record for address=' . $address . ' tick_id=' . $tick_id);
+            }
+        }
+    }
+    // If this is a rollback, then handle detecting records in balances table which should not exist and delete them
+    if($rollback){
+        // Get list of address balances based on balances table
+        $old_balances = getAddressTableBalances($address_id);
+        foreach($old_balances as $tick_id => $balance){
+            $balance = $balances[$tick_id];
+            if(!isset($balance) || $balance==0){
+                $results = $mysqli->query("DELETE FROM balances WHERE address_id='{$address_id}' AND tick_id='{$tick_id}'");
+                if(!$results)
+                    byeLog('Error while trying to delete balance record for address=' . $address . ' tick_id=' . $tick_id);
             }
         }
     }
 }
 
 
+
 // Handle updating address balances (credits-debits=balance)
-// @param {address} boolean Full update
-// @param {address} string  Address string
-// @param {address} array   Array of address strings
-function updateBalances( $address=null ){
+// @param {address}  boolean Full update
+// @param {address}  string  Address string
+// @param {address}  array   Array of address strings
+// @param {rollback} boolean Rollback
+function updateBalances( $address=null, $rollback=false ){
     global $mysqli;
     $addrs = [];
     $type  = gettype($address);
@@ -1088,15 +1164,15 @@ function updateBalances( $address=null ){
     }
     // Loop through addresses and update balance list
     foreach($addrs as $address)
-        updateAddressBalance($address);
+        updateAddressBalance($address, $rollback);
 }
 
 
 // Handle updating token information (supply, price, etc)
 // @param {tickers} boolean Full update
-// @param {tickers} string  Ticker string
-// @param {tickers} array   Array of address strings
-function updateTokens( $tickers=null){
+// @param {tickers} string  Ticker 
+// @param {tickers} array   Array of Tickers
+function updateTokens( $tickers=null, $rollback=true){
     global $mysqli;
     $tokens = [];
     $type  = gettype($tickers);
@@ -1133,10 +1209,12 @@ function updateTokenInfo( $tick=null){
         $tick_id = createTicker($tick);
     // Lookup current token information
     $data = getTokenInfo($tick);
-    // Get current token supply (current token supply)
-    $data->SUPPLY = getTokenSupply($tick);
-    // Update the record in `tokens` table
-    createToken($data);
+    if($data){
+        // Get current token supply (current token supply)
+        $data->SUPPLY = getTokenSupply($tick);
+        // Update the record in `tokens` table
+        createToken($data);
+    }
 }
 
 // Get token supply from credits/debits table (credits - debits = supply)
@@ -1399,7 +1477,7 @@ function isLegacyBTNSFormat($params){
     if(strlen($version)>2)
         return true;
     // VERSION should be NULL or integer
-    if(is_string($version))
+    if(is_string($version) && !is_numeric($version))
         return true;
     // Add more rules here if ppl keep using old BTNS format...
     return false;
@@ -1473,16 +1551,20 @@ function isDistributed($tick=null){
 // @param {tx_hash}  string   TX_HASH to a list
 // @param {type}     string   List Type (1=TICK, 2=ASSET, 3=ADDRESS)
 function isValidList($tx_hash=null, $type=null){
-    global $mysqli;
-    // Coming soon... gotta get list functionality written first... lol
+    if(getListType($tx_hash)==$type)
+        return true;
     return false;
-
 }
 
 
 // Validate if a balances array holds a certain amount of a tick token
 function hasBalance($balances=null, $tick=null, $amount=null){
-    $balance = (isset($balances[$tick])) ? $balances[$tick] : 0;
+    $type = gettype($tick);
+    if($type==='integer' || is_numeric($tick))
+        $tick_id = $tick;
+    if($type==='string' && !is_numeric($tick))
+        $tick_id = createTicker($tick);
+    $balance = (isset($balances[$tick_id])) ? $balances[$tick_id] : 0;
     if($balance >= $amount)
         return true;
     return false;
@@ -1494,4 +1576,17 @@ function debitBalances($balances=null, $tick=null, $amount=null){
     $balances[$tick] = $balance - $amount;
     return $balances;
 }
+
+// Check if an address is allowed to perform an action on a token (allow/block list)
+function isActionAllowed($tick=null, $address=null){
+    $info  = getTokenInfo($tick);
+    // False if we have an ALLOW_LIST and user is NOT on it
+    if($info->ALLOW_LIST && !in_array($address,getList($info->ALLOW_LIST)))
+        return false;
+    // False if we have an BLOCK_LIST and user IS on it
+    if($info->BLOCK_LIST && in_array($address,getList($info->BLOCK_LIST)))
+        return false;
+    return true;
+}
+
 ?>

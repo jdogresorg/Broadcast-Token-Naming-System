@@ -46,6 +46,9 @@ define("ERRORLOG", '/var/tmp/btns-indexer-' . $network . '.errors');
 // Load config (only after $network is defined)
 require_once('includes/config.php');
 
+// Print indexer version number so it shows up in debug logs
+print "BTNS Indexer v" . VERSION_STRING . "\n";
+
 // Set database name from global var CP_DATA 
 $dbase = CP_DATA; 
 
@@ -53,35 +56,11 @@ $dbase = CP_DATA;
 initDB();
 
 // Create a lock file, and bail if we detect an instance is already running
-// createLockFile();
-
-// Print indexer version number so it shows up in debug logs
-print "BTNS Indexer v" . VERSION_STRING . "\n";
+createLockFile();
 
 // Handle rollbacks
-if($rollback){
-    $block_index = $mysqli->real_escape_string($rollback);
-    $tables = [
-        'blocks',
-        'credits',
-        'debits',
-        'issues',
-        'mints',
-        'sends',
-        'tokens',
-        'transactions'
-    ];
-    foreach($tables as $table){
-        $results = $mysqli->query("DELETE FROM {$table} WHERE block_index>{$block_index}");
-        if(!$results)
-            byeLog("Error while trying to rollback {$table} table to block {$block_index}");
-    }
-    // Add code here update balances table using credits/debits to get back to sane balances after rollback
-    // ... coming soon
-    // Add code here to handle deleting items from list_{items,edits} tables using 
-    // ... coming soon
-    byeLog("Rollback to block {$block_index} complete.");
-}
+if($rollback)
+    btnsRollback($rollback);
 
 // If no block given, load last block from state file, or use first block with BTNX tx
 if(!$block){
@@ -91,11 +70,10 @@ if(!$block){
 }
 
 // Get the current block index from status info
-$sql = "SELECT block_index FROM {$dbase}.blocks ORDER BY block_index DESC limit 1";
-$results = $mysqli->query($sql);
+$results = $mysqli->query("SELECT block_index FROM {$dbase}.blocks ORDER BY block_index DESC limit 1");
 if($results){
-    $row = $results->fetch_assoc();
-    $current = $row['block_index'];
+    $row     = (object) $results->fetch_assoc();
+    $current = $row->block_index;
 } else {
     byeLog('Error while trying to lookup current block');
 }
@@ -104,10 +82,8 @@ if($results){
 // Prevents issue where tokens might be missed because we are still in middle of parsing in a block
 $service  = 'counterparty'; // counterparty / dogeparty
 $lockfile = '/var/tmp/' . $service . '2mysql-' . $network . '.lock';
-if(file_exists($lockfile)){
-    removeLockFile();
-    bye("found {$service} parsing a block... exiting");
-}
+if(file_exists($lockfile))
+    byeLog("found {$service} parsing a block... exiting");
 
 // Loop through the blocks until we are current
 while($block <= $current){
@@ -156,8 +132,8 @@ while($block <= $current){
                 // Extract ACTION from PARAMS
                 $action = strtoupper(array_shift($params)); 
 
-                // Support legacy BTNS format with no VERSION on DEPLOY/MINT actions (default to VERSION 0)
-                if(in_array($action,array('DEPLOY','MINT')) && isLegacyBTNSFormat($params))
+                // Support legacy BTNS format with no VERSION on DEPLOY/MINT/TRANSFER actions (default to VERSION 0)
+                if(in_array($action,array('DEPLOY','MINT','TRANSFER')) && isLegacyBTNSFormat($params))
                     array_splice($params, 0, 0, 0);
 
                 // Support old BRC20/SRC20 actions 
@@ -189,12 +165,6 @@ while($block <= $current){
                 // Handle processing the specific BTNS ACTION commands
                 btnsAction($action, $params, $data, $error);
             }
-
-            // Handle updating balances for any addresses used in this block (probably unneccessary since we update balances as we parse)
-            // updateBalances($addresses);
-
-            // Handle updating token data (amount minted, etc)
-            updateTokens($tickers);
         }
     } else {
         byeLog("Error while trying to lookup BTNS broadcasts");
@@ -213,7 +183,8 @@ while($block <= $current){
         break;
     } else {
         // Save block# to state file (so we can resume from this block next run)
-        file_put_contents(LASTFILE, $block);
+        if($block>$last)
+            file_put_contents(LASTFILE, $block);
     }
 
     // Increase block before next loop
