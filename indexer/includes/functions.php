@@ -808,6 +808,37 @@ function createListItem($data=null, $item=null){
 }
 
 
+// Delete records in lists, list_items, and list_edits tables
+function deleteLists($list=null, $rollback=null){
+    global $mysqli;
+    $lists = array();
+    $type  = gettype($list);
+    if($type==='array')
+        $lists = $list;
+    if($type==='string'||is_numeric($list))
+        array_push($lists, $list);
+    // Loop through lists and convert any transaction hashes to database ids
+    foreach($lists as $idx => $list){
+        $type = getType($list);
+        if($type=="string" && !is_numeric($list))
+            $lists[$idx] = createTransaction($list);
+    }
+    $tables = ['list_items', 'list_edits'];
+    foreach($lists as $list_id){
+        // Delete item from lists table
+        $results = $mysqli->query("DELETE FROM lists WHERE tx_hash_id='{$list_id}'");
+        if(!$results)
+            byeLog('Error while trying to delete records from the lists table');
+        // Deletes item from list_items and list_edits tables
+        foreach($tables as $table){
+            $results = $mysqli->query("DELETE FROM {$table} WHERE list_id='{$list_id}'");
+            if(!$results)
+                byeLog('Error while trying to delete records from the ' . $table . ' table');
+        }
+    }
+}
+
+
 // Handle getting token information for a given tick
 function getTokenInfo($tick=null){
     global $mysqli;
@@ -994,7 +1025,7 @@ function getAddressDebits($address=null){
     return $data;
 }
 
-// Handle getting address balances for a given address
+// Get address balances using credits/debits table data
 function getAddressBalances($address=null){
     global $mysqli;
     $type = gettype($address);
@@ -1018,55 +1049,99 @@ function getAddressBalances($address=null){
         } catch(Exception $e){
             $balance = number_format(0,$decimal,'.','');
         }
-        if(is_numeric($balance) && $balance>0)
+        // Pass forward any numeric values (including 0 balance)
+        if(is_numeric($balance))
             $balances[$tick_id] = $balance;
     }
     return $balances;
 }
 
-// Create/Update records in the 'balances' table
-function updateAddressBalance( $address=null){
+// Get address balances using balances table data
+function getAddressTableBalances($address=null){
     global $mysqli;
     $type = gettype($address);
     if($type==='integer' || is_numeric($address))
         $address_id = $address;
     if($type==='string' && !is_numeric($address))
         $address_id = createAddress($address);
+    // Assoc array to store tick/balance
+    $balances = array(); 
+    $results = $mysqli->query("SELECT tick_id, amount FROM balances WHERE address_id='{$address_id}'");
+    if($results){
+        if($results->num_rows){
+            while($row = $results->fetch_assoc()){
+                $row = (object) $row;
+                $balances[$row->tick_id] = $row->amount;
+            }
+        }
+    } else {
+        byeLog('Error while trying to lookup balances record for address=' . $address);
+    }
+    return $balances;
+}
+
+
+// Create/Update/Delete records in the 'balances' table
+function updateAddressBalance( $address=null, $rollback=false){
+    global $mysqli;
+    // print "updateAddressBalance address={$address}\n";
+    $type = gettype($address);
+    if($type==='integer' || is_numeric($address))
+        $address_id = $address;
+    if($type==='string' && !is_numeric($address))
+        $address_id = createAddress($address);
+    // Get list of address balances based on credits/debits tables
     $balances = getAddressBalances($address_id);
     if(count($balances)){
         foreach($balances as $tick_id => $balance){
-            // print "processing balance tick={$tick_id} balance={$balance}\n";
+            // print "processing balance address_id={$address_id} tick={$tick_id} balance={$balance}\n";
+            $whereSql = "address_id='{$address_id}' AND tick_id='{$tick_id}'";
             // Check if we already have a record for this address/tick_id
-            $sql     = "SELECT id FROM balances WHERE address_id='{$address_id}' AND tick_id='{$tick_id}' LIMIT 1";
+            $sql     = "SELECT id FROM balances WHERE {$whereSql} LIMIT 1";
             $results = $mysqli->query($sql);
             if($results){
-                $update = ($results->num_rows) ? true : false;
-                if($update){
-                    $sql = "UPDATE balances SET amount='{$balance}' WHERE address_id='{$address_id}' AND tick_id='{$tick_id}'";
-                } else {
+                $action = ($results->num_rows) ? 'update' : 'insert';
+                if($balance==0)
+                    $action = 'delete';
+                // print "action={$action}\n";
+                if($action=='delete'){
+                    $sql = "DELETE FROM balances WHERE {$whereSql}";
+                } else if($action=='update'){
+                    $sql = "UPDATE balances SET amount='{$balance}' WHERE {$whereSql}";
+                } else if($action=='insert'){
                     $sql = "INSERT INTO balances (tick_id, address_id, amount) values ('{$tick_id}','{$address_id}','{$balance}')";
                 }
-                // Create/Update balances records
-                if($update||(!$update && $balance)){
-                    $results = $mysqli->query($sql);
-                    if(!$results){
-                        $action = ($update) ? 'update' : 'created';
-                        byeLog('Error while trying to ' . $action  . ' balance record for address=' . $address . ' tick_id=' . $tick_id);
-                    }
-                }
+                $results = $mysqli->query($sql);
+                if(!$results)
+                    byeLog('Error while trying to ' . $action  . ' balance record for address=' . $address . ' tick_id=' . $tick_id);
             } else {
                 byeLog('Error while trying to lookup balances record for address=' . $address . ' tick_id=' . $tick_id);
+            }
+        }
+    }
+    // If this is a rollback, then handle detecting records in balances table which should not exist and delete them
+    if($rollback){
+        // Get list of address balances based on balances table
+        $old_balances = getAddressTableBalances($address_id);
+        foreach($old_balances as $tick_id => $balance){
+            $balance = $balances[$tick_id];
+            if(!isset($balance) || $balance==0){
+                $results = $mysqli->query("DELETE FROM balances WHERE address_id='{$address_id}' AND tick_id='{$tick_id}'");
+                if(!$results)
+                    byeLog('Error while trying to delete balance record for address=' . $address . ' tick_id=' . $tick_id);
             }
         }
     }
 }
 
 
+
 // Handle updating address balances (credits-debits=balance)
-// @param {address} boolean Full update
-// @param {address} string  Address string
-// @param {address} array   Array of address strings
-function updateBalances( $address=null ){
+// @param {address}  boolean Full update
+// @param {address}  string  Address string
+// @param {address}  array   Array of address strings
+// @param {rollback} boolean Rollback
+function updateBalances( $address=null, $rollback=false ){
     global $mysqli;
     $addrs = [];
     $type  = gettype($address);
@@ -1089,7 +1164,7 @@ function updateBalances( $address=null ){
     }
     // Loop through addresses and update balance list
     foreach($addrs as $address)
-        updateAddressBalance($address);
+        updateAddressBalance($address, $rollback);
 }
 
 
@@ -1097,7 +1172,7 @@ function updateBalances( $address=null ){
 // @param {tickers} boolean Full update
 // @param {tickers} string  Ticker 
 // @param {tickers} array   Array of Tickers
-function updateTokens( $tickers=null){
+function updateTokens( $tickers=null, $rollback=true){
     global $mysqli;
     $tokens = [];
     $type  = gettype($tickers);
