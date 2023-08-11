@@ -180,10 +180,10 @@ function btnsSend($params=null, $data=null, $error=null){
             $addresses[$send->DESTINATION] = 1;
 
             // Debit AMOUNT from SOURCE address
-            createDebit('SEND', $send->BLOCK_INDEX, $send->TX_HASH, $send->TICK, $send->AMOUNT, $data->SOURCE);
+            createDebit('SEND', $send->BLOCK_INDEX, $send->TX_HASH, $send->TICK, $send->AMOUNT, $send->SOURCE);
 
             // Credit AMOUNT to DESTINATION address
-            createCredit('SEND', $send->BLOCK_INDEX, $send->TX_HASH, $send->TICK, $send->AMOUNT, $data->DESTINATION);
+            createCredit('SEND', $send->BLOCK_INDEX, $send->TX_HASH, $send->TICK, $send->AMOUNT, $send->DESTINATION);
 
             // Update balances for SOURCE and DESTINATION addresses
             updateBalances([$send->SOURCE, $send->DESTINATION]);
