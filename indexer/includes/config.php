@@ -42,7 +42,7 @@ if(NETWORK=='mainnet'){
 // Testnet config
 if(NETWORK=='testnet'){
     // First block with BTNS transaction (none yet, so just picking block)
-    define("FIRST_BLOCK",2466000);
+    define("FIRST_BLOCK",2473585);
 
     // BTNS Address 
     define('BURN_ADDRESS', "mvCounterpartyXXXXXXXXXXXXXXW24Hef");
