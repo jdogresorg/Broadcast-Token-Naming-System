@@ -47,16 +47,18 @@ Name                          | Title                                     |  Aut
 | [`SWEEP`](./docs/actions/SWEEP.md)         | Transfer all `token` and/or ownerships to a destination address                                   |
 
 
-# BTNS Indexer
-- Coming soon
+# BTNS Indexers
+- [BTNS Indexer](.indexer/) (PHP)
 
 
 # BTNS Explorers
-- Coming soon
+- [BTNS XChain (mainnet)](https://btns.xchain.io/)
+- [BTNS XChain (testnet)](https://btns-testnet.xchain.io/)
 
 
 # BTNS APIs
-- Coming soon
+- [BTNS XChain API (mainnet)](https://btns.xchain.io/api)
+- [BTNS XChain API (testnet)](https://btns-testnet.xchain.io/api)
 
 
 # BTNS Wallets
