@@ -53,8 +53,8 @@ This example issues a JDOG token
 ```
 
 ```
-bt:ISSUE|0|JDOG||||||||1
-This example issues a JDOG token with LOCK_SUPPLY set to 1 to permanently
+bt:ISSUE|0|JDOG|1||||1|||1
+This example issues a JDOG token with MAX_SUPPLY set to 1, Mints 1 token via MINT_SUPPLY, and has LOCK_SUPPLY set to 1 to permanently lock the MAX_SUPPLY
 ```
 
 ```
@@ -103,6 +103,7 @@ This example issues a TEST token with a max supply of 100, and a maximum mint of
 - Additional `TICK` `ISSUE` transactions after first valid `TICK` `ISSUE`, will be considered invalid and ignored, unless broadcast from `token` owners address
 - `DECIMALS` can not be changed after `token` supply is issued and/or minted
 - `MAX_SUPPLY` max value is 1,000,000,000,000,000,000,000 (1 Sextillion)
+- `LOCK_SUPPLY` can not be set to `1` and permanently locked unless `MAX_SUPPLY` is set to a non-zero number.
 
 ## Notes
 - `ISSUE` `TICK` with `MAX_SUPPLY` and `MINT_SUPPLY` set to any non `0` value, to mint supply until `MAX_SUPPLY` is reached (owner can mint beyond `MAX_MINT`)
