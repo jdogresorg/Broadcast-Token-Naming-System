@@ -22,7 +22,7 @@ $reserved = array('BTC','XCP','GAS');
 define("RESERVED_TICKS",$reserved);
 
 // Min/Max MAX_SUPPLY
-define('MIN_TOKEN_SUPPLY',0);
+define('MIN_TOKEN_SUPPLY',0.000000000000000001);
 define('MAX_TOKEN_SUPPLY',1000000000000000000000);
 
 // Min/Max DECIMALS
