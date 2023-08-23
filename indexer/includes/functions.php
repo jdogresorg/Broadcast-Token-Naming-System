@@ -930,13 +930,11 @@ function getAssetId($asset=null){
 // Handle getting asset information for an asset
 function getAssetInfo($asset=null){
     global $mysqli, $dbase;
-    $type = gettype($tick);
+    $type = gettype($asset);
     $data = false;
-    if($type==='integer' || is_numeric($asset)){
-        $asset_id = $asset;
-    } else {
+    // Only do lookup on strings, since all CP assets are strings
+    if($type=='string')
         $asset_id = getAssetId($asset);
-    }
     if($asset_id){
         // Get data from assets table
         $sql = "SELECT 
