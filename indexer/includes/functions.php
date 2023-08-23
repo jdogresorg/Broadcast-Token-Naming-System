@@ -1226,8 +1226,10 @@ function getTokenSupply( $tick=null ){
         $tick_id = $tick;
     if($type==='string' && !is_numeric($tick))
         $tick_id = createTicker($tick);
-    // Get Credits
-    $sql = "SELECT SUM(amount) as credits FROM credits WHERE tick_id='{$tick_id}'";
+    // Get info on decimal precision
+    $decimals = getTokenDecimalPrecision($tick_id);
+    // Get Credits 
+    $sql = "SELECT CAST(SUM(amount) AS DECIMAL(60,$decimals)) as credits FROM credits WHERE tick_id='{$tick_id}'";
     $results = $mysqli->query($sql);
     if($results){
         if($results->num_rows){
@@ -1238,7 +1240,7 @@ function getTokenSupply( $tick=null ){
         byeLog('Error while trying to get list of credits');
     }
     // Get Debits
-    $sql = "SELECT SUM(amount) as debits FROM debits WHERE tick_id='{$tick_id}'";
+    $sql = "SELECT CAST(SUM(amount) AS DECIMAL(60,$decimals)) as debits FROM debits WHERE tick_id='{$tick_id}'";
     $results = $mysqli->query($sql);
     if($results){
         if($results->num_rows){
@@ -1248,11 +1250,9 @@ function getTokenSupply( $tick=null ){
     } else {
         byeLog('Error while trying to get list of debits');
     }
-    $decimals = getTokenDecimalPrecision($tick_id);
-    $supply   = bcsub($credits, $debits, $decimals);
+    $supply = bcsub($credits, $debits, $decimals);
     return $supply;
 }
-
 
 // Handle doing VERY lose validation on an address
 function isCryptoAddress( $address=null ){
