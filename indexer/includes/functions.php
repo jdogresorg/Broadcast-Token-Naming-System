@@ -219,12 +219,12 @@ function createIssue( $data=null ){
     $mint_supply        = (isset($data->MINT_SUPPLY) && is_numeric($data->MINT_SUPPLY)) ? $data->MINT_SUPPLY : 0;
     $callback_amount    = (isset($data->CALLBACK_AMOUNT) && is_numeric($data->CALLBACK_AMOUNT)) ? $data->CALLBACK_AMOUNT : 0;
     $decimals           = (isset($data->DECIMALS)) ? $data->DECIMALS : 0;
-    // If we have a valid decimal value, store amounts as satoshis (integers)
+    // Force any amount values to the correct decimal precision
     if(is_numeric($decimals) && $decimals>=0 && $decimals<=18){
-        $max_supply      = bcmul($max_supply,  '1' . str_repeat('0',$decimals),0);
-        $max_mint        = bcmul($max_mint,    '1' . str_repeat('0',$decimals),0);
-        $mint_supply     = bcmul($mint_supply, '1' . str_repeat('0',$decimals),0);
-        $callback_amount = bcmul($callback_amount, '1' . str_repeat('0',$decimals),0);
+        $max_supply      = bcmul($max_supply,1,$decimals);
+        $max_mint        = bcmul($max_mint,1,$decimals);
+        $mint_supply     = bcmul($mint_supply,1,$decimals);
+        $callback_amount = bcmul($callback_amount,1,$decimals);
     }
     $max_supply         = $mysqli->real_escape_string($max_supply);
     $max_mint           = $mysqli->real_escape_string($max_mint);
@@ -404,12 +404,12 @@ function createToken( $data=null ){
     $mint_supply        = (isset($data->MINT_SUPPLY) && is_numeric($data->MINT_SUPPLY)) ? $data->MINT_SUPPLY : 0;
     $callback_amount    = (isset($data->CALLBACK_AMOUNT) && is_numeric($data->CALLBACK_AMOUNT)) ? $data->CALLBACK_AMOUNT : 0;
     $decimals           = (isset($data->DECIMALS)) ? $data->DECIMALS : 0;
-    // If we have a valid decimal value, store amounts as satoshis (integers)
+    // Force any amount values to the correct decimal precision
     if(is_numeric($decimals) && $decimals>=0 && $decimals<=18){
-        $max_supply      = bcmul($max_supply,  '1' . str_repeat('0',$decimals),0);
-        $max_mint        = bcmul($max_mint,    '1' . str_repeat('0',$decimals),0);
-        $mint_supply     = bcmul($mint_supply, '1' . str_repeat('0',$decimals),0);
-        $callback_amount = bcmul($callback_amount, '1' . str_repeat('0',$decimals),0);
+        $max_supply      = bcmul($max_supply,1,$decimals);
+        $max_mint        = bcmul($max_mint,1,$decimals);
+        $mint_supply     = bcmul($mint_supply,1,$decimals);
+        $callback_amount = bcmul($callback_amount,1,$decimals);
     }
     $supply             = $mysqli->real_escape_string($supply);
     $max_supply         = $mysqli->real_escape_string($max_supply);
