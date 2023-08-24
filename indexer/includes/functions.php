@@ -842,12 +842,8 @@ function deleteLists($list=null, $rollback=null){
 // Handle getting token information for a given tick
 function getTokenInfo($tick=null){
     global $mysqli;
-    $type = gettype($tick);
-    $data = false; // Default to 0 (no supply)
-    if($type==='integer' || is_numeric($tick))
-        $tick_id = $tick;
-    if($type==='string' && !is_numeric($tick))
-        $tick_id = createTicker($tick);
+    $data = false;
+    $tick_id = createTicker($tick);
     // Get data from tokens table
     $sql = "SELECT 
                 t2.tick,
@@ -1182,11 +1178,11 @@ function updateTokens( $tickers=null, $rollback=true){
         array_push($tokens, $tickers);
     // Dump full list of tokens
     if($type==='boolean' && $address===true){
-        $results = $mysqli->query("SELECT tick_id FROM tokens");
+        $results = $mysqli->query("SELECT t2.tick FROM tokens t1, index_tickers t2 WHERE t1.tick_id=t2.id");
         if($results){
             if($results->num_rows)
                 while($row = $results->fetch_assoc())
-                    array_push($tokens, $row['tick_id']);
+                    array_push($tokens, $row['tick']);
         } else {
             byeLog('Error while trying to get list of all tokens');
         }
@@ -1197,14 +1193,10 @@ function updateTokens( $tickers=null, $rollback=true){
 }
 
 // Handle getting token info (supply, price, etc) and updating the `tokens` table
-function updateTokenInfo( $tick=null){
+function updateTokenInfo( $tick=null ){
     // print "updateTokenInfo tick={$tick}\n";
     global $mysqli;
-    $type = gettype($tick);
-    if($type==='integer' || is_numeric($tick))
-        $tick_id = $tick;
-    if($type==='string' && !is_numeric($tick))
-        $tick_id = createTicker($tick);
+    $tick_id = createTicker($tick);
     // Lookup current token information
     $data = getTokenInfo($tick);
     if($data){
@@ -1221,11 +1213,7 @@ function getTokenSupply( $tick=null ){
     $credits = 0;
     $debits  = 0;
     $supply  = 0;
-    $type = gettype($tick);
-    if($type==='integer' || is_numeric($tick))
-        $tick_id = $tick;
-    if($type==='string' && !is_numeric($tick))
-        $tick_id = createTicker($tick);
+    $tick_id = createTicker($tick);
     // Get info on decimal precision
     $decimals = getTokenDecimalPrecision($tick_id);
     // Get Credits 
@@ -1557,11 +1545,7 @@ function isValidList($tx_hash=null, $type=null){
 
 // Validate if a balances array holds a certain amount of a tick token
 function hasBalance($balances=null, $tick=null, $amount=null){
-    $type = gettype($tick);
-    if($type==='integer' || is_numeric($tick))
-        $tick_id = $tick;
-    if($type==='string' && !is_numeric($tick))
-        $tick_id = createTicker($tick);
+    $tick_id = createTicker($tick);
     $balance = (isset($balances[$tick_id])) ? $balances[$tick_id] : 0;
     if($balance >= $amount)
         return true;
