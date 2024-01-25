@@ -24,18 +24,23 @@ This command creates or issues a `BTNS` `token`
 | `CALLBACK_AMOUNT`  | String | `TICK` `token` amount that users get when `CALLBACK` command is used                        |
 | `ALLOW_LIST`       | String | `TX_HASH` of a BTNS `LIST` of addresses allowed to interact with this token                 |
 | `BLOCK_LIST`       | String | `TX_HASH` of a BTNS `LIST` of addresses NOT allowed to interact with this token             |
+| `MINT_START_BLOCK` | String | `BLOCK_INDEX` when `MINT` transactions are allowed (begin mint)                             |
+| `MINT_STOP_BLOCK`  | String | `BLOCK_INDEX` when `MINT` transactions are NOT allowed (end mint)                           |
+| `MINT_FEE_TICK`    | String | `TICK` required in order to `MINT`                                                          |
+| `MINT_FEE_AMOUNT`  | String | `TICK` `AMOUNT` required in order to `MINT`                                                 |
+| `MINT_FEE_ADDRESS` | String | Address where `MINT` fee can be sent instead of being destroyed                             |
 
 
 ## Formats
 
 ### Version `0`
-- `VERSION|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT|ALLOW_LIST|BLOCK_LIST`
+- `VERSION|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT|ALLOW_LIST|BLOCK_LIST|MINT_START_BLOCK|MINT_STOP_BLOCK|MINT_FEE_TICK|MINT_FEE_AMOUNT|MINT_FEE_ADDRESS`
 
 ### Version `1` - Edit `DESCRIPTION`
 - `VERSION|TICK|DESCRIPTION`
 
 ### Version `2` - Edit `MINT` `PARAMS`
-- `VERSION|TICK|MAX_MINT|MINT_SUPPLY|TRANSFER_SUPPLY`
+- `VERSION|TICK|MAX_MINT|MINT_SUPPLY|TRANSFER_SUPPLY|MINT_START_BLOCK|MINT_STOP_BLOCK|MINT_FEE_TICK|MINT_FEE_AMOUNT|MINT_FEE_ADDRESS`
 
 ### Version `3` - Edit `LOCK` `PARAMS`
 - `VERSION|TICK|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK`
@@ -122,3 +127,8 @@ This example issues a TEST token with a max supply of 100, and a maximum mint of
 - By default any address can interact with a BTNS token, to change this behavior use `ALLOW_LIST` and `BLOCK_LIST`
 - If `TICK` contains any unicode characters, then `TICK` should be `base64` encoded
 - `counterparty` `ASSET` and `SUBASSET` names are reserved within the BTNS for use by the `counterparty` owner
+- `MINT_START_BLOCK` and `MINT_STOP_BLOCK` can be used to determine period(s) when `MINT` transactions are allowed
+- `MINT_FEE_TICK` and `MINT_FEE_AMOUNT` can be used to require a set `TICK` `AMOUNT` fee be paid on a MINT transaction
+- `MINT_FEE_ADDRESS` can be used to send `MINT` fees to an address instead of destroying the fee
+- `MINT_FEE_TICK` can be set to `BTC` and `MINT_FEE_ADDRESS` set to `` to require a minimum BTC miners fee be paid on a MINT transactions
+
