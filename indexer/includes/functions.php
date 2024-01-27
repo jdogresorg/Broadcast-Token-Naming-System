@@ -1442,7 +1442,7 @@ function getFormatVersion($format=null){
 // Handle validating amount format
 function isValidAmountFormat($divisible=null, $amount=null){
     [$int, $sats] = explode('.',$amount);
-    if(!$divisible && is_numeric($int))
+    if(!$divisible && is_numeric($int) && $int==$amount)
         return true;
     if($divisible && is_numeric($int) && (is_null($sats) || is_numeric($sats)))
         return true;
