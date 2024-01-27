@@ -304,15 +304,15 @@ function createIssue( $data=null ){
 // Create record in `mints` table
 function createMint( $data=null ){
     global $mysqli;
-    $tick_id      = createTicker($data->TICK);
-    $source_id    = createAddress($data->SOURCE);
-    $transfer_id  = createAddress($data->TRANSFER);
-    $tx_hash_id   = createTransaction($data->TX_HASH);
-    $status_id    = createStatus($data->STATUS);
-    $tx_index     = $mysqli->real_escape_string($data->TX_INDEX);
-    $amount       = $mysqli->real_escape_string($data->AMOUNT);
-    $block_index  = $mysqli->real_escape_string($data->BLOCK_INDEX);
-    $amount       = $mysqli->real_escape_string($data->AMOUNT);
+    $tick_id        = createTicker($data->TICK);
+    $source_id      = createAddress($data->SOURCE);
+    $destination_id = createAddress($data->DESTINATION);
+    $tx_hash_id     = createTransaction($data->TX_HASH);
+    $status_id      = createStatus($data->STATUS);
+    $tx_index       = $mysqli->real_escape_string($data->TX_INDEX);
+    $amount         = $mysqli->real_escape_string($data->AMOUNT);
+    $block_index    = $mysqli->real_escape_string($data->BLOCK_INDEX);
+    $amount         = $mysqli->real_escape_string($data->AMOUNT);
     // Check if record already exists
     $results = $mysqli->query("SELECT tx_index FROM mints WHERE tx_hash_id='{$tx_hash_id}'");
     if($results){
@@ -323,7 +323,7 @@ function createMint( $data=null ){
                     SET
                         tick_id='{$tick_id}',
                         amount='{$amount}',
-                        destination_id='{$transfer_id}',
+                        destination_id='{$destination_id}',
                         source_id='{$source_id}',
                         block_index='{$block_index}',
                         tx_index='{$tx_index}',
@@ -332,7 +332,7 @@ function createMint( $data=null ){
                         tx_hash_id='{$tx_hash_id}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO mints (tx_index, tick_id, amount, source_id, destination_id, tx_hash_id, block_index, status_id) values ('{$tx_index}','{$tick_id}', '{$amount}', '{$source_id}', '{$transfer_id}', '{$tx_hash_id}', '{$block_index}', '{$status_id}')";
+            $sql = "INSERT INTO mints (tx_index, tick_id, amount, source_id, destination_id, tx_hash_id, block_index, status_id) values ('{$tx_index}','{$tick_id}', '{$amount}', '{$source_id}', '{$destination_id}', '{$tx_hash_id}', '{$block_index}', '{$status_id}')";
         }
         $results = $mysqli->query($sql);
         if(!$results)
