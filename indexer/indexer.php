@@ -148,12 +148,6 @@ while($block <= $current){
                     'TX_HASH'     => $row->tx_hash  // Transaction Hash
                 );
 
-                // Create a record of this transaction in the transactions table
-                createTxIndex($data);
-
-                // Get tx_index of record using tx_hash
-                $data->TX_INDEX = getTxIndex($data->TX_HASH);
-
                 // Validate Action
                 if(!array_key_exists($action,PROTOCOL_CHANGES))
                     $error = 'invalid: Unknown ACTION';
@@ -161,6 +155,16 @@ while($block <= $current){
                 // Verify action is activated (past ACTIVATION_BLOCK)
                 if(!$error && !isEnabled($action, $network, $block))
                     $error = 'invalid: ACTIVATION_BLOCK';
+
+                // Set action to UNKNOWN if we detect error
+                if($error)
+                    $data->ACTION = $action = 'UNKNOWN';
+
+                // Create a record of this transaction in the transactions table
+                createTxIndex($data);
+
+                // Get tx_index of record using tx_hash
+                $data->TX_INDEX = getTxIndex($data->TX_HASH);
 
                 // Handle processing the specific BTNS ACTION commands
                 btnsAction($action, $params, $data, $error);
