@@ -173,6 +173,9 @@ while($block <= $current){
     // Create hash of the credits/debits/balances table and create record in `blocks` table
     createBlock($block);
 
+    // Do a sanity check to verify that token supplys match data in credits/debits/balances tables 
+    sanityCheck($block);
+
     // Report time to process block
     $time = $timer->finish();
     print " Done [{$time}ms]\n";

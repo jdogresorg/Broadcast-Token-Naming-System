@@ -1242,6 +1242,28 @@ function getTokenSupply( $tick=null ){
     return $supply;
 }
 
+// Get token supply from balances table
+function getTokenSupplyBalance( $tick=null ){
+    global $mysqli;
+    $supply  = 0;
+    $tick_id = createTicker($tick);
+    // Get info on decimal precision
+    $decimals = getTokenDecimalPrecision($tick_id);
+    // Get Credits 
+    $sql = "SELECT CAST(SUM(amount) AS DECIMAL(60,$decimals)) as supply FROM balances WHERE tick_id='{$tick_id}'";
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows){
+            $row    = (object) $results->fetch_assoc();
+            $supply = (!is_null($row->supply)) ? $row->supply : 0;
+        }
+    } else {
+        byeLog('Error while trying to get list of balances');
+    }
+    return $supply;
+}
+
+
 // Handle doing VERY lose validation on an address
 function isCryptoAddress( $address=null ){
     $len   = strlen($address);
@@ -1569,6 +1591,73 @@ function isActionAllowed($tick=null, $address=null){
     if($info->BLOCK_LIST && in_array($address,getList($info->BLOCK_LIST)))
         return false;
     return true;
+}
+
+// Validate that token supplys match credits/debits/balances information
+function sanityCheck( $block=null ){
+    global $mysqli;
+    $tickers     = []; // Assoc array of tickers
+    $supply      = []; // Assoc array of supplys
+    $block_index = $mysqli->real_escape_string($block);
+    // Get list of tables to check for transactions / tickers
+    $sql = "SELECT 
+                distinct(t2.type) as type
+            FROM
+                transactions t1,
+                index_tx_types t2
+            WHERE
+                t2.id=t1.type_id AND
+                t2.type!='UNKNOWN' AND
+                t1.block_index='{$block_index}'";
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows){
+            while($row = $results->fetch_assoc()){
+                $row = (object) $row;
+                // Ignore certain tx types
+                if(in_array($row->type,array('LIST')))
+                    continue;
+                // Loop through tables and get ticker and supply
+                $table = strtolower($row->type) . 's';
+                $sql = "SELECT 
+                            t2.id,
+                            t2.tick,
+                            t1.supply
+                        FROM
+                            {$table} m LEFT JOIN tokens t1 on (t1.tick_id=m.tick_id),
+                            index_tickers t2
+                        WHERE
+                            t2.id=m.tick_id AND
+                            m.block_index='{$block_index}'";
+                // print $sql;
+                $results2 = $mysqli->query($sql);
+                if($results2){
+                    if($results2->num_rows){
+                        while($row2 = $results2->fetch_assoc()){
+                            $row2 = (object) $row2;
+                            // Add ticker and supply info to assoc arrays
+                            $tickers[$row2->tick] = $row2->id;
+                            $supply[$row2->tick]  = (!is_null($row2->supply)) ? $row2->supply : "0";
+                        }
+                    }
+                } else {
+                    byeLog("Error while trying to lookup tickers in block : {$block}");
+                }
+            }
+        }
+    } else {
+        byeLog("Error while trying to lookup transactions in block : {$block}");
+    }
+    // Loop through the tickers and validate token supply match credits/debits/balances info
+    foreach($tickers as $tick => $tick_id){
+        $supplyA = $supply[$tick];               // Supply from tokens table
+        $supplyB = getTokenSupplyBalance($tick); // Supply from balances table
+        $supplyC = getTokenSupply($tick);        // Supply from credits/debits tables
+        if($supplyA!=$supplyB)
+            byeLog("SanityError: balances table supply does not match token supply : {$tick}");
+        if($supplyA!=$supplyC)
+            byeLog("SanityError: credits/debits table supply does not match token supply : {$tick}");
+    }
 }
 
 ?>
