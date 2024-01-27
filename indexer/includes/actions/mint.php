@@ -45,6 +45,10 @@ function btnsMint($params=null, $data=null, $error=null){
     if(!$error && !$btInfo)
         $error = 'invalid: TICK (unknown)';
 
+    // Validate DESTINATION and SOURCE are different
+    if($data->DESTINATION == $data->SOURCE)
+        unset($data->DESTINATION);
+
     // Update BTNS transaction object with basic token details
     if($btInfo){
         $data->SUPPLY     = ($btInfo) ? $btInfo->SUPPLY : 0;
@@ -70,7 +74,7 @@ function btnsMint($params=null, $data=null, $error=null){
      ****************************************************************/
 
     // Verify AMOUNT is less than MAX_MINT
-    if(!$error && isset($data->AMOUNT)  && $data->AMOUNT > $data->MAX_MINT)
+    if(!$error && isset($data->AMOUNT) && $data->AMOUNT > $data->MAX_MINT)
         $error = 'invalid: AMOUNT > MAX_MINT';
 
     // Verify minting AMOUNT will not exceed MAX_SUPPLY
