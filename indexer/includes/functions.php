@@ -1177,7 +1177,7 @@ function updateTokens( $tickers=null, $rollback=true){
     if($type==='string')
         array_push($tokens, $tickers);
     // Dump full list of tokens
-    if($type==='boolean' && $address===true){
+    if($type==='boolean' && $tickers===true){
         $results = $mysqli->query("SELECT t2.tick FROM tokens t1, index_tickers t2 WHERE t1.tick_id=t2.id");
         if($results){
             if($results->num_rows)
