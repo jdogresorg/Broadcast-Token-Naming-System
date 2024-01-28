@@ -90,6 +90,10 @@ function btnsIssue( $params=null, $data=null, $error=null){
     if(!$error && in_array($data->TICK,RESERVED_TICKS))        
         $error = 'invalid: TICK (reserved)';
 
+    // Verify TRANSFER_SUPPLY and SOURCE are different
+    if($data->TRANSFER_SUPPLY == $data->SOURCE)
+        unset($data->TRANSFER_SUPPLY);
+
     // Get information on BTNS token
     $btInfo        = getTokenInfo($data->TICK);
     $isDistributed = isDistributed($data->TICK);
