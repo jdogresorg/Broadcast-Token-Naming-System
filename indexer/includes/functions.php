@@ -840,10 +840,11 @@ function deleteLists($list=null, $rollback=null){
 
 
 // Handle getting token information for a given tick
-function getTokenInfo($tick=null){
+function getTokenInfo($tick=null, $tick_id=null){
     global $mysqli;
     $data = false;
-    $tick_id = createTicker($tick);
+    if(!is_null($tick) && is_null($tick_id))
+        $tick_id = createTicker($tick);
     // Get data from tokens table
     $sql = "SELECT 
                 t2.tick,
@@ -963,9 +964,9 @@ function getAssetInfo($asset=null){
     return $data;
 }
 
-// Handle getting decimal precision for a given tick
-function getTokenDecimalPrecision($tick=null){
-    $info = getTokenInfo($tick);
+// Handle getting decimal precision for a given tick_id
+function getTokenDecimalPrecision($tick_id=null){
+    $info = getTokenInfo(null, $tick_id);
     $decimals = ($info) ? $info->DECIMALS : 0;
     return $decimals;
 }
