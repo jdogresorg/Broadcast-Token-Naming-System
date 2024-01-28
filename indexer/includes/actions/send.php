@@ -96,6 +96,10 @@ function btnsSend($params=null, $data=null, $error=null){
     // Add SOURCE address to the addresses array
     $addresses[$data->SOURCE] = 1;
 
+    // Array of credits and debits
+    $credits = [];
+    $debits  = [];
+
     // Loop through sends and process each
     foreach($sends as $info){
 
@@ -167,10 +171,10 @@ function btnsSend($params=null, $data=null, $error=null){
         // Print status message 
         print "\n\t SEND : {$send->TICK} : {$send->AMOUNT} : {$send->DESTINATION} : {$send->STATUS}";
 
-        // Create record in transfers table
+        // Create record in sends table
         createSend($send);
 
-        // If this was a valid transaction, then create credit/debit/balance records
+        // If this was a valid transaction, then add records to the credits and debits array
         if($status=='valid'){
 
             // Add ticker to tickers array
@@ -179,17 +183,32 @@ function btnsSend($params=null, $data=null, $error=null){
             // Add destination address to addresses array
             $addresses[$send->DESTINATION] = 1;
 
-            // Debit AMOUNT from SOURCE address
-            createDebit('SEND', $send->BLOCK_INDEX, $send->TX_HASH, $send->TICK, $send->AMOUNT, $send->SOURCE);
+            // Add ticker and amount to debits array
+            array_push($debits,  array($send->TICK, $send->AMOUNT));
 
-            // Credit AMOUNT to DESTINATION address
-            createCredit('SEND', $send->BLOCK_INDEX, $send->TX_HASH, $send->TICK, $send->AMOUNT, $send->DESTINATION);
-
-            // Update balances for SOURCE and DESTINATION addresses
-            updateBalances([$send->SOURCE, $send->DESTINATION]);
-
+            // Add ticker, amount, and destination to credits array
+            array_push($credits, array($send->TICK, $send->AMOUNT, $send->DESTINATION));
         }
     }
+
+    // Consolidate the credit and debit records to write as few records as possible
+    $debits  = consolidateCreditDebitRecords('debits', $debits);
+    $credits = consolidateCreditDebitRecords('credits', $credits);
+
+    // Create records in debits table
+    foreach($debits as $debit){
+        [$tick, $amount] = $debit;
+        createDebit('SEND', $data->BLOCK_INDEX, $data->TX_HASH, $tick, $amount, $data->SOURCE);
+    }
+
+    // Create records in credits table
+    foreach($credits as $credit){
+        [$tick, $amount, $destination] = $credit;
+        createCredit('SEND', $data->BLOCK_INDEX, $data->TX_HASH, $tick, $amount, $destination);
+    }
+
+    // Update address balances
+    updateBalances(array_keys($addresses));
 }
 
 ?>

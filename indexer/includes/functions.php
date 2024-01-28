@@ -1660,4 +1660,24 @@ function sanityCheck( $block=null ){
     }
 }
 
+// Consolidate Credit and Debit records
+function consolidateCreditDebitRecords($type=null, $records=null){
+    $arr  = [];
+    $data = [];
+    foreach($records as $rec){
+        [$key, $amount, $destination] = $rec;
+        if($type=='credits')
+            $key .= '-' . $destination;
+        $arr[$key] = ($arr[$key]) ? strval($arr[$key] + $amount) : $amount; 
+    }
+    foreach($arr as $tick => $amount){
+        $info = array($tick, $amount);
+        if($type=='credits'){
+            [$tick, $destination] = explode('-',$tick);
+            $info = array($tick, $amount, $destination);
+        } 
+        array_push($data, $info);
+    }
+    return $data;
+}
 ?>
