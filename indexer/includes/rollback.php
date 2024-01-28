@@ -29,19 +29,30 @@ function btnsRollback($block_index=null){
 
         // Get list of any addresses or tickers associated with the rollback blocks
         if(in_array($table, array('credits','debits'))){
-            $results = $mysqli->query("SELECT address_id, tick_id FROM {$table} WHERE block_index>{$block_index}");
+            $sql = "SELECT 
+                        a.address, 
+                        t2.tick
+                    FROM 
+                        {$table} t1, 
+                        index_tickers t2,
+                        index_addresses a
+                    WHERE 
+                        t2.id=t1.tick_id AND 
+                        a.id=t1.address_id AND
+                        t1.block_index>{$block_index}";
+            $results = $mysqli->query($sql);
             if($results){
                 if($results->num_rows){
                     while($row = $results->fetch_assoc()){
                         $row = (object) $row;
-                        if(!in_array($row->address_id, $addresses))
-                            array_push($addresses, $row->address_id);
-                        if(!in_array($row->tick_id, $tickers))
-                            array_push($tickers, $row->tick_id);
+                        if(!in_array($row->address, $addresses))
+                            array_push($addresses, $row->address);
+                        if(!in_array($row->tick, $tickers))
+                            array_push($tickers, $row->tick);
                     }
                 }
             } else {
-                byeLog('Error while trying to lookup rollback data in the ' . $table);
+                byeLog("Error while trying to lookup rollback data in the {$table} table");
             }
         }
 
