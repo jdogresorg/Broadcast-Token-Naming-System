@@ -971,8 +971,8 @@ function getTokenDecimalPrecision($tick_id=null){
     return $decimals;
 }
 
-// Handle getting credits for a given address
-function getAddressCredits($address=null){
+// Handle getting credits or debits records for a given address
+function getAddressCreditDebit($table=null, $address=null){
     global $mysqli;
     $data = array(); // Assoc array to store tick/credits
     $type = gettype($address);
@@ -980,44 +980,34 @@ function getAddressCredits($address=null){
         $address_id = $address;
     if($type==='string' && !is_numeric($address))
         $address_id = createAddress($address);
-    // Get Credits
-    $sql = "SELECT tick_id, sum(amount) as amount FROM credits WHERE address_id='{$address_id}' GROUP BY tick_id";
-    $results = $mysqli->query($sql);
-    if($results){
-        if($results->num_rows){
-            while($row = $results->fetch_assoc()){
-                $row = (object) $row;
-                $data[$row->tick_id] = $row->amount;
+    if(in_array($table,array('credits','debits'))){
+        // Get data from the table
+        $sql = "SELECT 
+                    t1.tick_id,
+                    t1.amount,
+                    t2.decimals
+                FROM
+                    {$table} t1,
+                    tokens t2
+                WHERE 
+                    t2.tick_id=t1.tick_id AND
+                    t1.address_id='{$address_id}'";
+        $results = $mysqli->query($sql);
+        if($results){
+            if($results->num_rows){
+                while($row = $results->fetch_assoc()){
+                    $row = (object) $row;
+                    if(!$data[$row->tick_id])
+                        $data[$row->tick_id] = 0;
+                    $data[$row->tick_id] = bcadd($data[$row->tick_id], $row->amount, $row->decimals);
+                }
             }
+        } else {
+            byeLog("Error while trying to lookup address {$table} for : {$address}");
         }
-    } else {
-        byeLog("Error while trying to lookup address credits for : {$address}");
     }
-    return $data;
-}
+    return $data;    
 
-// Handle getting debits for a given address
-function getAddressDebits($address=null){
-    global $mysqli;
-    $data = array(); // Assoc array to store tick/debits
-    $type = gettype($address);
-    if($type==='integer' || is_numeric($address))
-        $address_id = $address;
-    if($type==='string' && !is_numeric($address))
-        $address_id = createAddress($address);
-    // Get Debits
-    $results = $mysqli->query("SELECT tick_id, sum(amount) as amount FROM debits WHERE address_id='{$address_id}' GROUP BY tick_id");
-    if($results){
-        if($results->num_rows){
-            while($row = $results->fetch_assoc()){
-                $row = (object) $row;
-                $data[$row->tick_id] = $row->amount;
-            }
-        }
-    } else {
-        byeLog("Error while trying to lookup address debits for : {$address}");
-    }
-    return $data;
 }
 
 // Get address balances using credits/debits table data
@@ -1028,8 +1018,8 @@ function getAddressBalances($address=null){
         $address_id = $address;
     if($type==='string' && !is_numeric($address))
         $address_id = createAddress($address);
-    $credits  = getAddressCredits($address_id);
-    $debits   = getAddressDebits($address_id);
+    $credits  = getAddressCreditDebit('credits', $address_id);
+    $debits   = getAddressCreditDebit('debits',  $address_id);
     $decimals = array(); // Assoc array to store tick/decimals
     $balances = array(); // Assoc array to store tick/balance
     foreach($credits as $tick_id => $amount)
