@@ -375,6 +375,7 @@ function createSend( $data=null ){
                     SET
                         tx_index='{$tx_index}',
                         block_index='{$block_index}',
+                        memo_id='{$memo_id}',
                         status_id='{$status_id}'
                     WHERE 
                         tick_id='{$tick_id}' AND
