@@ -1,5 +1,11 @@
 CHANGELOG
 ---
+0.11.0
+- DESTROY support
+- Added basic sanity checks
+- Fixed sanity issues related to credit/debits/balances/supply mismatches
+- Cleaned up code
+
 0.10.1
 - set MIN_TOKEN_SUPPLY to 0.000000000000000001
 - Prevent LOCK_SUPPLY if no supply is issued 
