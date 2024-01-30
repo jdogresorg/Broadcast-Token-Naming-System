@@ -11,6 +11,7 @@ function btnsRollback($block_index=null){
         'blocks',
         'credits',
         'debits',
+        'destroys',
         'issues',
         'lists',
         'mints',

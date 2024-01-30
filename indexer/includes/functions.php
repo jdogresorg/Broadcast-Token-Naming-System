@@ -394,6 +394,56 @@ function createSend( $data=null ){
     }
 }
 
+// Create record in `destroys` table
+function createDestroy( $data=null ){
+    global $mysqli;
+    $tick_id        = createTicker($data->TICK);
+    $source_id      = createAddress($data->SOURCE);
+    $tx_hash_id     = createTransaction($data->TX_HASH);
+    $status_id      = createStatus($data->STATUS);
+    $memo_id        = createMemo($data->MEMO);
+    $tx_index       = $mysqli->real_escape_string($data->TX_INDEX);
+    $amount         = $mysqli->real_escape_string($data->AMOUNT);
+    $block_index    = $mysqli->real_escape_string($data->BLOCK_INDEX);
+    $amount         = $mysqli->real_escape_string($data->AMOUNT);
+    // Check if record already exists
+    $sql = "SELECT
+                tx_index
+            FROM
+                destroys
+            WHERE
+                tick_id='{$tick_id}' AND
+                source_id='{$source_id}' AND
+                amount='{$amount}' AND
+                tx_hash_id='{$tx_hash_id}'";
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows){
+            // UPDATE record
+            $sql = "UPDATE
+                        destroys
+                    SET
+                        tx_index='{$tx_index}',
+                        block_index='{$block_index}',
+                        memo_id='{$memo_id}',
+                        status_id='{$status_id}'
+                    WHERE 
+                        tick_id='{$tick_id}' AND
+                        source_id='{$source_id}' AND
+                        amount='{$amount}' AND
+                        tx_hash_id='{$tx_hash_id}'";
+        } else {
+            // INSERT record
+            $sql = "INSERT INTO destroys (tx_index, tick_id, source_id, amount, memo_id, tx_hash_id, block_index, status_id) values ('{$tx_index}','{$tick_id}', '{$source_id}', '{$amount}','{$memo_id}', '{$tx_hash_id}', '{$block_index}', '{$status_id}')";
+        }
+        $results = $mysqli->query($sql);
+        if(!$results)
+            byeLog('Error while trying to create / update a record in the destroys table');
+    } else {
+        byeLog('Error while trying to lookup record in destroys table');
+    }
+}
+
 // Create / Update record in `tokens` table
 function createToken( $data=null ){
     global $mysqli;
