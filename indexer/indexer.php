@@ -39,9 +39,9 @@ $network  = ($testnet) ? 'testnet' : 'mainnet';
 $rollback = (is_numeric($args['rollback'])) ? intval($args['rollback']) : false;
 
 // Define some constants used for locking processes and logging errors
-define("LOCKFILE", '/var/tmp/btns-indexer-' . $network . '.lock');
-define("LASTFILE", '/var/tmp/btns-indexer-' . $network . '.last-block');
-define("ERRORLOG", '/var/tmp/btns-indexer-' . $network . '.errors');
+define("LOCKFILE", '/var/tmp/btns-indexer-dogeparty-' . $network . '.lock');
+define("LASTFILE", '/var/tmp/btns-indexer-dogeparty-' . $network . '.last-block');
+define("ERRORLOG", '/var/tmp/btns-indexer-dogeparty-' . $network . '.errors');
 
 // Load config (only after $network is defined)
 require_once('includes/config.php');
