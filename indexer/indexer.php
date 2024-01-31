@@ -37,11 +37,12 @@ $single   = (isset($args['single'])) ? true : false;
 $block    = (is_numeric($args['block'])) ? intval($args['block']) : false;
 $network  = ($testnet) ? 'testnet' : 'mainnet';
 $rollback = (is_numeric($args['rollback'])) ? intval($args['rollback']) : false;
+$service  = 'counterparty'; // counterparty / dogeparty
 
 // Define some constants used for locking processes and logging errors
-define("LOCKFILE", '/var/tmp/btns-indexer-' . $network . '.lock');
-define("LASTFILE", '/var/tmp/btns-indexer-' . $network . '.last-block');
-define("ERRORLOG", '/var/tmp/btns-indexer-' . $network . '.errors');
+define("LOCKFILE", '/var/tmp/btns-indexer-' . $service . '-' . $network . '.lock');
+define("LASTFILE", '/var/tmp/btns-indexer-' . $service . '-' . $network . '.last-block');
+define("ERRORLOG", '/var/tmp/btns-indexer-' . $service . '-' . $network . '.errors');
 
 // Load config (only after $network is defined)
 require_once('includes/config.php');
@@ -80,7 +81,6 @@ if($results){
 
 // Check to make sure cp2mysql is not running and parsing in block data
 // Prevents issue where tokens might be missed because we are still in middle of parsing in a block
-$service  = 'counterparty'; // counterparty / dogeparty
 $lockfile = '/var/tmp/' . $service . '2mysql-' . $network . '.lock';
 if(file_exists($lockfile))
     byeLog("found {$service} parsing a block... exiting");
