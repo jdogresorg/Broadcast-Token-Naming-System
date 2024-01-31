@@ -219,6 +219,8 @@ function createIssue( $data=null ){
     $mint_supply        = (isset($data->MINT_SUPPLY) && is_numeric($data->MINT_SUPPLY)) ? $data->MINT_SUPPLY : 0;
     $callback_amount    = (isset($data->CALLBACK_AMOUNT) && is_numeric($data->CALLBACK_AMOUNT)) ? $data->CALLBACK_AMOUNT : 0;
     $decimals           = (isset($data->DECIMALS)) ? $data->DECIMALS : 0;
+    // Truncate description to 250 chars 
+    $description        = substr($data->DESCRIPTION,0,250);
     // Force any amount values to the correct decimal precision
     if(is_numeric($decimals) && $decimals>=0 && $decimals<=18){
         $max_supply      = bcmul($max_supply,1,$decimals);
@@ -230,7 +232,7 @@ function createIssue( $data=null ){
     $max_mint           = $mysqli->real_escape_string($max_mint);
     $mint_supply        = $mysqli->real_escape_string($mint_supply);
     $decimals           = $mysqli->real_escape_string($decimals);
-    $description        = $mysqli->real_escape_string($data->DESCRIPTION);
+    $description        = $mysqli->real_escape_string($description);
     $block_index        = $mysqli->real_escape_string($data->BLOCK_INDEX);
     $tx_index           = $mysqli->real_escape_string($data->TX_INDEX);
     $status             = $mysqli->real_escape_string($data->STATUS);

@@ -193,9 +193,13 @@ function btnsIssue( $params=null, $data=null, $error=null){
     if(!$error && $btInfo && $btnInfo->LOCK_MINT && isset($data->MAX_MINT) && $data->MAX_MINT!=$btnInfo->MAX_MINT)
         $error = 'invalid: MAX_MINT (locked)';
 
+    // Verify DESCRIPTION is less than or equal to MAX_TOKEN_DESCRIPTION
+    if(!$error && $data->DESCRIPTION && strlen($data->DESCRIPTION) >= MAX_TOKEN_DESCRIPTION)
+        $error = 'invalid: DESCRIPTION (length)';
+
     // Verify DESCRIPTION can not be changed if LOCK_DESCRIPTION is enabled
-    if(!$error && $btInfo && $btnInfo->LOCK_DESCRIPTION && isset($data->MAX_MINT) && $data->MAX_MINT!=$btnInfo->MAX_MINT)
-        $error = 'invalid: MAX_MINT (locked)';
+    if(!$error && $btInfo && $btnInfo->LOCK_DESCRIPTION && isset($data->DESCRIPTION) && $data->DESCRIPTION!=$btnInfo->DESCRIPTION)
+        $error = 'invalid: DESCRIPTION (locked)';
 
     // Verify CALLBACK_BLOCK can not be changed if LOCK_CALLBACK is enabled
     if(!$error && $btInfo && $btnInfo->LOCK_CALLBACK && isset($data->CALLBACK_BLOCK) && $data->CALLBACK_BLOCK!=$btnInfo->CALLBACK_BLOCK)
