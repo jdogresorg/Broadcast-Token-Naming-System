@@ -98,6 +98,13 @@ function btnsIssue( $params=null, $data=null, $error=null){
     $btInfo        = getTokenInfo($data->TICK);
     $isDistributed = isDistributed($data->TICK);
 
+    // Populate empty PARAMS with current setting
+    if($btInfo){
+        foreach($btInfo as $key => $value)
+            if(!$data->{$key})
+                $data->{$key} = $value;
+    } 
+
     // If BTNS Token does not exist yet, do some additional validations
     if(!$btInfo){
         $cpInfo = getAssetInfo($data->TICK);
