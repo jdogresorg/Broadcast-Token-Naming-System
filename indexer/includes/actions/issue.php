@@ -107,7 +107,7 @@ function btnsIssue( $params=null, $data=null, $error=null){
 
     // If BTNS Token does not exist yet, do some additional validations
     if(!$btInfo){
-        $cpInfo = getAssetInfo($data->TICK);
+        $cpInfo = getAssetInfo($data->TICK, $data->BLOCK_INDEX);
 
         // Verify TICK is not already registered on Counterparty by a different address
         if(!$error && $cpInfo && $cpInfo->OWNER!=$data->SOURCE)

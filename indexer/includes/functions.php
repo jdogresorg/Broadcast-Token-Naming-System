@@ -980,7 +980,7 @@ function getAssetId($asset=null){
 }
 
 // Handle getting asset information for an asset
-function getAssetInfo($asset=null){
+function getAssetInfo($asset=null, $block_index=null){
     global $mysqli, $dbase;
     $type = gettype($asset);
     $data = false;
@@ -1014,7 +1014,33 @@ function getAssetInfo($asset=null){
             } 
         } else {
             byeLog("Error while trying to lookup asset info for : {$asset}");
-        }        
+        }
+        // If block_index is set, get asset owner at time of block_index
+        if(is_numeric($block_index)){
+            $sql = "SELECT 
+                        a1.address as issuer,
+                        a2.address as source
+                    FROM
+                        {$dbase}.issuances i LEFT JOIN 
+                        {$dbase}.index_addresses a1 on (a1.id=i.issuer_id),
+                        {$dbase}.index_addresses a2
+                    WHERE
+                        a2.id=i.source_id AND
+                        i.asset_id='{$asset_id}' AND
+                        i.block_index<='{$block_index}'
+                    ORDER BY block_index DESC
+                    LIMIT 1";
+            // print $sql;
+            $results = $mysqli->query($sql);
+            if($results){
+                if($results->num_rows){
+                    $row  = (object) $results->fetch_assoc();
+                    $data->OWNER = (!is_null($row->issuer)) ? $row->issuer : $row->source;
+                } 
+            } else {
+                byeLog("Error while trying to lookup asset owner for {$asset} at block {$block_index}");
+            }
+        }
     }
     return $data;
 }
