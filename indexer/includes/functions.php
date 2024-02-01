@@ -1036,7 +1036,10 @@ function getAssetInfo($asset=null, $block_index=null){
                 if($results->num_rows){
                     $row  = (object) $results->fetch_assoc();
                     $data->OWNER = (!is_null($row->issuer)) ? $row->issuer : $row->source;
-                } 
+                } else {
+                    // If no issuances exist at time of block_index, asset was not created yet
+                    $data = false;
+                }
             } else {
                 byeLog("Error while trying to lookup asset owner for {$asset} at block {$block_index}");
             }
