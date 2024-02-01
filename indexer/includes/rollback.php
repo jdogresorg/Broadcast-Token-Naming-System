@@ -24,6 +24,10 @@ function btnsRollback($block_index=null){
     $addresses    = array();
     $tickers      = array();
     $transactions = array();
+    $timer        = new Profiler();
+
+    // Notify user of start of rollback
+    print "Starting rollback to block {$block_index}...";
 
     // Loop through all database tables
     foreach($tables as $table){
@@ -85,6 +89,10 @@ function btnsRollback($block_index=null){
 
     // Delete items from list_{items,edits} tables
     deleteLists($transactions, true);
+
+    // Report time to process block
+    $time = $timer->finish();
+    print " Done [{$time}sec]\n";
 
     // Notify user rollback is complete
     byeLog("Rollback to block {$block_index} complete.");
