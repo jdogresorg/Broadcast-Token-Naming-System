@@ -182,7 +182,7 @@ while($block <= $current){
 
     // Report time to process block
     $time = $timer->finish();
-    print " Done [{$time}ms]\n";
+    print " Done [{$time}sec]\n";
 
     // Bail out if user only wants to process one block
     if($single){
