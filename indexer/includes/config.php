@@ -29,6 +29,9 @@ define('MAX_TOKEN_SUPPLY',1000000000000000000000);
 define('MIN_TOKEN_DECIMALS',0);
 define('MAX_TOKEN_DECIMALS',18);
 
+// Max DESCRIPTION length
+define('MAX_TOKEN_DESCRIPTION',250);
+
 // Mainnet config
 if(NETWORK=='mainnet'){
     // First block with BTNS transaction
