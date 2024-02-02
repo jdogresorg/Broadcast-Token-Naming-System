@@ -37,7 +37,7 @@ $single   = (isset($args['single'])) ? true : false;
 $block    = (is_numeric($args['block'])) ? intval($args['block']) : false;
 $network  = ($testnet) ? 'testnet' : 'mainnet';
 $rollback = (is_numeric($args['rollback'])) ? intval($args['rollback']) : false;
-$service  = 'counterparty'; // counterparty / dogeparty
+$service  = 'dogeparty'; // counterparty / dogeparty
 
 // Define some constants used for locking processes and logging errors
 define("LOCKFILE", '/var/tmp/btns-indexer-' . $service . '-' . $network . '.lock');

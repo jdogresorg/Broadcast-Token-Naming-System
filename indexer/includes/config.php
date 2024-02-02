@@ -18,7 +18,7 @@ define("MIN_TICK_LENGTH",1);
 define("MAX_TICK_LENGTH",250);
 
 // Reserved BTNS TICK names
-$reserved = array('BTC','XCP','GAS');
+$reserved = array('DOGE','XDP','GAS');
 define("RESERVED_TICKS",$reserved);
 
 // Min/Max MAX_SUPPLY
@@ -35,21 +35,21 @@ define('MAX_TOKEN_DESCRIPTION',250);
 // Mainnet config
 if(NETWORK=='mainnet'){
     // First block with BTNS transaction
-    define("FIRST_BLOCK",789742);
+    define("FIRST_BLOCK",4717389);
 
     // BTNS Address 
-    define('BURN_ADDRESS', "1Muhahahahhahahahahahhahahauxh9QX");
+    define('BURN_ADDRESS', "DDogepartyxxxxxxxxxxxxxxxxxxw1dfzr");
     define('GAS_ADDRESS', "1BTNSGASK5En7rFurDJ79LQ8CVYo2ecLC8");
 }
 
 // Testnet config
 if(NETWORK=='testnet'){
     // First block with BTNS transaction (none yet, so just picking block)
-    define("FIRST_BLOCK",2473585);
+    define("FIRST_BLOCK",5940447);
 
     // BTNS Address 
-    define('BURN_ADDRESS', "mvCounterpartyXXXXXXXXXXXXXXW24Hef");
-    define('GAS_ADDRESS', "mvCounterpartyXXXXXXXXXXXXXXW24Hef");
+    define('BURN_ADDRESS', "ndogepartyxxxxxxxxxxxxxxxxxxwpsZCH");
+    define('GAS_ADDRESS', "ndogepartyxxxxxxxxxxxxxxxxxxwpsZCH");
 }
 
 // Database Credentials
