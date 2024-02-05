@@ -24,7 +24,7 @@ This command creates or issues a `BTNS` `token`
 | `CALLBACK_AMOUNT`  | String | `TICK` `token` amount that users get when `CALLBACK` command is used                        |
 | `ALLOW_LIST`       | String | `TX_HASH` of a BTNS `LIST` of addresses allowed to interact with this token                 |
 | `BLOCK_LIST`       | String | `TX_HASH` of a BTNS `LIST` of addresses NOT allowed to interact with this token             |
-| `MINT_MAX_ADDRESS` | String | Maximum amount of supply any address can mint via `MINT` transactions                       |
+| `MINT_ADDRESS_MAX` | String | Maximum amount of supply any address can mint via `MINT` transactions                       |
 | `MINT_START_BLOCK` | String | `BLOCK_INDEX` when `MINT` transactions are allowed (begin mint)                             |
 | `MINT_STOP_BLOCK`  | String | `BLOCK_INDEX` when `MINT` transactions are NOT allowed (end mint)                           |
 | `MINT_FEE_TICK`    | String | `TICK` required in order to `MINT`                                                          |
@@ -35,13 +35,13 @@ This command creates or issues a `BTNS` `token`
 ## Formats
 
 ### Version `0`
-- `VERSION|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT|ALLOW_LIST|BLOCK_LIST|MINT_MAX_ADDRESS|MINT_START_BLOCK|MINT_STOP_BLOCK|MINT_FEE_TICK|MINT_FEE_AMOUNT|MINT_FEE_ADDRESS`
+- `VERSION|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT|ALLOW_LIST|BLOCK_LIST|MINT_ADDRESS_MAX|MINT_START_BLOCK|MINT_STOP_BLOCK|MINT_FEE_TICK|MINT_FEE_AMOUNT|MINT_FEE_ADDRESS`
 
 ### Version `1` - Edit `DESCRIPTION`
 - `VERSION|TICK|DESCRIPTION`
 
 ### Version `2` - Edit `MINT` `PARAMS`
-- `VERSION|TICK|MAX_MINT|MINT_SUPPLY|TRANSFER_SUPPLY|MINT_MAX_ADDRESS|MINT_START_BLOCK|MINT_STOP_BLOCK|MINT_FEE_TICK|MINT_FEE_AMOUNT|MINT_FEE_ADDRESS`
+- `VERSION|TICK|MAX_MINT|MINT_SUPPLY|TRANSFER_SUPPLY|MINT_ADDRESS_MAX|MINT_START_BLOCK|MINT_STOP_BLOCK|MINT_FEE_TICK|MINT_FEE_AMOUNT|MINT_FEE_ADDRESS`
 
 ### Version `3` - Edit `LOCK` `PARAMS`
 - `VERSION|TICK|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK`
