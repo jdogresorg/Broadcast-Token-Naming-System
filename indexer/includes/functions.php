@@ -219,20 +219,23 @@ function createIssue( $data=null ){
     $max_supply         = (isset($data->MAX_SUPPLY) && is_numeric($data->MAX_SUPPLY)) ? $data->MAX_SUPPLY : 0;
     $max_mint           = (isset($data->MAX_MINT) && is_numeric($data->MAX_MINT)) ? $data->MAX_MINT : 0;
     $mint_supply        = (isset($data->MINT_SUPPLY) && is_numeric($data->MINT_SUPPLY)) ? $data->MINT_SUPPLY : 0;
+    $mint_address_max   = (isset($data->MINT_ADDRESS_MAX) && is_numeric($data->MINT_ADDRESS_MAX)) ? $data->MINT_ADDRESS_MAX : 0;
     $callback_amount    = (isset($data->CALLBACK_AMOUNT) && is_numeric($data->CALLBACK_AMOUNT)) ? $data->CALLBACK_AMOUNT : 0;
     $decimals           = (isset($data->DECIMALS)) ? $data->DECIMALS : 0;
     // Truncate description to 250 chars 
     $description        = substr($data->DESCRIPTION,0,250);
     // Force any amount values to the correct decimal precision
     if(is_numeric($decimals) && $decimals>=0 && $decimals<=18){
-        $max_supply      = bcmul($max_supply,1,$decimals);
-        $max_mint        = bcmul($max_mint,1,$decimals);
-        $mint_supply     = bcmul($mint_supply,1,$decimals);
-        $callback_amount = bcmul($callback_amount,1,$decimals);
+        $max_supply       = bcmul($max_supply,1,$decimals);
+        $max_mint         = bcmul($max_mint,1,$decimals);
+        $mint_supply      = bcmul($mint_supply,1,$decimals);
+        $mint_address_max = bcmul($mint_address_max,1,$decimals);
+        $callback_amount  = bcmul($callback_amount,1,$decimals);
     }
     $max_supply         = $mysqli->real_escape_string($max_supply);
     $max_mint           = $mysqli->real_escape_string($max_mint);
     $mint_supply        = $mysqli->real_escape_string($mint_supply);
+    $mint_address_max   = $mysqli->real_escape_string($mint_address_max);
     $decimals           = $mysqli->real_escape_string($decimals);
     $description        = $mysqli->real_escape_string($description);
     $block_index        = $mysqli->real_escape_string($data->BLOCK_INDEX);
@@ -285,6 +288,7 @@ function createIssue( $data=null ){
                         callback_amount='{$callback_amount}',
                         allow_list_id='{$allow_list_id}',
                         block_list_id='{$block_list_id}',
+                        mint_address_max='{$mint_address_max}',
                         source_id='{$source_id}',
                         block_index='{$block_index}',
                         tx_index='{$tx_index}',
@@ -293,14 +297,14 @@ function createIssue( $data=null ){
                         tx_hash_id='{$tx_hash_id}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO issues (tick_id, max_supply, max_mint, decimals, description, mint_supply, transfer_id, transfer_supply_id, lock_supply, lock_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, allow_list_id, block_list_id, source_id, tx_hash_id, block_index, tx_index, status_id) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$mint_supply}', '{$transfer_id}', '{$transfer_supply_id}', '{$lock_supply}', '{$lock_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$allow_list_id}', '{$block_list_id}','{$source_id}', '{$tx_hash_id}', '{$block_index}', '{$tx_index}', '{$status_id}')";
+            $sql = "INSERT INTO issues (tick_id, max_supply, max_mint, decimals, description, mint_supply, transfer_id, transfer_supply_id, lock_supply, lock_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, allow_list_id, block_list_id, mint_address_max, source_id, tx_hash_id, block_index, tx_index, status_id) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$mint_supply}', '{$transfer_id}', '{$transfer_supply_id}', '{$lock_supply}', '{$lock_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$allow_list_id}', '{$block_list_id}', '{$mint_address_max}', '{$source_id}', '{$tx_hash_id}', '{$block_index}', '{$tx_index}', '{$status_id}')";
         }
         // print $sql;
         $results = $mysqli->query($sql);
         if(!$results)
-            byeLog('Error while trying to create / update a record in the deploys table');
+            byeLog('Error while trying to create / update a record in the issues table');
     } else {
-        byeLog('Error while trying to lookup record in deploys table');
+        byeLog('Error while trying to lookup record in issues table');
     }
 }
 
@@ -457,18 +461,21 @@ function createToken( $data=null ){
     $max_supply         = (isset($data->MAX_SUPPLY) && is_numeric($data->MAX_SUPPLY)) ? $data->MAX_SUPPLY : 0;
     $max_mint           = (isset($data->MAX_MINT) && is_numeric($data->MAX_MINT)) ? $data->MAX_MINT : 0;
     $mint_supply        = (isset($data->MINT_SUPPLY) && is_numeric($data->MINT_SUPPLY)) ? $data->MINT_SUPPLY : 0;
+    $mint_address_max   = (isset($data->MINT_ADDRESS_MAX) && is_numeric($data->MINT_ADDRESS_MAX)) ? $data->MINT_ADDRESS_MAX : 0;
     $callback_amount    = (isset($data->CALLBACK_AMOUNT) && is_numeric($data->CALLBACK_AMOUNT)) ? $data->CALLBACK_AMOUNT : 0;
     $decimals           = (isset($data->DECIMALS)) ? $data->DECIMALS : 0;
     // Force any amount values to the correct decimal precision
     if(is_numeric($decimals) && $decimals>=0 && $decimals<=18){
-        $max_supply      = bcmul($max_supply,1,$decimals);
-        $max_mint        = bcmul($max_mint,1,$decimals);
-        $mint_supply     = bcmul($mint_supply,1,$decimals);
-        $callback_amount = bcmul($callback_amount,1,$decimals);
+        $max_supply       = bcmul($max_supply,1,$decimals);
+        $max_mint         = bcmul($max_mint,1,$decimals);
+        $mint_supply      = bcmul($mint_supply,1,$decimals);
+        $mint_address_max = bcmul($mint_address_max,1,$decimals);
+        $callback_amount  = bcmul($callback_amount,1,$decimals);
     }
     $supply             = $mysqli->real_escape_string($supply);
     $max_supply         = $mysqli->real_escape_string($max_supply);
     $max_mint           = $mysqli->real_escape_string($max_mint);
+    $mint_address_max   = $mysqli->real_escape_string($mint_address_max);
     $decimals           = $mysqli->real_escape_string($decimals);
     $description        = $mysqli->real_escape_string($data->DESCRIPTION);
     $block_index        = $mysqli->real_escape_string($data->BLOCK_INDEX);
@@ -510,6 +517,7 @@ function createToken( $data=null ){
                         callback_amount='{$callback_amount}',
                         allow_list_id='{$allow_list_id}',
                         block_list_id='{$block_list_id}',
+                        mint_address_max='{$mint_address_max}',
                         block_index='{$block_index}',
                         supply='{$supply}',
                         owner_id='{$owner_id}'
@@ -517,7 +525,7 @@ function createToken( $data=null ){
                         tick_id='{$tick_id}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO tokens (tick_id, max_supply, max_mint, decimals, description, lock_supply, lock_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, allow_list_id, block_list_id, owner_id, supply, block_index) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$lock_supply}', '{$lock_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$allow_list_id}', '{$block_list_id}', '{$owner_id}','{$supply}', '{$block_index}')";
+            $sql = "INSERT INTO tokens (tick_id, max_supply, max_mint, decimals, description, lock_supply, lock_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, allow_list_id, block_list_id, mint_address_max, owner_id, supply, block_index) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$lock_supply}', '{$lock_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$allow_list_id}', '{$block_list_id}', '{$mint_address_max}', '{$owner_id}','{$supply}', '{$block_index}')";
         }
         // print $sql;
         $results = $mysqli->query($sql);
@@ -920,6 +928,7 @@ function getTokenInfo($tick=null, $tick_id=null){
                 t1.callback_amount,
                 t4.hash as allow_list,
                 t5.hash as block_list,
+                t1.mint_address_max,
                 a.address as owner
             FROM 
                 tokens t1
@@ -956,7 +965,8 @@ function getTokenInfo($tick=null, $tick_id=null){
                 'CALLBACK_BLOCK'    => $row->callback_block,
                 'CALLBACK_AMOUNT'   => $row->callback_amount,
                 'ALLOW_LIST'        => $row->allow_list,
-                'BLOCK_LIST'        => $row->block_list
+                'BLOCK_LIST'        => $row->block_list,
+                'MINT_ADDRESS_MAX'  => $row->mint_address_max
             );
         } 
     } else {
@@ -1056,7 +1066,7 @@ function getTokenDecimalPrecision($tick_id=null){
 }
 
 // Handle getting credits or debits records for a given address
-function getAddressCreditDebit($table=null, $address=null){
+function getAddressCreditDebit($table=null, $address=null, $action=null){
     global $mysqli;
     $data = array(); // Assoc array to store tick/credits
     $type = gettype($address);
@@ -1064,6 +1074,8 @@ function getAddressCreditDebit($table=null, $address=null){
         $address_id = $address;
     if($type==='string' && !is_numeric($address))
         $address_id = createAddress($address);
+    if(isset($action))
+        $action_id = createAction($action);
     if(in_array($table,array('credits','debits'))){
         // Get data from the table
         $sql = "SELECT 
@@ -1076,6 +1088,8 @@ function getAddressCreditDebit($table=null, $address=null){
                 WHERE 
                     t2.tick_id=t1.tick_id AND
                     t1.address_id='{$address_id}'";
+        if(isset($action))
+            $sql .= " AND t1.action_id={$action_id}";
         $results = $mysqli->query($sql);
         if($results){
             if($results->num_rows){
@@ -1754,5 +1768,17 @@ function consolidateCreditDebitRecords($type=null, $records=null){
         array_push($data, $info);
     }
     return $data;
+}
+
+// Get total amount of credit or debit records for a given address, ticker, and action
+function getActionCreditDebitAmount($table=null, $action=null, $tick=null, $address=null){
+    global $mysqli;
+    $total   = 0;
+    $tick_id = createTicker($tick);
+    $addr_id = createAddress($address);
+    $data    = getAddressCreditDebit($table, $addr_id, $action);
+    if($data[$tick_id])
+        $total = $data[$tick_id];
+    return $total;
 }
 ?>

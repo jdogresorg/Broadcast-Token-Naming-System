@@ -20,6 +20,7 @@ CREATE TABLE issues (
     callback_amount     VARCHAR(250),                         -- AMOUNT users get if CALLBACK
     allow_list_id       INTEGER UNSIGNED NOT NULL default 0,  -- id of record in index_transactions table
     block_list_id       INTEGER UNSIGNED NOT NULL default 0,  -- id of record in index_transactions table
+    mint_address_max    VARCHAR(250),                         -- Maximum amount of supply an address can MINT
     source_id           INTEGER UNSIGNED,                     -- id of record in index_addresses table (address that did DEPLOY)
     tx_hash_id          INTEGER UNSIGNED,                     -- id of record in index_transactions
     block_index         INTEGER UNSIGNED,                     -- block index of DEPLOY transaction

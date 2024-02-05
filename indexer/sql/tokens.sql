@@ -19,6 +19,7 @@ CREATE TABLE tokens (
     callback_amount    BIGINT UNSIGNED,                      -- AMOUNT users get if CALLBACK
     allow_list_id      INTEGER UNSIGNED NOT NULL default 0,  -- id of record in index_transactions table
     block_list_id      INTEGER UNSIGNED NOT NULL default 0,  -- id of record in index_transactions table
+    mint_address_max   VARCHAR(250),                         -- Maximum amount of supply an address can MINT
     owner_id           INTEGER UNSIGNED,                     -- id of record in index_addresses table
     btc_price          VARCHAR(250) NOT NULL default 0       -- last price of BTC purchase of 1 token
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

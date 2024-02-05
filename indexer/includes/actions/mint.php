@@ -51,10 +51,11 @@ function btnsMint($params=null, $data=null, $error=null){
 
     // Update BTNS transaction object with basic token details
     if($btInfo){
-        $data->SUPPLY     = ($btInfo) ? $btInfo->SUPPLY : 0;
-        $data->DECIMALS   = ($btInfo) ? $btInfo->DECIMALS : 0;
-        $data->MAX_SUPPLY = ($btInfo) ? $btInfo->MAX_SUPPLY : 0;
-        $data->MAX_MINT   = ($btInfo) ? $btInfo->MAX_MINT : 0;
+        $data->SUPPLY           = ($btInfo) ? $btInfo->SUPPLY : 0;
+        $data->DECIMALS         = ($btInfo) ? $btInfo->DECIMALS : 0;
+        $data->MAX_SUPPLY       = ($btInfo) ? $btInfo->MAX_SUPPLY : 0;
+        $data->MAX_MINT         = ($btInfo) ? $btInfo->MAX_MINT : 0;
+        $data->MINT_ADDRESS_MAX = ($btInfo) ? $btInfo->MINT_ADDRESS_MAX : 0;
     }
 
     /*****************************************************************
@@ -88,6 +89,10 @@ function btnsMint($params=null, $data=null, $error=null){
     // Verify action is allowed to DESTINATION (ALLOW_LIST & BLOCK_LIST)
     if(!$error && isset($data->DESTINATION) && !isActionAllowed($data->TICK, $data->DESTINATION))
         $error = 'invalid: DESTINATION (not authorized)';
+
+    // Verify minting AMOUNT will not exceed MINT_ADDRESS_MAX
+    if(!$error && $data->MINT_ADDRESS_MAX > 0 && (bcadd(getActionCreditDebitAmount('credits', 'MINT', $data->TICK, $data->SOURCE),$data->AMOUNT,$data->DECIMALS) > $data->MINT_ADDRESS_MAX))
+        $error = 'invalid: mint exceeds MINT_ADDRESS_MAX';
 
     // Determine final status
     $data->STATUS = $status = ($error) ? $error : 'valid';
