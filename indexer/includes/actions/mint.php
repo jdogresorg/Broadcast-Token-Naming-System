@@ -90,8 +90,8 @@ function btnsMint($params=null, $data=null, $error=null){
     if(!$error && isset($data->DESTINATION) && !isActionAllowed($data->TICK, $data->DESTINATION))
         $error = 'invalid: DESTINATION (not authorized)';
 
-    // Verify minting AMOUNT will not exceed MINT_ADDRESS_MAX
-    if(!$error && $data->MINT_ADDRESS_MAX > 0 && (bcadd(getActionCreditDebitAmount('credits', 'MINT', $data->TICK, $data->SOURCE),$data->AMOUNT,$data->DECIMALS) > $data->MINT_ADDRESS_MAX))
+   // Verify minting AMOUNT will not exceed MINT_ADDRESS_MAX
+    if(!$error && isset($data->MINT_ADDRESS_MAX) && $data->MINT_ADDRESS_MAX && (bcadd(getActionCreditDebitAmount('credits', 'MINT', $data->TICK, $data->SOURCE),$data->AMOUNT,$data->DECIMALS) > $data->MINT_ADDRESS_MAX))
         $error = 'invalid: mint exceeds MINT_ADDRESS_MAX';
 
     // Determine final status
