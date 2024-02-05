@@ -128,6 +128,7 @@ This example issues a TEST token with a max supply of 100, and a maximum mint of
 - By default any address can interact with a BTNS token, to change this behavior use `ALLOW_LIST` and `BLOCK_LIST`
 - If `TICK` contains any unicode characters, then `TICK` should be `base64` encoded
 - `counterparty` `ASSET` and `SUBASSET` names are reserved within the BTNS for use by the `counterparty` owner
+- `MINT_ADDRESS_MAX` can be used to limit the maximum `TICK` `AMOUNT` that a single address can `MINT`
 - `MINT_START_BLOCK` and `MINT_STOP_BLOCK` can be used to determine period(s) when `MINT` transactions are allowed
 - `MINT_FEE_TICK` and `MINT_FEE_AMOUNT` can be used to require a set `TICK` `AMOUNT` fee be paid on a MINT transaction
 - `MINT_FEE_ADDRESS` can be used to send `MINT` fees to an address instead of destroying the fee
