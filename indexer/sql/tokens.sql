@@ -20,6 +20,8 @@ CREATE TABLE tokens (
     allow_list_id      INTEGER UNSIGNED NOT NULL default 0,  -- id of record in index_transactions table
     block_list_id      INTEGER UNSIGNED NOT NULL default 0,  -- id of record in index_transactions table
     mint_address_max   VARCHAR(250),                         -- Maximum amount of supply an address can MINT
+    mint_start_block   INTEGER UNSIGNED,                     -- block_index when MINT transactions are allowed (begin mint)
+    mint_stop_block    INTEGER UNSIGNED,                     -- BLOCK_INDEX when MINT transactions are NOT allowed (end mint)
     owner_id           INTEGER UNSIGNED,                     -- id of record in index_addresses table
     btc_price          VARCHAR(250) NOT NULL default 0       -- last price of BTC purchase of 1 token
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

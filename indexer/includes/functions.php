@@ -220,6 +220,8 @@ function createIssue( $data=null ){
     $max_mint           = (isset($data->MAX_MINT) && is_numeric($data->MAX_MINT)) ? $data->MAX_MINT : 0;
     $mint_supply        = (isset($data->MINT_SUPPLY) && is_numeric($data->MINT_SUPPLY)) ? $data->MINT_SUPPLY : 0;
     $mint_address_max   = (isset($data->MINT_ADDRESS_MAX) && is_numeric($data->MINT_ADDRESS_MAX)) ? $data->MINT_ADDRESS_MAX : 0;
+    $mint_start_block   = (isset($data->MINT_START_BLOCK) && is_numeric($data->MINT_START_BLOCK)) ? $data->MINT_START_BLOCK : 0;
+    $mint_stop_block    = (isset($data->MINT_STOP_BLOCK) && is_numeric($data->MINT_STOP_BLOCK)) ? $data->MINT_STOP_BLOCK : 0;
     $callback_amount    = (isset($data->CALLBACK_AMOUNT) && is_numeric($data->CALLBACK_AMOUNT)) ? $data->CALLBACK_AMOUNT : 0;
     $decimals           = (isset($data->DECIMALS)) ? $data->DECIMALS : 0;
     // Truncate description to 250 chars 
@@ -236,6 +238,8 @@ function createIssue( $data=null ){
     $max_mint           = $mysqli->real_escape_string($max_mint);
     $mint_supply        = $mysqli->real_escape_string($mint_supply);
     $mint_address_max   = $mysqli->real_escape_string($mint_address_max);
+    $mint_start_block   = $mysqli->real_escape_string($mint_start_block);
+    $mint_stop_block    = $mysqli->real_escape_string($mint_stop_block);
     $decimals           = $mysqli->real_escape_string($decimals);
     $description        = $mysqli->real_escape_string($description);
     $block_index        = $mysqli->real_escape_string($data->BLOCK_INDEX);
@@ -289,6 +293,8 @@ function createIssue( $data=null ){
                         allow_list_id='{$allow_list_id}',
                         block_list_id='{$block_list_id}',
                         mint_address_max='{$mint_address_max}',
+                        mint_start_block='{$mint_start_block}',
+                        mint_stop_block='{$mint_stop_block}',
                         source_id='{$source_id}',
                         block_index='{$block_index}',
                         tx_index='{$tx_index}',
@@ -297,7 +303,7 @@ function createIssue( $data=null ){
                         tx_hash_id='{$tx_hash_id}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO issues (tick_id, max_supply, max_mint, decimals, description, mint_supply, transfer_id, transfer_supply_id, lock_supply, lock_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, allow_list_id, block_list_id, mint_address_max, source_id, tx_hash_id, block_index, tx_index, status_id) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$mint_supply}', '{$transfer_id}', '{$transfer_supply_id}', '{$lock_supply}', '{$lock_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$allow_list_id}', '{$block_list_id}', '{$mint_address_max}', '{$source_id}', '{$tx_hash_id}', '{$block_index}', '{$tx_index}', '{$status_id}')";
+            $sql = "INSERT INTO issues (tick_id, max_supply, max_mint, decimals, description, mint_supply, transfer_id, transfer_supply_id, lock_supply, lock_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, allow_list_id, block_list_id, mint_address_max, mint_start_block, mint_stop_block, source_id, tx_hash_id, block_index, tx_index, status_id) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$mint_supply}', '{$transfer_id}', '{$transfer_supply_id}', '{$lock_supply}', '{$lock_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$allow_list_id}', '{$block_list_id}', '{$mint_address_max}', '{$mint_start_block}', '{$mint_stop_block}', '{$source_id}', '{$tx_hash_id}', '{$block_index}', '{$tx_index}', '{$status_id}')";
         }
         // print $sql;
         $results = $mysqli->query($sql);
@@ -462,6 +468,8 @@ function createToken( $data=null ){
     $max_mint           = (isset($data->MAX_MINT) && is_numeric($data->MAX_MINT)) ? $data->MAX_MINT : 0;
     $mint_supply        = (isset($data->MINT_SUPPLY) && is_numeric($data->MINT_SUPPLY)) ? $data->MINT_SUPPLY : 0;
     $mint_address_max   = (isset($data->MINT_ADDRESS_MAX) && is_numeric($data->MINT_ADDRESS_MAX)) ? $data->MINT_ADDRESS_MAX : 0;
+    $mint_start_block   = (isset($data->MINT_START_BLOCK) && is_numeric($data->MINT_START_BLOCK)) ? $data->MINT_START_BLOCK : 0;
+    $mint_stop_block    = (isset($data->MINT_STOP_BLOCK) && is_numeric($data->MINT_STOP_BLOCK)) ? $data->MINT_STOP_BLOCK : 0;
     $callback_amount    = (isset($data->CALLBACK_AMOUNT) && is_numeric($data->CALLBACK_AMOUNT)) ? $data->CALLBACK_AMOUNT : 0;
     $decimals           = (isset($data->DECIMALS)) ? $data->DECIMALS : 0;
     // Force any amount values to the correct decimal precision
@@ -476,6 +484,8 @@ function createToken( $data=null ){
     $max_supply         = $mysqli->real_escape_string($max_supply);
     $max_mint           = $mysqli->real_escape_string($max_mint);
     $mint_address_max   = $mysqli->real_escape_string($mint_address_max);
+    $mint_start_block   = $mysqli->real_escape_string($mint_start_block);
+    $mint_stop_block    = $mysqli->real_escape_string($mint_stop_block);
     $decimals           = $mysqli->real_escape_string($decimals);
     $description        = $mysqli->real_escape_string($data->DESCRIPTION);
     $block_index        = $mysqli->real_escape_string($data->BLOCK_INDEX);
@@ -518,6 +528,8 @@ function createToken( $data=null ){
                         allow_list_id='{$allow_list_id}',
                         block_list_id='{$block_list_id}',
                         mint_address_max='{$mint_address_max}',
+                        mint_start_block='{$mint_start_block}',
+                        mint_stop_block='{$mint_stop_block}',
                         block_index='{$block_index}',
                         supply='{$supply}',
                         owner_id='{$owner_id}'
@@ -525,7 +537,7 @@ function createToken( $data=null ){
                         tick_id='{$tick_id}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO tokens (tick_id, max_supply, max_mint, decimals, description, lock_supply, lock_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, allow_list_id, block_list_id, mint_address_max, owner_id, supply, block_index) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$lock_supply}', '{$lock_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$allow_list_id}', '{$block_list_id}', '{$mint_address_max}', '{$owner_id}','{$supply}', '{$block_index}')";
+            $sql = "INSERT INTO tokens (tick_id, max_supply, max_mint, decimals, description, lock_supply, lock_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, allow_list_id, block_list_id, mint_address_max, mint_start_block, mint_stop_block, owner_id, supply, block_index) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$lock_supply}', '{$lock_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$allow_list_id}', '{$block_list_id}', '{$mint_address_max}', '{$mint_start_block}', '{$mint_stop_block}', '{$owner_id}','{$supply}', '{$block_index}')";
         }
         // print $sql;
         $results = $mysqli->query($sql);
@@ -929,6 +941,8 @@ function getTokenInfo($tick=null, $tick_id=null){
                 t4.hash as allow_list,
                 t5.hash as block_list,
                 t1.mint_address_max,
+                t1.mint_start_block,
+                t1.mint_stop_block,
                 a.address as owner
             FROM 
                 tokens t1
@@ -966,7 +980,9 @@ function getTokenInfo($tick=null, $tick_id=null){
                 'CALLBACK_AMOUNT'   => $row->callback_amount,
                 'ALLOW_LIST'        => $row->allow_list,
                 'BLOCK_LIST'        => $row->block_list,
-                'MINT_ADDRESS_MAX'  => $row->mint_address_max
+                'MINT_ADDRESS_MAX'  => $row->mint_address_max,
+                'MINT_START_BLOCK'  => $row->mint_start_block,
+                'MINT_STOP_BLOCK'   => $row->mint_stop_block
             );
         } 
     } else {

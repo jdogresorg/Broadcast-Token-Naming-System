@@ -24,6 +24,8 @@
  * - ALLOW_LIST       - `TX_HASH` of a BTNS LIST of addresses allowed to interact with this token
  * - BLOCK_LIST       - `TX_HASH` of a BTNS LIST of addresses NOT allowed to interact with this token
  * - MINT_ADDRESS_MAX - Maximum amount of supply any address can mint via `MINT` transactions
+ * - MINT_START_BLOCK - `BLOCK_INDEX` when `MINT` transactions are allowed (begin mint)
+ * - MINT_STOP_BLOCK` - `BLOCK_INDEX` when `MINT` transactions are NOT allowed (end mint)
  * 
  * FORMATS :
  * - 0 = Full
@@ -38,16 +40,16 @@ function btnsIssue( $params=null, $data=null, $error=null){
 
     // Define list of known FORMATS
     $formats = array(
-        0 => 'VERSION|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT|ALLOW_LIST|BLOCK_LIST|MINT_ADDRESS_MAX',
+        0 => 'VERSION|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT|ALLOW_LIST|BLOCK_LIST|MINT_ADDRESS_MAX|MINT_START_BLOCK|MINT_STOP_BLOCK',
         1 => 'VERSION|TICK|DESCRIPTION',
-        2 => 'VERSION|TICK|MAX_MINT|MINT_SUPPLY|TRANSFER_SUPPLY|MINT_ADDRESS_MAX',
+        2 => 'VERSION|TICK|MAX_MINT|MINT_SUPPLY|TRANSFER_SUPPLY|MINT_ADDRESS_MAX|MINT_START_BLOCK|MINT_STOP_BLOCK',
         3 => 'VERSION|TICK|LOCK_SUPPLY|LOCK_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK',
         4 => 'VERSION|TICK|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK'
     );
 
     // Define list of AMOUNT and LOCK fields (used in validations)
     $fieldList = array(
-        'AMOUNT' => array('MAX_SUPPLY','MAX_MINT','MINT_SUPPLY','CALLBACK_AMOUNT','MINT_ADDRESS_MAX'),
+        'AMOUNT' => array('MAX_SUPPLY', 'MAX_MINT', 'MINT_SUPPLY', 'CALLBACK_AMOUNT', 'MINT_ADDRESS_MAX', 'MINT_START_BLOCK', 'MINT_STOP_BLOCK'),
         'LOCK'   => array('LOCK_SUPPLY', 'LOCK_MINT', 'LOCK_DESCRIPTION', 'LOCK_RUG', 'LOCK_SLEEP', 'LOCK_CALLBACK')
     );
 
@@ -194,11 +196,11 @@ function btnsIssue( $params=null, $data=null, $error=null){
         $error = 'invalid: MINT_SUPPLY > MAX_SUPPLY';
 
     // Verify MINT_ADDRESS_MAX is less than MAX_SUPPLY
-    if(!$error && isset($data->MINT_ADDRESS_MAX) && $data->MINT_ADDRESS_MAX > $data->MAX_SUPPLY)
+    if(!$error && isset($data->MINT_ADDRESS_MAX) && $data->MINT_ADDRESS_MAX > 0 && $data->MINT_ADDRESS_MAX > $data->MAX_SUPPLY)
         $error = 'invalid: MINT_ADDRESS_MAX > MAX_SUPPLY';
 
     // Verify MINT_ADDRESS_MAX is greater than than MAX_MINT
-    if(!$error && isset($data->MINT_ADDRESS_MAX) && $data->MINT_ADDRESS_MAX < $data->MAX_MINT)
+    if(!$error && isset($data->MINT_ADDRESS_MAX) && $data->MINT_ADDRESS_MAX > 0 && $data->MINT_ADDRESS_MAX < $data->MAX_MINT)
         $error = 'invalid: MINT_ADDRESS_MAX < MAX_MINT';
 
     // Verify MAX_SUPPLY can not be changed if LOCK_SUPPLY is enabled
@@ -252,6 +254,18 @@ function btnsIssue( $params=null, $data=null, $error=null){
     // Verify BLOCK_LIST is a valid list of addresses
     if(!$error && isset($data->BLOCK_LIST) && !isValidList($data->BLOCK_LIST,3))
         $error = 'invalid: BLOCK_LIST (bad list)';
+
+    // Verify MINT_START_BLOCK is greater than or equal to current block
+    if(!$error && isset($data->MINT_START_BLOCK) && $data->MINT_START_BLOCK < $data->BLOCK_INDEX)
+        $error = 'invalid: MINT_START_BLOCK < BLOCK_INDEX';
+
+    // Verify MINT_STOP_BLOCK is greater than or equal to current block
+    if(!$error && isset($data->MINT_STOP_BLOCK) && $data->MINT_START_BLOCK < $data->BLOCK_INDEX)
+        $error = 'invalid: MINT_STOP_BLOCK < BLOCK_INDEX';
+
+    // Verify MINT_STOP_BLOCK is greater than or equal to MINT_START_BLOCK
+    if(!$error && isset($data->MINT_STOP_BLOCK) && $data->MINT_STOP_BLOCK < $data->MINT_START_BLOCK)
+        $error = 'invalid: MINT_STOP_BLOCK > MINT_START_BLOCK';
 
     // Determine final status
     $data->STATUS = $status = ($error) ? $error : 'valid';
