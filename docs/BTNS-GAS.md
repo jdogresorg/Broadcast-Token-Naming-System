@@ -13,9 +13,10 @@ Establish a standard GAS utility token to provide functionality where it isn't t
 # Specification
 
 ```
-GAS Supply  : 10,000,000.00000000 (10M)
-Mint Period : 30 days
-Mint Method : Fair / Open Mint
+Token Name   : GAS
+Total Supply : 10,000,000.00000000 (10M)
+Mint Period  : 30 days
+Mint Method  : Fair / Open Mint
 ```
 
 ## Mint Period 1
@@ -23,7 +24,7 @@ Mint Method : Fair / Open Mint
 Mint Supply : 2,500,000.00000000 (2.5M)
 Mint Amount : 60.0 GAS (40 GAS + 50% Bonus)
 Mint Target : 41,666 transactions
-Mint Starts : Block # XXX,XXXX
+Mint Starts : Block # 831,208
 ```
 
 ## Mint Period 2
@@ -31,7 +32,7 @@ Mint Starts : Block # XXX,XXXX
 Mint Supply : 2,500,000.00000000 (2.5M)
 Mint Amount : 50.0 GAS (40 GAS + 25% Bonus)
 Mint Target : 50,000 transactions
-Mint Starts : Block # XXX,XXXX
+Mint Starts : Block # 832,216
 ```
 
 ## Mint Period 3
@@ -39,7 +40,7 @@ Mint Starts : Block # XXX,XXXX
 Mint Supply : 2,500,000.00000000 (2.5M)
 Mint Amount : 44.0 GAS (40 GAS + 10% Bonus)
 Mint Target : 56,818 transactions
-Mint Starts : Block # XXX,XXXX
+Mint Starts : Block # 833,224
 ```
 
 ## Mint Period 4
@@ -47,7 +48,7 @@ Mint Starts : Block # XXX,XXXX
 Mint Supply : 2,500,000.00000000 (2.5M)
 Mint Amount : 40.0 GAS (40 GAS + 0% Bonus)
 Mint Target : 62,500 transactions
-Mint Starts : Block # XXX,XXXX
+Mint Starts : Block # 834,232
 ```
 
 ## Mint Examples
