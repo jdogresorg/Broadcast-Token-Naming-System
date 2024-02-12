@@ -49,7 +49,7 @@ if(NETWORK=='testnet'){
 
     // BTNS Address 
     define('BURN_ADDRESS', "mvCounterpartyXXXXXXXXXXXXXXW24Hef");
-    define('GAS_ADDRESS', "mvCounterpartyXXXXXXXXXXXXXXW24Hef");
+    define('GAS_ADDRESS', "mvThcDEbeqog2aJ7JNj1FefUPaNdYYGqHt");
 }
 
 // Database Credentials
