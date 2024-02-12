@@ -46,7 +46,7 @@ Mint Starts : Block # XXX,XXXX
 ```
 Mint Supply : 2,500,000.00000000 (2.5M)
 Mint Amount : 40.0 GAS (40 GAS + 0% Bonus)
-Mint Target : 56,818 transactions
+Mint Target : 62,500 transactions
 Mint Starts : Block # XXX,XXXX
 ```
 
