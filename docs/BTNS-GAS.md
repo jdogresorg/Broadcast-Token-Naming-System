@@ -18,7 +18,7 @@ Mint Period : 30 days
 Mint Method : Fair / Open Mint
 ```
 
-### Mint Period 1
+## Mint Period 1
 ```
 Mint Supply : 2,500,000.00000000 (2.5M)
 Mint Amount : 60.0 GAS (40 GAS + 50% Bonus)
@@ -50,8 +50,15 @@ Mint Target : 56,818 transactions
 Mint Starts : Block # XXX,XXXX
 ```
 
+## Mint Examples
+- Mint Period 1 = `bt:MINT|0|GAS|60`
+- Mint Period 2 = `bt:MINT|0|GAS|50`
+- Mint Period 3 = `bt:MINT|0|GAS|44`
+- Mint Period 4 = `bt:MINT|0|GAS|40`
+
 # Notes
+- GAS can be minted via broadcasting a message via the `counterparty` `broadcast` function
 - Address `1BTNSGASK5En7rFurDJ79LQ8CVYo2ecLC8` is the initial issuing address for the GAS token
-- Each period starts at a specific block # (1,008 blocks - 1 week)
-- 2.5M GAS minted each period
+- 2,500,000.00000000 (2.5M) GAS minted each period
 - 1,000 GAS MINT per address limit in place
+- Each period starts at a specific block # (1,008 blocks - 1 week)
