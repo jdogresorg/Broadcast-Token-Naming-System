@@ -39,7 +39,7 @@ if(NETWORK=='mainnet'){
 
     // BTNS Address 
     define('BURN_ADDRESS', "DDogepartyxxxxxxxxxxxxxxxxxxw1dfzr");
-    define('GAS_ADDRESS', "1BTNSGASK5En7rFurDJ79LQ8CVYo2ecLC8");
+    define('GAS_ADDRESS', "DBTNSGAShfRb6tHe4uzZHgHGhio9VdfmyM");
 }
 
 // Testnet config
@@ -49,7 +49,7 @@ if(NETWORK=='testnet'){
 
     // BTNS Address 
     define('BURN_ADDRESS', "ndogepartyxxxxxxxxxxxxxxxxxxwpsZCH");
-    define('GAS_ADDRESS', "ndogepartyxxxxxxxxxxxxxxxxxxwpsZCH");
+    define('GAS_ADDRESS', "niV5qKrqwsJyhR7SVrPnpuz2TC3aDKTWgU");
 }
 
 // Database Credentials
