@@ -62,4 +62,4 @@ Mint Starts : Block # 5,128,320
 - Address `DBTNSGAShfRb6tHe4uzZHgHGhio9VdfmyM` is the initial issuing address for the GAS token
 - 2,500,000.00000000 (2.5M) GAS minted each period
 - 1,000 GAS MINT per address limit in place
-- Each period starts at a specific block # (1,008 blocks - 1 week)
+- Each period starts at a specific block # (10,080 blocks - 1 week)
