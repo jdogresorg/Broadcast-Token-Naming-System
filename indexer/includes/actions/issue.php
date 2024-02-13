@@ -90,12 +90,8 @@ function btnsIssue( $params=null, $data=null, $error=null){
         $error = 'invalid: TICK (semicolon)';
 
     // Verify TICK is not on RESERVED_TICKS list
-    if(!$error && in_array($data->TICK,RESERVED_TICKS))        
+    if(!$error && in_array($data->TICK,RESERVED_TICKS))
         $error = 'invalid: TICK (reserved)';
-
-    // Verify TRANSFER_SUPPLY and SOURCE are different
-    if($data->TRANSFER_SUPPLY == $data->SOURCE)
-        unset($data->TRANSFER_SUPPLY);
 
     // Get information on BTNS token
     $btInfo        = getTokenInfo($data->TICK);
@@ -186,6 +182,10 @@ function btnsIssue( $params=null, $data=null, $error=null){
     // Verify TRANSFER addresses
     if(!$error && isset($data->TRANSFER) && !isCryptoAddress($data->TRANSFER))
         $error = 'invalid: TRANSFER (bad address)';
+
+    // Verify TRANSFER_SUPPLY and SOURCE are different
+    if($data->TRANSFER_SUPPLY == $data->SOURCE)
+        unset($data->TRANSFER_SUPPLY);
 
     // Verify TRANSFER_SUPPLY addresses
     if(!$error && isset($data->TRANSFER_SUPPLY) && !isCryptoAddress($data->TRANSFER_SUPPLY))
