@@ -141,18 +141,21 @@ The above example issues a JDOG token, and STAMPs file data into the token.
    - Lock against `RUG` command by setting `LOCK_RUG` to `1`
    - Lock against `SLEEP` command by setting `LOCK_SLEEP` to `1`
    - Lock against `CALLBACK` command by setting `LOCK_CALLBACK` to `1`
-
 - `DESTROY`
+   - Permanently destroy some `token` supply
 - `DISPENSER`
 - `DIVIDEND`
 - `LIST`
+   - Create and edit lists of `TICK`s
+   - Create and edit lists of `ASSET`s
+   - Create and edit lists of addresses
 - `MINT`
    - Mint `tokens` at rate of `MAX_MINT` until `MAX_SUPPLY` is reached ("fair" mint)
    - Transfer minted `token` supply to `TRANSFER` address
 - `RUG`
 - `SEND`
-  - Transfer `AMOUNT` of `token` from broadcast address to a `DESTINATION` address
-  - Send multiple `AMOUNT` of `token` to multiple `DESTINATION` addresses
+  - Transfer `AMOUNT` of `token` from broadcast address to a `DESTINATION` address, with an optional memo
+  - Send multiple `AMOUNT` of `token` to multiple `DESTINATION` addresses, with optional memos
 - `SLEEP`
 - `SWEEP`
 
