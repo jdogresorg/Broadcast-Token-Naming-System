@@ -10,7 +10,7 @@ define("NETWORK", $network);
 // BTNS Indexer Version
 define("VERSION_MAJOR", 0);
 define("VERSION_MINOR", 11);
-define("VERSION_REVISION",0);
+define("VERSION_REVISION",1);
 define("VERSION_STRING", VERSION_MAJOR . '.' . VERSION_MINOR . '.' . VERSION_REVISION);
 
 // TICK constants
@@ -18,7 +18,7 @@ define("MIN_TICK_LENGTH",1);
 define("MAX_TICK_LENGTH",250);
 
 // Reserved BTNS TICK names
-$reserved = array('BTC','XCP','GAS');
+$reserved = array('BTC','XCP');
 define("RESERVED_TICKS",$reserved);
 
 // Min/Max MAX_SUPPLY
@@ -49,7 +49,7 @@ if(NETWORK=='testnet'){
 
     // BTNS Address 
     define('BURN_ADDRESS', "mvCounterpartyXXXXXXXXXXXXXXW24Hef");
-    define('GAS_ADDRESS', "mvCounterpartyXXXXXXXXXXXXXXW24Hef");
+    define('GAS_ADDRESS', "mvThcDEbeqog2aJ7JNj1FefUPaNdYYGqHt");
 }
 
 // Database Credentials

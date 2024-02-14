@@ -1,5 +1,11 @@
 CHANGELOG
 ---
+0.11.1
+- Added support for `MINT_START_BLOCK`
+- Added support for `MINT_STOP_BLOCK`
+- Added support for `MINT_ADDRESS_MAX`
+- Updates to support `GAS` minting
+
 0.11.0
 - DESTROY support
 - Added basic sanity checks
