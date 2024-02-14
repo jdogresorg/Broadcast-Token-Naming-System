@@ -2,26 +2,26 @@
 This command airdrops `token` supply to one or more `BTNS` lists.
 
 ## PARAMS
-| Name      | Type   | Description                         |
-| --------- | ------ | ----------------------------------- |
-| `VERSION` | String | Broadcast Format Version            |
-| `TICK`    | String | 1 to 250 characters in length       |
-| `AMOUNT`  | String | Amount of `tokens` to airdrops      |
-| `LIST`    | String | `TX_HASH` of a BTNS `LIST` commands |
-| `MEMO`    | String | An optional memo to include         |
+| Name      | Type   | Description                   |
+| --------- | ------ | ------------------------------|
+| `VERSION` | String | Broadcast Format Version      |
+| `TICK`    | String | 1 to 250 characters in length |
+| `AMOUNT`  | String | Amount of `tokens` to airdrop |
+| `LIST`    | String | `TX_HASH` of a BTNS `LIST`    |
+| `MEMO`    | String | An optional memo to include   |
 
 ## Formats
 
-### Version `0`
+### Version `0` - Single Airdrop
 - `VERSION|TICK|AMOUNT|LIST|MEMO`
 
-### Version `1` - Single List, Multiple airdrops, Single memo
+### Version `1` - Multi-Airdrop (brief)
 - `VERSION|LIST|TICK|AMOUNT|TICK|AMOUNT|MEMO`
 
-### Version `2` - Multiple Lists, Multiple airdrops, Single memo
+### Version `2` - Multi-Airdrop (Full)
 - `VERSION|TICK|AMOUNT|LIST|TICK|AMOUNT|LIST|MEMO`
 
-### Version `3` - Multiple Lists, Multiple Airdrops, Multiple memos
+### Version `3` - Multi-Airdrop (Full) with Multiple Memos
 - `VERSION|TICK|AMOUNT|LIST|MEMO|TICK|AMOUNT|LIST|MEMO`
 
 
