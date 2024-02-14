@@ -93,15 +93,15 @@ function btnsMint($params=null, $data=null, $error=null){
         $error = 'invalid: DESTINATION (not authorized)';
 
     // Verify minting AMOUNT will not exceed MINT_ADDRESS_MAX
-    if(!$error && isset($data->MINT_ADDRESS_MAX) && $data->MINT_ADDRESS_MAX && (bcadd(getActionCreditDebitAmount('credits', 'MINT', $data->TICK, $data->SOURCE),$data->AMOUNT,$data->DECIMALS) > $data->MINT_ADDRESS_MAX))
+    if(!$error && isset($data->MINT_ADDRESS_MAX) && $data->MINT_ADDRESS_MAX > 0 && (bcadd(getActionCreditDebitAmount('credits', 'MINT', $data->TICK, $data->SOURCE),$data->AMOUNT,$data->DECIMALS) > $data->MINT_ADDRESS_MAX))
         $error = 'invalid: mint exceeds MINT_ADDRESS_MAX';
 
     // Verify minting begins at MINT_START_BLOCK
-    if(!$error && isset($data->MINT_START_BLOCK) && $data->MINT_START_BLOCK && $data->BLOCK_INDEX < $data->MINT_START_BLOCK)
+    if(!$error && isset($data->MINT_START_BLOCK) && $data->MINT_START_BLOCK > 0 && $data->BLOCK_INDEX < $data->MINT_START_BLOCK)
         $error = 'invalid: MINT_START_BLOCK';
 
     // Verify minting ends at MINT_STOP_BLOCK
-    if(!$error && isset($data->MINT_STOP_BLOCK) && $data->MINT_STOP_BLOCK && $data->BLOCK_INDEX > $data->MINT_STOP_BLOCK)
+    if(!$error && isset($data->MINT_STOP_BLOCK) && $data->MINT_STOP_BLOCK > 0 && $data->BLOCK_INDEX > $data->MINT_STOP_BLOCK)
         $error = 'invalid: MINT_STOP_BLOCK';
 
     // Determine final status
