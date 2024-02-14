@@ -18,7 +18,7 @@ define("MIN_TICK_LENGTH",1);
 define("MAX_TICK_LENGTH",250);
 
 // Reserved BTNS TICK names
-$reserved = array('BTC','XCP','GAS');
+$reserved = array('BTC','XCP');
 define("RESERVED_TICKS",$reserved);
 
 // Min/Max MAX_SUPPLY

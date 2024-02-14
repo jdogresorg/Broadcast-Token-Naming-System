@@ -93,6 +93,10 @@ function btnsIssue( $params=null, $data=null, $error=null){
     if(!$error && in_array($data->TICK,RESERVED_TICKS))
         $error = 'invalid: TICK (reserved)';
 
+    // Verify only GAS_ADDRESS can issue GAS token
+    if(!$error && strtoupper($data->TICK)=='GAS' && $data->SOURCE!=GAS_ADDRESS)        
+        $error = 'invalid: GAS_ADDRESS';
+
     // Get information on BTNS token
     $btInfo        = getTokenInfo($data->TICK);
     $isDistributed = isDistributed($data->TICK);
