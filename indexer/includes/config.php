@@ -10,7 +10,7 @@ define("NETWORK", $network);
 // BTNS Indexer Version
 define("VERSION_MAJOR", 0);
 define("VERSION_MINOR", 11);
-define("VERSION_REVISION",0);
+define("VERSION_REVISION",1);
 define("VERSION_STRING", VERSION_MAJOR . '.' . VERSION_MINOR . '.' . VERSION_REVISION);
 
 // TICK constants
@@ -18,7 +18,7 @@ define("MIN_TICK_LENGTH",1);
 define("MAX_TICK_LENGTH",250);
 
 // Reserved BTNS TICK names
-$reserved = array('DOGE','XDP','GAS');
+$reserved = array('DOGE','XDP');
 define("RESERVED_TICKS",$reserved);
 
 // Min/Max MAX_SUPPLY
