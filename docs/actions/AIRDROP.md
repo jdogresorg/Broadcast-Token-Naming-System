@@ -8,14 +8,22 @@ This command airdrops `token` supply to one or more `BTNS` lists.
 | `TICK`    | String | 1 to 250 characters in length       |
 | `AMOUNT`  | String | Amount of `tokens` to airdrops      |
 | `LIST`    | String | `TX_HASH` of a BTNS `LIST` commands |
+| `MEMO`    | String | An optional memo to include         |
 
 ## Formats
 
 ### Version `0`
-- `VERSION|TICK|AMOUNT|LIST|LIST`
+- `VERSION|TICK|AMOUNT|LIST|MEMO`
 
-### Version `1`
-- `VERSION|TICK|AMOUNT|LIST|TICK|AMOUNT|LIST`
+### Version `1` - Single List, Multiple airdrops, Single memo
+- `VERSION|LIST|TICK|AMOUNT|TICK|AMOUNT|MEMO`
+
+### Version `2` - Multiple Lists, Multiple airdrops, Single memo
+- `VERSION|TICK|AMOUNT|LIST|TICK|AMOUNT|LIST|MEMO`
+
+### Version `3` - Multiple Lists, Multiple Airdrops, Multiple memos
+- `VERSION|TICK|AMOUNT|LIST|MEMO|TICK|AMOUNT|LIST|MEMO`
+
 
 ## Examples
 ```
@@ -31,8 +39,12 @@ This example airdops 1 GAS to every holder on a list and 2 BRRR to every holder 
 ## Rules
 
 ## Notes
--  Use format `0` to send the same `AMOUNT`  of `token` to one or more `LIST`
--  Use format `1` to send multiple `AMOUNT` of multiple `token` to different `LIST`
 - `AIRDROP` to `address` `LIST` sends `AMOUNT` of `token` to each address on the list
 - `AIRDROP` to `token` `LIST` sends `AMOUNT` of `token` to holders of each `token` on the list
 - `AIRDROP` to `ASSET` `LIST` sends `AMOUNT` of `token` to holders of each `ASSET` on the list
+- Format version `0` allows for a single airdrop
+- Format version `1` allows for repeating `TICK` and `AMOUNT` params to enable multiple airdrops to a single list
+- Format version `2` allows for repeating `TICK`, `AMOUNT` and `LIST` params to enable multiple airdrops to multiple lists
+- Format version `3` allows for repeating `TICK`, `AMOUNT`, `LIST`, and `MEMO` params to enable multiple airdrops to multiple lists with multiple memos
+- Format version `0`, `1`, and `2` allow for a single optional `MEMO` field to be included as the last PARAM
+
