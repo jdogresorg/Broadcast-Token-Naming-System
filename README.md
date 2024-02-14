@@ -23,8 +23,9 @@ Science is messy sometimes... _**DO NOT**_ put in funds your not willing to lose
 
 Name                          | Title                                     |  Author / Owner        | Status        |
 ----------------------------  | ----------------------------------------- | ---------------------- | ------------- |
-[`BTNS`](./docs/BTNS.md)        | Broadcast Token Naming System (**BTNS**) | Jeremy Johnson (J-Dog) | Accepted      |
-[`BTNS-420`](./docs/BTNS-420.md)| BTNS Token Standard (**BTNS-420**)        | Jeremy Johnson (J-Dog) | Draft         |
+[`BTNS`](./docs/BTNS.md)        | Broadcast Token Naming System (**BTNS**)  | Jeremy Johnson (J-Dog) | Accepted    |
+[`BTNS-420`](./docs/BTNS-420.md)| BTNS Token Standard (**BTNS-420**)        | Jeremy Johnson (J-Dog) | Draft       |
+[`BTNS-GAS`](./docs/BTNS-GAS.md)| BTNS GAS Utility Token (**BTNS-GAS**)     | Jeremy Johnson (J-Dog) | Accepted    |
 
 
 # BTNS `ACTION` commands

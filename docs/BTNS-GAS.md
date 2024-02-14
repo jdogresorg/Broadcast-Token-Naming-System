@@ -1,6 +1,6 @@
         Title: BTNS GAS Utility Token
         Author: Jeremy Johnson (J-Dog)
-        Status: Draft
+        Status: Accepted
         Type: Standards
         Created: 2024-02-12
 
