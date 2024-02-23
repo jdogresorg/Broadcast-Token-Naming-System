@@ -208,6 +208,7 @@ function btnsSend($params=null, $data=null, $error=null){
     }
 
     // Update address balances
+    // TODO: Optimize this to only update balances for ticks, not full balances... its way too slow now
     updateBalances(array_keys($addresses));
 }
 
