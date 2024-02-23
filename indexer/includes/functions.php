@@ -1823,4 +1823,72 @@ function getBlockTableHashes($block=null){
     return $hashes;
 }
 
+// Generalized function to handle processing a broadcast transaction
+// @param {tx}               object     Transaction object
+// @param {tx->source}       string     Source address
+// @param {$tx->text}        string     Broadcast `text`
+// @param {$tx->version}     integer    Broadcast `value`
+// @param {$tx->tx_hash}     string     Transaction hash
+// @param {$tx->block_index} string     Block index of tx
+function processTransaction($tx=null){
+    // Assoc arrays to track address/ticker changes
+    $addresses = array();
+    $tickers   = array();
+    $error     = false;
+    $tx        = (object) $tx;
+    $prefixes  = array('/^bt:/','/^btns:/');
+    $params    = explode('|',preg_replace($prefixes,'',$tx->text));
+    $version   = $tx->version;  // Project Version
+    $source    = $tx->source;   // Source address
+
+    // Create database records and get ids for tx_hash and source address
+    $source_id  = createAddress($tx->source);
+    $tx_hash_id = createTransaction($tx->tx_hash);
+
+    // Trim whitespace from any PARAMS
+    foreach($params as $idx => $value)
+        $params[$idx] = trim($value);
+
+    // Extract ACTION from PARAMS
+    $action = strtoupper(array_shift($params)); 
+
+    // Support legacy BTNS format with no VERSION on DEPLOY/MINT/TRANSFER actions (default to VERSION 0)
+    if(in_array($action,array('DEPLOY','MINT','TRANSFER')) && isLegacyBTNSFormat($params))
+        array_splice($params, 0, 0, 0);
+
+    // Support old BRC20/SRC20 actions 
+    if($action=='TRANSFER') $action = 'SEND';
+    if($action=='DEPLOY')   $action = 'ISSUE';
+
+    // Define basic BTNS transaction data object
+    $data = (object) array(
+        'ACTION'      => $action,           // Action (ISSUE, MINT, SEND, etc)
+        'BLOCK_INDEX' => $tx->block_index, // Block index 
+        'SOURCE'      => $tx->source,      // Source/Broadcasting address
+        'TX_HASH'     => $tx->tx_hash      // Transaction Hash
+    );
+
+    // Validate Action
+    if(!array_key_exists($action,PROTOCOL_CHANGES))
+        $error = 'invalid: Unknown ACTION';
+
+    // Verify action is activated (past ACTIVATION_BLOCK)
+    if(!$error && !isEnabled($action, $network, $block))
+        $error = 'invalid: ACTIVATION_BLOCK';
+
+    // Set action to UNKNOWN if we detect error
+    if($error)
+        $data->ACTION = $action = 'UNKNOWN';
+
+    // Create a record of this transaction in the transactions table
+    createTxIndex($data);
+
+    // Get tx_index of record using tx_hash
+    $data->TX_INDEX = getTxIndex($data->TX_HASH);
+
+    // Handle processing the specific BTNS ACTION commands
+    btnsAction($action, $params, $data, $error);
+}
+
+
 ?>

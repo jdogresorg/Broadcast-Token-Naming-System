@@ -95,7 +95,8 @@ while($block <= $current){
                 b.text,
                 b.value as version,
                 t.hash as tx_hash,
-                a.address as source
+                a.address as source,
+                b.block_index as block_index
             FROM
                 {$dbase}.broadcasts b,
                 {$dbase}.index_transactions t,
@@ -109,72 +110,14 @@ while($block <= $current){
             ORDER BY b.tx_index ASC";
     $results = $mysqli->query($sql);
     if($results){
-        if($results->num_rows){
-            while($row = $results->fetch_assoc()){
-                // Assoc arrays to track address/ticker changes
-                $addresses = array();
-                $tickers   = array();
-                $error     = false;                  
-                $row       = (object) $row;
-                $prefixes  = array('/^bt:/','/^btns:/');
-                $params    = explode('|',preg_replace($prefixes,'',$row->text));
-                $version   = $row->version;  // Project Version
-                $source    = $row->source;   // Source address
-
-                // Create database records and get ids for tx_hash and source address
-                $source_id  = createAddress($row->source);
-                $tx_hash_id = createTransaction($row->tx_hash);
-
-                // Trim whitespace from any PARAMS
-                foreach($params as $idx => $value)
-                    $params[$idx] = trim($value);
-
-                // Extract ACTION from PARAMS
-                $action = strtoupper(array_shift($params)); 
-
-                // Support legacy BTNS format with no VERSION on DEPLOY/MINT/TRANSFER actions (default to VERSION 0)
-                if(in_array($action,array('DEPLOY','MINT','TRANSFER')) && isLegacyBTNSFormat($params))
-                    array_splice($params, 0, 0, 0);
-
-                // Support old BRC20/SRC20 actions 
-                if($action=='TRANSFER') $action = 'SEND';
-                if($action=='DEPLOY')   $action = 'ISSUE';
-
-                // Define basic BTNS transaction data object
-                $data = (object) array(
-                    'ACTION'      => $action,       // Action (ISSUE, MINT, SEND, etc)
-                    'BLOCK_INDEX' => $block,        // Block index 
-                    'SOURCE'      => $row->source,  // Source/Broadcasting address
-                    'TX_HASH'     => $row->tx_hash  // Transaction Hash
-                );
-
-                // Validate Action
-                if(!array_key_exists($action,PROTOCOL_CHANGES))
-                    $error = 'invalid: Unknown ACTION';
-
-                // Verify action is activated (past ACTIVATION_BLOCK)
-                if(!$error && !isEnabled($action, $network, $block))
-                    $error = 'invalid: ACTIVATION_BLOCK';
-
-                // Set action to UNKNOWN if we detect error
-                if($error)
-                    $data->ACTION = $action = 'UNKNOWN';
-
-                // Create a record of this transaction in the transactions table
-                createTxIndex($data);
-
-                // Get tx_index of record using tx_hash
-                $data->TX_INDEX = getTxIndex($data->TX_HASH);
-
-                // Handle processing the specific BTNS ACTION commands
-                btnsAction($action, $params, $data, $error);
-            }
-        }
+        if($results->num_rows)
+            while($row = $results->fetch_assoc())
+                processTransaction($row);
     } else {
         byeLog("Error while trying to lookup BTNS broadcasts");
     }
 
-    // Create hash of the credits/debits/balances table and create record in `blocks` table
+    // Create record in `blocks` table with hashes of the credits/debits/transactions tables
     createBlock($block);
 
     // Do a sanity check to verify that token supplys match data in credits/debits/balances tables 
