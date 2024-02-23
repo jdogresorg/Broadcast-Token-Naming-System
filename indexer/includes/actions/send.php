@@ -88,6 +88,7 @@ function btnsSend($params=null, $data=null, $error=null){
     }
 
     // Get source address balances 
+    // TODO : add block index to get balances as of block X
     $balances = getAddressBalances($data->SOURCE);
 
     // Store original error value
