@@ -1890,5 +1890,38 @@ function processTransaction($tx=null){
     btnsAction($action, $params, $data, $error);
 }
 
+// Get broadcast transactions for a given block
+function getBroadcastTransactions($block){
+    global $mysqli, $dbase;
+    $data = array();
+    // Lookup any BTNS action broadcasts in this block (anything with bt: or btns: prefix)
+    $sql = "SELECT
+                b.text,
+                b.value as version,
+                t.hash as tx_hash,
+                a.address as source,
+                b.block_index as block_index
+            FROM
+                {$dbase}.broadcasts b,
+                {$dbase}.index_transactions t,
+                {$dbase}.index_addresses a
+            WHERE 
+                t.id=b.tx_hash_id AND
+                a.id=b.source_id AND
+                b.block_index='{$block}' AND
+                b.status='valid' AND
+                (b.text LIKE 'bt:%' OR b.text LIKE 'btns:%')
+            ORDER BY b.tx_index ASC";
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows)
+            while($row = $results->fetch_assoc())
+                array_push($data, $row);
+    } else {
+        byeLog("Error while trying to lookup BTNS broadcasts");
+    }
+    return $data;
+}
+
 
 ?>

@@ -90,32 +90,10 @@ while($block <= $current){
     $timer = new Profiler();
     print "processing block {$block}...";
 
-    // Lookup any BTNS action broadcasts in this block (anything with bt: or btns: prefix)
-    $sql = "SELECT
-                b.text,
-                b.value as version,
-                t.hash as tx_hash,
-                a.address as source,
-                b.block_index as block_index
-            FROM
-                {$dbase}.broadcasts b,
-                {$dbase}.index_transactions t,
-                {$dbase}.index_addresses a
-            WHERE 
-                t.id=b.tx_hash_id AND
-                a.id=b.source_id AND
-                b.block_index='{$block}' AND
-                b.status='valid' AND
-                (b.text LIKE 'bt:%' OR b.text LIKE 'btns:%')
-            ORDER BY b.tx_index ASC";
-    $results = $mysqli->query($sql);
-    if($results){
-        if($results->num_rows)
-            while($row = $results->fetch_assoc())
-                processTransaction($row);
-    } else {
-        byeLog("Error while trying to lookup BTNS broadcasts");
-    }
+    // Get any broadcast transactions for this block and process them
+    $txs = getBroadcastTransactions($block);
+    foreach($txs as $tx)
+        processTransaction($tx);
 
     // Create record in `blocks` table with hashes of the credits/debits/transactions tables
     createBlock($block);
