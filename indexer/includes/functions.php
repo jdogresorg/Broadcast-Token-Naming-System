@@ -648,10 +648,6 @@ function createDebit( $action=null, $block_index=null, $event=null, $tick=null, 
 // Create record in `blocks` table
 function createBlock( $block=null ){
     global $mysqli, $dbase;
-    $credits      = array();
-    $debits       = array();
-    $balances     = array();
-    $transactions = array();
     $block_time   = 0;
     // Get timestamp of Block from main database 
     $results = $mysqli->query("SELECT block_time FROM {$dbase}.blocks WHERE block_index='{$block}' LIMIT 1");
@@ -663,62 +659,11 @@ function createBlock( $block=null ){
     } else {
         byeLog('Error while trying to lookup records in credits table');
     }
-
-    // Get all data from credits table
-    $results = $mysqli->query("SELECT * FROM credits WHERE block_index<='{$block}' ORDER BY block_index ASC, tick_id ASC, address_id ASC, amount DESC");
-    if($results){
-        if($results->num_rows){
-            while($row = $results->fetch_assoc())
-                array_push($credits, (object) $row);
-        }
-    } else {
-        byeLog('Error while trying to lookup records in credits table');
-    }
-    // Get all data from debits table
-    $results = $mysqli->query("SELECT * FROM debits WHERE block_index<='{$block}' ORDER BY block_index ASC, tick_id ASC, address_id ASC, amount DESC");
-    if($results){
-        if($results->num_rows){
-            while($row = $results->fetch_assoc())
-                array_push($debits, (object) $row);
-        }
-    } else {
-        byeLog('Error while trying to lookup records in debits table');
-    }
-    // Get all data from balances table
-    $results = $mysqli->query("SELECT * FROM balances WHERE id IS NOT NULL ORDER BY tick_id ASC, address_id ASC, amount DESC");
-    if($results){
-        if($results->num_rows){
-            while($row = $results->fetch_assoc())
-                array_push($balances, (object) $row);
-        }
-    } else {
-        byeLog('Error while trying to lookup records in balances table');
-    }
-    // Get all data from transactions table
-    $results = $mysqli->query("SELECT * FROM transactions WHERE tx_index IS NOT NULL ORDER BY tx_index ASC");
-    if($results){
-        if($results->num_rows){
-            while($row = $results->fetch_assoc())
-                array_push($transactions, (object) $row);
-        }
-    } else {
-        byeLog('Error while trying to lookup records in balances table');
-    }
-    // Generate SHA256 hashes based on the json object
-    // This is a rough/dirty way to get some sha256 hashes qucikly... def should revisit when not in a rush
-    $credits_hash            = hash('sha256', json_encode($credits));
-    $debits_hash             = hash('sha256', json_encode($debits));
-    $balances_hash           = hash('sha256', json_encode($balances));
-    $transactions_hash       = hash('sha256', json_encode($transactions));
-    $credits_hash_short      = substr($credits_hash,0,5);
-    $debits_hash_short       = substr($debits_hash,0,5);
-    $balances_hash_short     = substr($balances_hash,0,5);
-    $transactions_hash_short = substr($transactions_hash,0,5);
-    $credits_hash_id         = createTransaction($credits_hash);
-    $debits_hash_id          = createTransaction($debits_hash);
-    $balances_hash_id        = createTransaction($balances_hash);
-    $txlist_hash_id          = createTransaction($transactions_hash);
-    print "\n\t [credits:{$credits_hash_short} debits:{$debits_hash_short} balances:{$balances_hash_short} txlist:{$transactions_hash_short}]";
+    // Get a list of hashes for this block
+    list($credits, $debits, $txlist) = getBlockHashes($block);
+    $credits_hash_id = createTransaction($credits);
+    $debits_hash_id  = createTransaction($debits);
+    $txlist_hash_id  = createTransaction($txlist);
     // Check if record already exists
     $results = $mysqli->query("SELECT id FROM blocks WHERE block_index='{$block}'");
     if($results){
@@ -730,13 +675,12 @@ function createBlock( $block=null ){
                         block_time='{$block_time}',
                         credits_hash_id='{$credits_hash_id}',
                         debits_hash_id='{$debits_hash_id}',
-                        balances_hash_id='{$balances_hash_id}',
                         txlist_hash_id='{$txlist_hash_id}'
                     WHERE 
                         block_index='{$block}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO blocks (block_index, block_time, credits_hash_id, debits_hash_id, balances_hash_id, txlist_hash_id) values ('{$block}', '{$block_time}', '{$credits_hash_id}', '{$debits_hash_id}', '{$balances_hash_id}', '{$txlist_hash_id}')";
+            $sql = "INSERT INTO blocks (block_index, block_time, credits_hash_id, debits_hash_id, txlist_hash_id) values ('{$block}', '{$block_time}', '{$credits_hash_id}', '{$debits_hash_id}', '{$txlist_hash_id}')";
         }
         $results = $mysqli->query($sql);
         if(!$results)
@@ -744,6 +688,12 @@ function createBlock( $block=null ){
     } else {
         byeLog('Error while trying to lookup record in blocks table');
     }
+    // Print out a status update
+    $credits = substr($credits,0,5);
+    $debits  = substr($debits,0,5);
+    $txlist  = substr($txlist,0,5);
+    print "\n\t [credits:{$credits} debits:{$debits} txlist:{$txlist}]";
+
 }
 
 // Create record in `lists` table
@@ -1700,7 +1650,7 @@ function isActionAllowed($tick=null, $address=null){
 
 // Validate that token supplys match credits/debits/balances information
 function sanityCheck( $block=null ){
-    global $mysqli;
+    global $mysqli, $network;
     $tickers     = []; // Assoc array of tickers
     $supply      = []; // Assoc array of supplys
     $block_index = $mysqli->real_escape_string($block);
@@ -1719,35 +1669,39 @@ function sanityCheck( $block=null ){
         if($results->num_rows){
             while($row = $results->fetch_assoc()){
                 $row = (object) $row;
-                // Ignore certain tx types
-                if(in_array($row->type,array('LIST')))
-                    continue;
-                // Loop through tables and get ticker and supply
-                $table = strtolower($row->type) . 's';
-                $sql = "SELECT 
-                            t2.id,
-                            t2.tick,
-                            t1.supply
-                        FROM
-                            {$table} m LEFT JOIN tokens t1 on (t1.tick_id=m.tick_id),
-                            index_tickers t2
-                        WHERE
-                            t2.id=m.tick_id AND
-                            m.block_index='{$block_index}'";
-                // print $sql;
-                $results2 = $mysqli->query($sql);
-                if($results2){
-                    if($results2->num_rows){
-                        while($row2 = $results2->fetch_assoc()){
-                            $row2 = (object) $row2;
-                            // Add ticker and supply info to assoc arrays
-                            $tickers[$row2->tick] = $row2->id;
-                            $supply[$row2->tick]  = (!is_null($row2->supply)) ? $row2->supply : "0";
+                // Only perform sanity checks on ACTIONS that are active in protocol_changes
+                if(isEnabled($row->type, $network, $block)){
+                    // Ignore certain tx types
+                    if(in_array($row->type,array('LIST')))
+                        continue;
+                    // Loop through tables and get ticker and supply
+                    $table = strtolower($row->type) . 's';
+                    $sql = "SELECT 
+                                t2.id,
+                                t2.tick,
+                                t1.supply
+                            FROM
+                                {$table} m LEFT JOIN tokens t1 on (t1.tick_id=m.tick_id),
+                                index_tickers t2
+                            WHERE
+                                t2.id=m.tick_id AND
+                                m.block_index='{$block_index}'";
+                    // print $sql;
+                    $results2 = $mysqli->query($sql);
+                    if($results2){
+                        if($results2->num_rows){
+                            while($row2 = $results2->fetch_assoc()){
+                                $row2 = (object) $row2;
+                                // Add ticker and supply info to assoc arrays
+                                $tickers[$row2->tick] = $row2->id;
+                                $supply[$row2->tick]  = (!is_null($row2->supply)) ? $row2->supply : "0";
+                            }
                         }
-                    }
-                } else {
-                    byeLog("Error while trying to lookup tickers in block : {$block}");
+                    } else {
+                        byeLog("Error while trying to lookup tickers in block : {$block}");
+                    }                    
                 }
+
             }
         }
     } else {
@@ -1797,4 +1751,76 @@ function getActionCreditDebitAmount($table=null, $action=null, $tick=null, $addr
         $total = $data[$tick_id];
     return $total;
 }
+
+// Get block hashes using credits/debits/transactions table data
+function getBlockHashes($block=null){
+    global $mysqli;
+    $credits = array();
+    $debits  = array();
+    $txlist  = array();
+    // Get all block data from credits table
+    $results = $mysqli->query("SELECT * FROM credits WHERE block_index<='{$block}' ORDER BY block_index ASC, tick_id ASC, address_id ASC, amount DESC");
+    if($results){
+        if($results->num_rows){
+            while($row = $results->fetch_assoc())
+                array_push($credits, (object) $row);
+        }
+    } else {
+        byeLog('Error while trying to lookup records in credits table');
+    }
+    // Get all block data from debits table
+    $results = $mysqli->query("SELECT * FROM debits WHERE block_index<='{$block}' ORDER BY block_index ASC, tick_id ASC, address_id ASC, amount DESC");
+    if($results){
+        if($results->num_rows){
+            while($row = $results->fetch_assoc())
+                array_push($debits, (object) $row);
+        }
+    } else {
+        byeLog('Error while trying to lookup records in debits table');
+    }
+    // Get all block data from transactions table
+    $results = $mysqli->query("SELECT * FROM transactions WHERE block_index<='{$block}' ORDER BY tx_index ASC");
+    if($results){
+        if($results->num_rows){
+            while($row = $results->fetch_assoc())
+                array_push($txlist, (object) $row);
+        }
+    } else {
+        byeLog('Error while trying to lookup records in transactions table');
+    }
+    // Generate SHA256 hashes based on the json object
+    $credits = hash('sha256', json_encode($credits));
+    $debits  = hash('sha256', json_encode($debits));
+    $txlist  = hash('sha256', json_encode($txlist));
+    return array($credits, $debits, $txlist);
+}
+
+// Get block hashes using blocks table data
+function getBlockTableHashes($block=null){
+    global $mysqli;
+    $hashes = false;
+    $sql = "SELECT
+                t1.hash as credits,
+                t2.hash as debits,
+                t3.hash as txlist
+            FROM
+                blocks b,
+                index_transactions t1,
+                index_transactions t2,
+                index_transactions t3
+            WHERE
+                t1.id=b.credits_hash_id AND
+                t2.id=b.debits_hash_id AND
+                t3.id=b.txlist_hash_id AND
+                b.block_index='{$block}'";
+    $results = $mysqli->query($sql);
+    if($results && $results->num_rows){
+        $row = (object) $results->fetch_assoc();
+        $hashes = array($row->credits,$row->debits, $row->txlist);
+    } else {
+        byeLog("Error while trying to lookup block hashes");
+    }
+    return $hashes;
+}
+
 ?>
