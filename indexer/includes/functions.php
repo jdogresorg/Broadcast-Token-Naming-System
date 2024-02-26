@@ -530,7 +530,6 @@ function createToken( $data=null ){
                         mint_address_max='{$mint_address_max}',
                         mint_start_block='{$mint_start_block}',
                         mint_stop_block='{$mint_stop_block}',
-                        block_index='{$block_index}',
                         supply='{$supply}',
                         owner_id='{$owner_id}'
                     WHERE 
