@@ -10,7 +10,7 @@
  * 0 = VERSION|COMMAND;COMMAND
  ********************************************************************/
 function btnsBatch($params=null, $data=null, $error=null){
-    global $mysqli;
+    global $mysqli, $reparse;
     // Coming soon
 }
 

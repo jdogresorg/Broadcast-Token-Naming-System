@@ -64,6 +64,9 @@ require_once('profiler.php');
 // Rollback code
 require_once('rollback.php');
 
+// Reparse code
+require_once('reparse.php');
+
 // Protocol Changes / Activation blocks
 require_once('protocol_changes.php');
 

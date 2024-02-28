@@ -10,7 +10,7 @@
  * 0 = VERSION|TICK
  ********************************************************************/
 function btnsCallback($params=null, $data=null, $error=null){
-    global $mysqli;
+    global $mysqli, $reparse;
     // Coming soon
 }
 

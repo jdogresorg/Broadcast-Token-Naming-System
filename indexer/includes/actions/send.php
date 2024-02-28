@@ -17,7 +17,7 @@
  * 
  ********************************************************************/
 function btnsSend($params=null, $data=null, $error=null){
-    global $mysqli, $tickers, $addresses;
+    global $mysqli, $reparse, $tickers, $addresses;
 
     // Define list of known FORMATS
     $formats = array(
@@ -207,6 +207,10 @@ function btnsSend($params=null, $data=null, $error=null){
         [$tick, $amount, $destination] = $credit;
         createCredit('SEND', $data->BLOCK_INDEX, $data->TX_HASH, $tick, $amount, $destination);
     }
+
+    // If this is a reparse, bail out before updating balances
+    if($reparse)
+        return;
 
     // Update address balances
     // TODO: Optimize this to only update balances for ticks, not full balances... its way too slow now

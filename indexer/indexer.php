@@ -24,6 +24,7 @@
  * --testnet    Load data from testnet
  * --block=#    Load data for given block
  * --rollback=# Rollback data to a given block
+ * --reparse    Reparse and validate all transactions
  * --single     Load single block
  ********************************************************************/
 
@@ -31,9 +32,10 @@
 error_reporting(E_ERROR|E_PARSE);
 
 // Parse in any command line args and set basic runtime flags
-$args     = getopt("", array("testnet::", "block::", "single::", "rollback::",));
+$args     = getopt("", array("testnet::", "block::", "single::", "rollback::", "reparse::"));
 $testnet  = (isset($args['testnet'])) ? true : false;
 $single   = (isset($args['single'])) ? true : false;  
+$reparse  = (isset($args['reparse'])) ? true : false;
 $block    = (is_numeric($args['block'])) ? intval($args['block']) : false;
 $network  = ($testnet) ? 'testnet' : 'mainnet';
 $rollback = (is_numeric($args['rollback'])) ? intval($args['rollback']) : false;
@@ -84,6 +86,10 @@ if($results){
 $lockfile = '/var/tmp/' . $service . '2mysql-' . $network . '.lock';
 if(file_exists($lockfile))
     byeLog("found {$service} parsing a block... exiting");
+
+// Handle reparses
+if($reparse)
+    btnsReparse($current);
 
 // Loop through the blocks until we are current
 while($block <= $current){

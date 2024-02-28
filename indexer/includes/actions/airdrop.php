@@ -13,7 +13,7 @@
  * 1 = VERSION|TICK|AMOUNT|LIST|TICK|AMOUNT|LIST
  ********************************************************************/
 function btnsAirdrop($params=null, $data=null, $error=null){
-    global $mysqli;
+    global $mysqli, $reparse;
     // Coming soon
 }
 

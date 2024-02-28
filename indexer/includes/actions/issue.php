@@ -36,7 +36,7 @@
  * 
  ********************************************************************/
 function btnsIssue( $params=null, $data=null, $error=null){
-    global $mysqli, $tickers, $addresses;
+    global $mysqli, $reparse, $tickers, $addresses;
 
     // Define list of known FORMATS
     $formats = array(
@@ -308,6 +308,10 @@ function btnsIssue( $params=null, $data=null, $error=null){
             createDebit('ISSUE', $data->BLOCK_INDEX, $data->TX_HASH, $data->TICK, $data->MINT_SUPPLY, $data->SOURCE);
             createCredit('ISSUE', $data->BLOCK_INDEX, $data->TX_HASH, $data->TICK, $data->MINT_SUPPLY, $data->TRANSFER_SUPPLY);
         }
+
+        // If this is a reparse, bail out before updating balances and token information
+        if($reparse)
+            return;
 
         // Update balances for addresses
         updateBalances([$data->SOURCE, $data->TRANSFER_SUPPLY]);

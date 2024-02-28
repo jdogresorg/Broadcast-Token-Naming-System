@@ -659,10 +659,10 @@ function createBlock( $block=null ){
         byeLog('Error while trying to lookup records in credits table');
     }
     // Get a list of hashes for this block
-    list($credits, $debits, $txlist) = getBlockHashes($block);
-    $credits_hash_id = createTransaction($credits);
-    $debits_hash_id  = createTransaction($debits);
-    $txlist_hash_id  = createTransaction($txlist);
+    $info = getBlockHashes($block);
+    $credits_hash_id = createTransaction($info['credits']['hash']);
+    $debits_hash_id  = createTransaction($info['debits']['hash']);
+    $txlist_hash_id  = createTransaction($info['txlist']['hash']);
     // Check if record already exists
     $results = $mysqli->query("SELECT id FROM blocks WHERE block_index='{$block}'");
     if($results){
@@ -864,7 +864,7 @@ function deleteLists($list=null, $rollback=null){
 
 
 // Handle getting token information for a given tick
-function getTokenInfo($tick=null, $tick_id=null){
+function getTokenInfo($tick=null, $tick_id=null, $block_index=null){
     global $mysqli;
     $data = false;
     if(!is_null($tick) && is_null($tick_id))
@@ -904,7 +904,10 @@ function getTokenInfo($tick=null, $tick_id=null){
                 t2.id=t1.tick_id AND
                 a.id=t1.owner_id AND
                 t1.tick_id='{$tick_id}'";
-                // print $sql;
+    // If a block index was given, only lookup token information before given block
+    if(isset($block_index) && is_numeric($block_index))
+        $sql .= " AND t1.block_index <= {$block_index}";
+    // print $sql;
     $results = $mysqli->query($sql);
     if($results){
         if($results->num_rows){
@@ -1031,7 +1034,7 @@ function getTokenDecimalPrecision($tick_id=null){
 }
 
 // Handle getting credits or debits records for a given address
-function getAddressCreditDebit($table=null, $address=null, $action=null){
+function getAddressCreditDebit($table=null, $address=null, $action=null, $block=null){
     global $mysqli;
     $data = array(); // Assoc array to store tick/credits
     $type = gettype($address);
@@ -1055,6 +1058,8 @@ function getAddressCreditDebit($table=null, $address=null, $action=null){
                     t1.address_id='{$address_id}'";
         if(isset($action))
             $sql .= " AND t1.action_id={$action_id}";
+        if(isset($block) && is_numeric($block))
+            $sql .= " AND t1.block_index < {$block}";
         $results = $mysqli->query($sql);
         if($results){
             if($results->num_rows){
@@ -1074,15 +1079,15 @@ function getAddressCreditDebit($table=null, $address=null, $action=null){
 }
 
 // Get address balances using credits/debits table data
-function getAddressBalances($address=null){
+function getAddressBalances($address=null, $tick=null, $block=null){
     global $mysqli;
     $type = gettype($address);
     if($type==='integer' || is_numeric($address))
         $address_id = $address;
     if($type==='string' && !is_numeric($address))
         $address_id = createAddress($address);
-    $credits  = getAddressCreditDebit('credits', $address_id);
-    $debits   = getAddressCreditDebit('debits',  $address_id);
+    $credits  = getAddressCreditDebit('credits', $address_id, null, $block);
+    $debits   = getAddressCreditDebit('debits',  $address_id, null, $block);
     $decimals = array(); // Assoc array to store tick/decimals
     $balances = array(); // Assoc array to store tick/balance
     foreach($credits as $tick_id => $amount)
@@ -1262,16 +1267,17 @@ function updateTokenInfo( $tick=null ){
 }
 
 // Get token supply from credits/debits table (credits - debits = supply)
-function getTokenSupply( $tick=null ){
+function getTokenSupply( $tick=null, $block_index=null ){
     global $mysqli;
     $credits = 0;
     $debits  = 0;
     $supply  = 0;
+    $block   = (is_numeric($block_index)) ? $block_index : 99999999999999;
     $tick_id = createTicker($tick);
     // Get info on decimal precision
     $decimals = getTokenDecimalPrecision($tick_id);
     // Get Credits 
-    $sql = "SELECT CAST(SUM(amount) AS DECIMAL(60,$decimals)) as credits FROM credits WHERE tick_id='{$tick_id}'";
+    $sql = "SELECT CAST(SUM(amount) AS DECIMAL(60,$decimals)) as credits FROM credits WHERE tick_id='{$tick_id}' AND block_index<='{$block}'";
     $results = $mysqli->query($sql);
     if($results){
         if($results->num_rows){
@@ -1282,7 +1288,7 @@ function getTokenSupply( $tick=null ){
         byeLog('Error while trying to get list of credits');
     }
     // Get Debits
-    $sql = "SELECT CAST(SUM(amount) AS DECIMAL(60,$decimals)) as debits FROM debits WHERE tick_id='{$tick_id}'";
+    $sql = "SELECT CAST(SUM(amount) AS DECIMAL(60,$decimals)) as debits FROM debits WHERE tick_id='{$tick_id}' AND block_index<='{$block}'";
     $results = $mysqli->query($sql);
     if($results){
         if($results->num_rows){
@@ -1751,12 +1757,67 @@ function getActionCreditDebitAmount($table=null, $action=null, $tick=null, $addr
     return $total;
 }
 
+
+
+// Get all data from a given table for a given block
+function getBlockTableData($table=null, $block=null){
+    global $mysqli;
+    $data   = [];
+    // Get all block data from table
+    $results = $mysqli->query("SELECT tx_index, status_id FROM {$table} WHERE block_index='{$block}' ORDER BY tx_index ASC");
+    if($results){
+        if($results->num_rows){
+            while($row = $results->fetch_assoc())
+                array_push($data, (object) $row);
+        } else {
+            array_push($data, (object) []);
+        }
+    } else {
+        byeLog("Error while trying to lookup records in {$table} table");
+    }
+    return $data;
+}
+
+// Function to get a SHA256 hash of a given data object
+function getDataHash($data=null){
+    $hash = hash('sha256', json_encode($data));
+    return $hash;
+}
+
+// Get block hashes using data from the ACTION tables
+function getBlockDataHashes($block=null){
+    global $mysqli;
+    // Define a list of tables
+    $tables = [
+        'destroys',
+        'issues',
+        'lists',
+        'mints',
+        'sends',
+    ];
+    // Define response info object
+    $info = [];
+    // Loop through the data tables and dump a quick list of tx_index and status
+    foreach($tables as $table){
+        $data = getBlockTableData($table, $block);
+        $hash = getDataHash($data);
+        $info[$table] = [
+            'hash' => $hash,
+            'data' => $data
+        ];
+    }
+    // Get hashes for data in the credits / debits / transactions tables
+    $info = array_merge($info, getBlockHashes($block));
+    return $info;
+}
+
 // Get block hashes using credits/debits/transactions table data
 function getBlockHashes($block=null){
     global $mysqli;
     $credits = array();
     $debits  = array();
     $txlist  = array();
+    $info    = array();
     // Get all block data from credits table
     $results = $mysqli->query("SELECT * FROM credits WHERE block_index<='{$block}' ORDER BY block_index ASC, tick_id ASC, address_id ASC, amount DESC");
     if($results){
@@ -1788,38 +1849,17 @@ function getBlockHashes($block=null){
         byeLog('Error while trying to lookup records in transactions table');
     }
     // Generate SHA256 hashes based on the json object
-    $credits = hash('sha256', json_encode($credits));
-    $debits  = hash('sha256', json_encode($debits));
-    $txlist  = hash('sha256', json_encode($txlist));
-    return array($credits, $debits, $txlist);
-}
-
-// Get block hashes using blocks table data
-function getBlockTableHashes($block=null){
-    global $mysqli;
-    $hashes = false;
-    $sql = "SELECT
-                t1.hash as credits,
-                t2.hash as debits,
-                t3.hash as txlist
-            FROM
-                blocks b,
-                index_transactions t1,
-                index_transactions t2,
-                index_transactions t3
-            WHERE
-                t1.id=b.credits_hash_id AND
-                t2.id=b.debits_hash_id AND
-                t3.id=b.txlist_hash_id AND
-                b.block_index='{$block}'";
-    $results = $mysqli->query($sql);
-    if($results && $results->num_rows){
-        $row = (object) $results->fetch_assoc();
-        $hashes = array($row->credits,$row->debits, $row->txlist);
-    } else {
-        byeLog("Error while trying to lookup block hashes");
+    $tables = ['credits','debits','txlist'];
+    // Loop through the data tables and dump a quick list of tx_index and status
+    foreach($tables as $table){
+        $data = ${$table};
+        $hash = getDataHash($data);
+    // print "table={$table}\n";
+    // print "hash={$hash}\n";
+    // print "data=" . count($data) . "\n";
+        $info[$table] = ['hash' => $hash];
     }
-    return $hashes;
+    return $info;
 }
 
 // Generalized function to handle processing a broadcast transaction
@@ -1922,5 +1962,29 @@ function getBroadcastTransactions($block){
     return $data;
 }
 
+// Get tx_index of the first valid ISSUE action for a given ticker
+function getFirstIssuanceTxIndex($tick=null){
+    global $mysqli;
+    $tick_id = createTicker($tick);
+    $sql = "SELECT tx_index FROM issues WHERE tick_id={$tick_id} AND status_id=1 ORDER BY tx_index ASC LIMIT 1";
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows){
+            $row = (object) $results->fetch_assoc();
+            return $row->tx_index;
+        }
+    } else {
+        byeLog("Error while trying to look up tx_index of first valid issuance");
+    }
+    return false;
+}
+
+// Handles validating if a ticker is valid before a given tx_index
+function validTickerBeforeTxIndex($tick=null, $txIndex=null){
+    $issueIndex = getFirstIssuanceTxIndex($tick);
+    if($issueIndex < $txIndex)
+        return true;
+    return false;
+}
 
 ?>

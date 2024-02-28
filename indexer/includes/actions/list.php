@@ -15,7 +15,7 @@
  * 
  ********************************************************************/
 function btnsList( $params=null, $data=null, $error=null){
-    global $mysqli, $tickers, $addresses;
+    global $mysqli, $reparse, $tickers, $addresses;
 
     // Define list of known FORMATS
     $formats = array(
