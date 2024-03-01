@@ -52,8 +52,8 @@ Name                          | Title                                     |  Aut
 - [BTNS Indexer](.indexer/) (PHP)
 
 # BTNS Bootstraps
-- [Counterparty (mainnet)](.indexer/bootstrap/BTNS_Counterparty.sql.gz) (Block #827,754)
-- [Counterparty (testnnet)](.indexer/bootstrap/BTNS_Counterparty_Testnet.sql.gz) (Block #2,575,960)
+- [Counterparty (mainnet)](.indexer/bootstrap/BTNS_Counterparty.sql.gz) (Block #830,458)
+- [Counterparty (testnnet)](.indexer/bootstrap/BTNS_Counterparty_Testnet.sql.gz) (Block #2,578,131)
 
 
 # BTNS Explorers
