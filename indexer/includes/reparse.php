@@ -2,17 +2,17 @@
 /*********************************************************************
  * reparse.php - Handles reparsing the ledger to re-validate all txs
  ********************************************************************/
-function btnsReparse($block_index=null){
+function btnsReparse($block_index=null, $start_index=null){
     global $mysqli, $runtime;
 
     // Placeholder for any error message
     $error = false;
 
     // Notify user of start of reparse
-    print "Reparsing all transactions...\n";
+    print "Reparsing transactions...\n";
 
-    // Start parsing transactions starting at the first block
-    $block   = FIRST_BLOCK;
+    // Start reparsing transactions at the first block or the given start_index
+    $block   = (isset($start_index) && is_numeric($start_index)) ? $start_index : FIRST_BLOCK;
     $current = $block_index;
 
     // Loop through the blocks until we are current
