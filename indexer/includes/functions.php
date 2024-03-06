@@ -1811,56 +1811,84 @@ function getBlockDataHashes($block=null){
     return $info;
 }
 
-// Get block hashes using credits/debits/transactions table data
+
+// Get block hashes using credits/debits/transactions table data and previous hash
 function getBlockHashes($block=null){
     global $mysqli;
     $credits = array();
     $debits  = array();
     $txlist  = array();
     $info    = array();
-    // Get all block data from credits table
-    $results = $mysqli->query("SELECT * FROM credits WHERE block_index<='{$block}' ORDER BY block_index ASC, tick_id ASC, address_id ASC, amount DESC");
+    $hashes  = array();
+    // Get data from credits table
+    $results = $mysqli->query("SELECT * FROM credits WHERE block_index='{$block}' ORDER BY block_index ASC, tick_id ASC, address_id ASC, amount DESC");
     if($results){
         if($results->num_rows){
             while($row = $results->fetch_assoc())
-                array_push($credits, (object) $row);
+                array_push($credits, $row);
         }
     } else {
         byeLog('Error while trying to lookup records in credits table');
     }
-    // Get all block data from debits table
-    $results = $mysqli->query("SELECT * FROM debits WHERE block_index<='{$block}' ORDER BY block_index ASC, tick_id ASC, address_id ASC, amount DESC");
+    // Get data from debits table
+    $results = $mysqli->query("SELECT * FROM debits WHERE block_index='{$block}' ORDER BY block_index ASC, tick_id ASC, address_id ASC, amount DESC");
     if($results){
         if($results->num_rows){
             while($row = $results->fetch_assoc())
-                array_push($debits, (object) $row);
+                array_push($debits, $row);
         }
     } else {
         byeLog('Error while trying to lookup records in debits table');
     }
     // Get all block data from transactions table
-    $results = $mysqli->query("SELECT * FROM transactions WHERE block_index<='{$block}' ORDER BY tx_index ASC");
+    $results = $mysqli->query("SELECT * FROM transactions WHERE block_index='{$block}' ORDER BY tx_index ASC");
     if($results){
         if($results->num_rows){
             while($row = $results->fetch_assoc())
-                array_push($txlist, (object) $row);
+                array_push($txlist, $row);
         }
     } else {
         byeLog('Error while trying to lookup records in transactions table');
     }
-    // Generate SHA256 hashes based on the json object
+    // Subtract one block from current block
+    $block--;
+    // Get hashes from the last block to include in this blocks hash
+    $sql = "SELECT
+                t1.hash as credits,
+                t2.hash as debits,
+                t3.hash as txlist
+            FROM
+                blocks b,
+                index_transactions t1,
+                index_transactions t2,
+                index_transactions t3
+            WHERE
+                t1.id=b.credits_hash_id AND
+                t2.id=b.debits_hash_id AND
+                t3.id=b.txlist_hash_id AND
+                b.block_index='{$block}'";
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows)
+            $hashes = $results->fetch_assoc();
+    } else {
+        byeLog('Error while trying to lookup records in transactions table');
+    }
     $tables = ['credits','debits','txlist'];
-    // Loop through the data tables and dump a quick list of tx_index and status
+    // Loop through the tables, add previous hash to data, then create new block hash
     foreach($tables as $table){
         $data = ${$table};
-        $hash = getDataHash($data);
-    // print "table={$table}\n";
-    // print "hash={$hash}\n";
-    // print "data=" . count($data) . "\n";
-        $info[$table] = ['hash' => $hash];
+        // Include the block_index and previous block hash in the hash calculation for this block hash
+        $data['block_index']   = $block;
+        $data['previous_hash'] = $hashes[$table];
+        $info[$table] = [
+            'hash' => getDataHash($data),
+            // 'data' => $data,
+        ];
     }
     return $info;
 }
+
 
 // Generalized function to handle processing a broadcast transaction
 // @param {tx}               object     Transaction object
