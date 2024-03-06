@@ -65,7 +65,6 @@ Below is a list of the defined BTNS `ACTION` commands and the function of each:
 | [`ADDRESS`](./actions/ADDRESS.md)     | Configures address specific options                                                               |
 | [`AIRDROP`](./actions/AIRDROP.md)     | Transfer/Distribute `token` supply to a `LIST`                                                    |
 | [`BATCH`](./actions/BATCH.md)         | Execute multiple BTNS `ACTION` commands in a single transaction                                   |
-| [`BET`](./actions/BET.md)             | Bet `token` on `broadcast` oracle feed outcomes                                                   |
 | [`CALLBACK`](./actions/CALLBACK.md)   | Return all `token` supply to owner address after a set block, in exchange for a different `token` |
 | [`DESTROY`](./actions/DESTROY.md)     | Destroy `token` supply forever                                                                    |
 | [`DISPENSER`](./actions/DISPENSER.md) | Create a dispenser (vending machine) to dispense a `token` when triggered                         |
