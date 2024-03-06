@@ -62,6 +62,10 @@ initDB();
 // Create a lock file, and bail if we detect an instance is already running
 createLockFile();
 
+// Define global assoc arrays to track address/ticker changes
+$addresses = [];
+$tickers   = [];
+
 // Handle rollbacks
 if($rollback)
     btnsRollback($rollback);
@@ -129,4 +133,7 @@ while($block <= $current){
 // Remove the lockfile now that we are done running
 removeLockFile();
 
-print "Total Execution time: " . $runtime->finish() ." seconds\n";
+// Print out information on the total runtime 
+printRuntime($runtime->finish());
+
+?>

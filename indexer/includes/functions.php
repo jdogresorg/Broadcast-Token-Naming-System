@@ -26,7 +26,6 @@ function createLockFile($file=null){
     }
 }
 
-
 // Handle removing a lockfile
 function removeLockFile($file=null){
     $lockFile = ($file!='') ? $file : LOCKFILE;
@@ -144,7 +143,6 @@ function createTicker( $tick=null ){
         byeLog('Error while trying to lookup record in index_tickers table');
     }
 }
-
 
 // Create records in the 'index_statuses' table and return record id
 function createStatus( $status=null ){
@@ -313,7 +311,6 @@ function createIssue( $data=null ){
         byeLog('Error while trying to lookup record in issues table');
     }
 }
-
 
 // Create record in `mints` table
 function createMint( $data=null ){
@@ -547,9 +544,6 @@ function createToken( $data=null ){
     }
 }
 
-
-
-
 // Create record in `credits` table
 function createCredit( $action=null, $block_index=null, $event=null, $tick=null, $amount=null, $address=null ){
     global $mysqli;
@@ -659,10 +653,13 @@ function createBlock( $block=null ){
         byeLog('Error while trying to lookup records in credits table');
     }
     // Get a list of hashes for this block
-    $info = getBlockHashes($block);
-    $credits_hash_id = createTransaction($info['credits']['hash']);
-    $debits_hash_id  = createTransaction($info['debits']['hash']);
-    $txlist_hash_id  = createTransaction($info['txlist']['hash']);
+    $info    = getBlockHashes($block);
+    $credits = $info['credits']['hash'];
+    $debits  = $info['debits']['hash'];
+    $txlist  = $info['txlist']['hash'];
+    $credits_hash_id = createTransaction($credits);
+    $debits_hash_id  = createTransaction($debits);
+    $txlist_hash_id  = createTransaction($txlist);
     // Check if record already exists
     $results = $mysqli->query("SELECT id FROM blocks WHERE block_index='{$block}'");
     if($results){
@@ -805,7 +802,6 @@ function createListEdit($data=null, $item=null, $status=null ){
     }
 }
 
-
 // Create record in `list_items` table
 function createListItem($data=null, $item=null){
     global $mysqli;
@@ -830,7 +826,6 @@ function createListItem($data=null, $item=null){
         byeLog('Error while trying to lookup record in list_edits table');
     }
 }
-
 
 // Delete records in lists, list_items, and list_edits tables
 function deleteLists($list=null, $rollback=null){
@@ -862,14 +857,19 @@ function deleteLists($list=null, $rollback=null){
     }
 }
 
-
-// Handle getting token information for a given tick
-function getTokenInfo($tick=null, $tick_id=null, $block_index=null){
+// Handle getting token information using issues table
+function getTokenInfo($tick=null, $tick_id=null, $block_index=null, $tx_index=null){
     global $mysqli;
-    $data = false;
+    $data    = false;
+    $whereSql = "";
     if(!is_null($tick) && is_null($tick_id))
         $tick_id = createTicker($tick);
-    // Get data from tokens table
+    // If a block index was given, only lookup tokens created before or in given block
+    if(isset($block_index) && is_numeric($block_index))
+        $whereSql .= " AND t1.block_index <= {$block_index}";
+    if(isset($tx_index) && is_numeric($tx_index))
+        $whereSql .= " AND t1.tx_index < '{$tx_index}'";
+    // Get data from issues table
     $sql = "SELECT 
                 t2.tick,
                 t1.max_supply,
@@ -877,7 +877,6 @@ function getTokenInfo($tick=null, $tick_id=null, $block_index=null){
                 t1.decimals,
                 t1.description,
                 t1.block_index,
-                t1.supply,
                 t1.lock_supply,
                 t1.lock_mint,
                 t1.lock_description,
@@ -892,53 +891,71 @@ function getTokenInfo($tick=null, $tick_id=null, $block_index=null){
                 t1.mint_address_max,
                 t1.mint_start_block,
                 t1.mint_stop_block,
-                a.address as owner
+                a1.address as owner,
+                a2.address as transfer
             FROM 
-                tokens t1
+                issues t1
+                LEFT JOIN index_addresses a2 on (a2.id=t1.transfer_id)
                 LEFT JOIN index_tickers t3 on (t3.id=t1.callback_tick_id)
                 LEFT JOIN index_transactions t4 on (t4.id=t1.allow_list_id)
                 LEFT JOIN index_transactions t5 on (t5.id=t1.block_list_id),
                 index_tickers t2,
-                index_addresses a
+                index_addresses a1
             WHERE 
                 t2.id=t1.tick_id AND
-                a.id=t1.owner_id AND
-                t1.tick_id='{$tick_id}'";
-    // If a block index was given, only lookup token information before given block
-    if(isset($block_index) && is_numeric($block_index))
-        $sql .= " AND t1.block_index <= {$block_index}";
+                a1.id=t1.source_id AND
+                t1.status_id=1 AND
+                t1.tick_id='{$tick_id}' 
+                {$whereSql}
+            ORDER BY tx_index ASC";
     // print $sql;
     $results = $mysqli->query($sql);
     if($results){
         if($results->num_rows){
-            $row  = (object) $results->fetch_assoc();
-            $data = (object) array(
-                'TICK'              => $row->tick,
-                'BLOCK_INDEX'       => $row->block_index,
-                'MAX_SUPPLY'        => $row->max_supply,
-                'MAX_MINT'          => $row->max_mint,
-                'DECIMALS'          => $row->decimals,
-                'DESCRIPTION'       => $row->description,
-                'SUPPLY'            => $row->supply,
-                'OWNER'             => $row->owner,
-                'LOCK_SUPPLY'       => $row->lock_supply,
-                'LOCK_MINT'         => $row->lock_mint,
-                'LOCK_DESCRIPTION'  => $row->lock_description,
-                'LOCK_RUG'          => $row->lock_rug,
-                'LOCK_SLEEP'        => $row->lock_sleep,
-                'LOCK_CALLBACK'     => $row->lock_callback,
-                'CALLBACK_TICK'     => $row->callback_tick,
-                'CALLBACK_BLOCK'    => $row->callback_block,
-                'CALLBACK_AMOUNT'   => $row->callback_amount,
-                'ALLOW_LIST'        => $row->allow_list,
-                'BLOCK_LIST'        => $row->block_list,
-                'MINT_ADDRESS_MAX'  => $row->mint_address_max,
-                'MINT_START_BLOCK'  => $row->mint_start_block,
-                'MINT_STOP_BLOCK'   => $row->mint_stop_block
-            );
+            // Loop through issues before tx_index
+            while($row = $results->fetch_assoc()){
+                $row  = (object) $row;
+                $arr  = array(
+                    'TICK'              => $row->tick,
+                    'OWNER'             => ($row->transfer) ? $row->transfer : $row->owner,
+                    'MAX_SUPPLY'        => $row->max_supply,
+                    'MAX_MINT'          => $row->max_mint,
+                    'DECIMALS'          => $row->decimals,
+                    'DESCRIPTION'       => $row->description,
+                    'OWNER'             => $row->owner,
+                    'LOCK_SUPPLY'       => $row->lock_supply,
+                    'LOCK_MINT'         => $row->lock_mint,
+                    'LOCK_DESCRIPTION'  => $row->lock_description,
+                    'LOCK_RUG'          => $row->lock_rug,
+                    'LOCK_SLEEP'        => $row->lock_sleep,
+                    'LOCK_CALLBACK'     => $row->lock_callback,
+                    'CALLBACK_TICK'     => $row->callback_tick,
+                    'CALLBACK_BLOCK'    => $row->callback_block,
+                    'CALLBACK_AMOUNT'   => $row->callback_amount,
+                    'ALLOW_LIST'        => $row->allow_list,
+                    'BLOCK_LIST'        => $row->block_list,
+                    'MINT_ADDRESS_MAX'  => $row->mint_address_max,
+                    'MINT_START_BLOCK'  => $row->mint_start_block,
+                    'MINT_STOP_BLOCK'   => $row->mint_stop_block
+                );
+                // build out token state before tx_index
+                // TODO: will need to massage the data a bit more to build out accurate token state... this is quick and dirty
+                foreach($arr as $key => $value){
+                    // Disallow unsetting of LOCK flags
+                    if(substr($key,0,5)=='LOCK_')
+                        if($data[$key]==1)
+                            continue;
+                    $data[$key] = $value;
+                }
+            }
         } 
     } else {
         byeLog("Error while trying to lookup token info for : {$tick}");
+    }
+    if($data){
+        // Get token supply at the given tx_index
+        $data['SUPPLY'] = getTokenSupply($tick, null, $tx_index); 
+        $data = (object) $data;
     }
     return $data;
 }
@@ -1034,7 +1051,7 @@ function getTokenDecimalPrecision($tick_id=null){
 }
 
 // Handle getting credits or debits records for a given address
-function getAddressCreditDebit($table=null, $address=null, $action=null, $block=null){
+function getAddressCreditDebit($table=null, $address=null, $action=null, $block=null, $tx_index=null){
     global $mysqli;
     $data = array(); // Assoc array to store tick/credits
     $type = gettype($address);
@@ -1044,6 +1061,14 @@ function getAddressCreditDebit($table=null, $address=null, $action=null, $block=
         $address_id = createAddress($address);
     if(isset($action))
         $action_id = createAction($action);
+    // Build out custom WHERE sql
+    $whereSql = "";
+    if(isset($action))
+        $whereSql .= " AND t1.action_id={$action_id}";
+    if(isset($block) && is_numeric($block))
+        $whereSql .= " AND t1.block_index < {$block}";
+    if(isset($tx_index) && is_numeric($tx_index))
+        $whereSql .= " AND t3.tx_index < {$tx_index}";
     if(in_array($table,array('credits','debits'))){
         // Get data from the table
         $sql = "SELECT 
@@ -1052,14 +1077,13 @@ function getAddressCreditDebit($table=null, $address=null, $action=null, $block=
                     t2.decimals
                 FROM
                     {$table} t1,
-                    tokens t2
+                    tokens t2,
+                    transactions t3
                 WHERE 
                     t2.tick_id=t1.tick_id AND
-                    t1.address_id='{$address_id}'";
-        if(isset($action))
-            $sql .= " AND t1.action_id={$action_id}";
-        if(isset($block) && is_numeric($block))
-            $sql .= " AND t1.block_index < {$block}";
+                    t3.tx_hash_id=t1.event_id AND
+                    t1.address_id='{$address_id}'
+                    {$whereSql}";
         $results = $mysqli->query($sql);
         if($results){
             if($results->num_rows){
@@ -1079,15 +1103,15 @@ function getAddressCreditDebit($table=null, $address=null, $action=null, $block=
 }
 
 // Get address balances using credits/debits table data
-function getAddressBalances($address=null, $tick=null, $block=null){
+function getAddressBalances($address=null, $tick=null, $block=null, $tx_index=null){
     global $mysqli;
     $type = gettype($address);
     if($type==='integer' || is_numeric($address))
         $address_id = $address;
     if($type==='string' && !is_numeric($address))
         $address_id = createAddress($address);
-    $credits  = getAddressCreditDebit('credits', $address_id, null, $block);
-    $debits   = getAddressCreditDebit('debits',  $address_id, null, $block);
+    $credits  = getAddressCreditDebit('credits', $address_id, null, $block, $tx_index);
+    $debits   = getAddressCreditDebit('debits',  $address_id, null, $block, $tx_index);
     $decimals = array(); // Assoc array to store tick/decimals
     $balances = array(); // Assoc array to store tick/balance
     foreach($credits as $tick_id => $amount)
@@ -1133,11 +1157,10 @@ function getAddressTableBalances($address=null){
     return $balances;
 }
 
-
 // Create/Update/Delete records in the 'balances' table
 function updateAddressBalance( $address=null, $rollback=false){
     global $mysqli;
-    // print "updateAddressBalance address={$address}\n";
+    // print "updateAddressBalance address={$address} rollback={$rollback}\n";
     $type = gettype($address);
     if($type==='integer' || is_numeric($address))
         $address_id = $address;
@@ -1187,8 +1210,6 @@ function updateAddressBalance( $address=null, $rollback=false){
     }
 }
 
-
-
 // Handle updating address balances (credits-debits=balance)
 // @param {address}  boolean Full update
 // @param {address}  string  Address string
@@ -1198,10 +1219,11 @@ function updateBalances( $address=null, $rollback=false ){
     global $mysqli;
     $addrs = [];
     $type  = gettype($address);
-    if($type==='array')
+    if($type==='array'){
         foreach($address as $addr)
             if(!is_null($addr) && $addr!='')
                 array_push($addrs, $addr);
+    }
     if($type==='string')
         array_push($addrs, $address);
     // Dump full list of addresses
@@ -1219,7 +1241,6 @@ function updateBalances( $address=null, $rollback=false ){
     foreach($addrs as $address)
         updateAddressBalance($address, $rollback);
 }
-
 
 // Handle updating token information (supply, price, etc)
 // @param {tickers} boolean Full update
@@ -1267,7 +1288,10 @@ function updateTokenInfo( $tick=null ){
 }
 
 // Get token supply from credits/debits table (credits - debits = supply)
-function getTokenSupply( $tick=null, $block_index=null ){
+// @param {tick}            string  Ticker name
+// @param {block_index}     integer Block Index 
+// @param {tx_index}        integer tx_index of transaction
+function getTokenSupply( $tick=null, $block_index=null, $tx_index=null ){
     global $mysqli;
     $credits = 0;
     $debits  = 0;
@@ -1276,8 +1300,23 @@ function getTokenSupply( $tick=null, $block_index=null ){
     $tick_id = createTicker($tick);
     // Get info on decimal precision
     $decimals = getTokenDecimalPrecision($tick_id);
+    $whereSql = "";
+    // Filter by block_index
+    if(is_numeric($block))
+        $whereSql .= " AND m.block_index <= '{$block}'";
+    // Filter by tx_index
+    if(is_numeric($tx_index))
+        $whereSql .= " AND t.tx_index < {$tx_index}";
     // Get Credits 
-    $sql = "SELECT CAST(SUM(amount) AS DECIMAL(60,$decimals)) as credits FROM credits WHERE tick_id='{$tick_id}' AND block_index<='{$block}'";
+    $sql = "SELECT 
+                CAST(SUM(m.amount) AS DECIMAL(60,$decimals)) as credits 
+            FROM 
+                credits m,
+                transactions t
+            WHERE 
+                m.event_id=t.tx_hash_id AND
+                m.tick_id='{$tick_id}'
+                {$whereSql}";
     $results = $mysqli->query($sql);
     if($results){
         if($results->num_rows){
@@ -1288,7 +1327,15 @@ function getTokenSupply( $tick=null, $block_index=null ){
         byeLog('Error while trying to get list of credits');
     }
     // Get Debits
-    $sql = "SELECT CAST(SUM(amount) AS DECIMAL(60,$decimals)) as debits FROM debits WHERE tick_id='{$tick_id}' AND block_index<='{$block}'";
+    $sql = "SELECT 
+                CAST(SUM(m.amount) AS DECIMAL(60,$decimals)) as debits 
+            FROM 
+                debits m,
+                transactions t
+            WHERE 
+                m.event_id=t.tx_hash_id AND
+                m.tick_id='{$tick_id}'
+                {$whereSql}";
     $results = $mysqli->query($sql);
     if($results){
         if($results->num_rows){
@@ -1323,7 +1370,6 @@ function getTokenSupplyBalance( $tick=null ){
     return $supply;
 }
 
-
 // Handle doing VERY lose validation on an address
 function isCryptoAddress( $address=null ){
     $len   = strlen($address);
@@ -1335,7 +1381,6 @@ function isCryptoAddress( $address=null ){
         return true;
     return false;
 }
-
 
 // Generalized function to invoke BTNS action commands
 function btnsAction($action=null, $params=null, $data=null, $error=null){
@@ -1354,7 +1399,6 @@ function btnsAction($action=null, $params=null, $data=null, $error=null){
     if($action=='SEND')         btnsSend($params, $data, $error);
     if($action=='SWEEP')        btnsSweep($params, $data, $error);
 }
-
 
 // Create records in the 'tx_index_types' table and return record id
 function createTxType( $type=null ){
@@ -1405,7 +1449,6 @@ function getTxIndex($tx_hash=null){
         bye('Error while trying to lookup tx_index in the transactions table');
     }
 }
-
 
 // Create records in the 'transactions' table
 function createTxIndex( $data=null ){
@@ -1746,12 +1789,12 @@ function consolidateCreditDebitRecords($type=null, $records=null){
 }
 
 // Get total amount of credit or debit records for a given address, ticker, and action
-function getActionCreditDebitAmount($table=null, $action=null, $tick=null, $address=null){
+function getActionCreditDebitAmount($table=null, $action=null, $tick=null, $address=null, $tx_index=null){
     global $mysqli;
     $total   = 0;
     $tick_id = createTicker($tick);
     $addr_id = createAddress($address);
-    $data    = getAddressCreditDebit($table, $addr_id, $action);
+    $data    = getAddressCreditDebit($table, $addr_id, $action, null, $tx_index);
     if($data[$tick_id])
         $total = $data[$tick_id];
     return $total;
@@ -1810,7 +1853,6 @@ function getBlockDataHashes($block=null){
     $info = array_merge($info, getBlockHashes($block));
     return $info;
 }
-
 
 // Get block hashes using credits/debits/transactions table data and previous hash
 function getBlockHashes($block=null){
@@ -1889,7 +1931,6 @@ function getBlockHashes($block=null){
     return $info;
 }
 
-
 // Generalized function to handle processing a broadcast transaction
 // @param {tx}               object     Transaction object
 // @param {tx->source}       string     Source address
@@ -1898,9 +1939,6 @@ function getBlockHashes($block=null){
 // @param {$tx->tx_hash}     string     Transaction hash
 // @param {$tx->block_index} string     Block index of tx
 function processTransaction($tx=null){
-    // Assoc arrays to track address/ticker changes
-    $addresses = array();
-    $tickers   = array();
     $error     = false;
     $tx        = (object) $tx;
     $prefixes  = array('/^bt:/','/^btns:/');
@@ -2013,6 +2051,38 @@ function validTickerBeforeTxIndex($tick=null, $txIndex=null){
     if($issueIndex < $txIndex)
         return true;
     return false;
+}
+
+// Handle adding a ticker to the $addresses assoc array and $tickers array
+function addAddressTicker($address=null, $tick=null){
+    global $addresses, $tickers;
+    $type = gettype($tick);
+    $list = (isset($addresses[$address])) ? $addresses[$address] : [];
+    // If $tick is an array, use the array
+    if($type=="array"){
+        $list = $tick;
+    } else {
+        // Add TICK to $addresses
+        if(!in_array($tick, $list))
+            array_push($list, $tick);
+        // Add TICK to $tickers
+        if(!in_array($tick, $tickers))
+            array_push($tickers, $tick);
+    }
+    $addresses[$address] = $list;
+}
+
+// Handle displaying runtime information in a nice format
+function printRuntime($seconds){
+    $msg   = "";
+    $hours = floor($seconds / 3600);
+    $mins  = floor(($seconds / 60) % 60);
+    $secs  = $seconds % 60;
+    $ms    = explode(".",$seconds)[1];
+    if($hours>0) $msg .= "{$hours} hours ";
+    if($mins>0)  $msg .= "{$mins} minutes ";
+    if($secs>0)  $msg .= "{$secs}.{$ms} seconds";
+    print "Total Execution time: {$msg}\n";
 }
 
 ?>

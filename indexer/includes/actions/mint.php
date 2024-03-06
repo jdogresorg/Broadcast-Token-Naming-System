@@ -13,7 +13,7 @@
  * 
  ********************************************************************/
 function btnsMint($params=null, $data=null, $error=null){
-    global $mysqli, $reparse, $tickers, $addresses;
+    global $mysqli, $reparse, $addresses, $tickers;
 
     // Define list of known FORMATS
     $formats = array(
@@ -36,7 +36,14 @@ function btnsMint($params=null, $data=null, $error=null){
         $data = setActionParams($data, $params, $formats[$format]);
 
     // Get information on BTNS token
-    $btInfo = getTokenInfo($data->TICK);
+    $btInfo = getTokenInfo($data->TICK, null, $data->BLOCK_INDEX, $data->TX_INDEX);
+
+    // Clone the raw data for storage in mints table
+    $mint = clone($data);
+
+    // Verify TICK is valid before MINT
+    if($btInfo->BLOCK_INDEX==$data->BLOCK_INDEX && !validTickerBeforeTxIndex($data->TICK, $data->TX_INDEX))
+        unset($btInfo);
 
     // Set divisible flag
     $divisible = ($btInfo->DECIMALS==0) ? 0 : 1; 
@@ -93,7 +100,7 @@ function btnsMint($params=null, $data=null, $error=null){
         $error = 'invalid: DESTINATION (not authorized)';
 
     // Verify minting AMOUNT will not exceed MINT_ADDRESS_MAX
-    if(!$error && isset($data->MINT_ADDRESS_MAX) && $data->MINT_ADDRESS_MAX > 0 && (bcadd(getActionCreditDebitAmount('credits', 'MINT', $data->TICK, $data->SOURCE),$data->AMOUNT,$data->DECIMALS) > $data->MINT_ADDRESS_MAX))
+    if(!$error && isset($data->MINT_ADDRESS_MAX) && $data->MINT_ADDRESS_MAX > 0 && (bcadd(getActionCreditDebitAmount('credits', 'MINT', $data->TICK, $data->SOURCE, $data->TX_INDEX),$data->AMOUNT,$data->DECIMALS) > $data->MINT_ADDRESS_MAX))
         $error = 'invalid: mint exceeds MINT_ADDRESS_MAX';
 
     // Verify minting begins at MINT_START_BLOCK
@@ -105,26 +112,16 @@ function btnsMint($params=null, $data=null, $error=null){
         $error = 'invalid: MINT_STOP_BLOCK';
 
     // Determine final status
-    $data->STATUS = $status = ($error) ? $error : 'valid';
+    $data->STATUS = $mint->STATUS = $status = ($error) ? $error : 'valid';
 
     // Print status message 
     print "\n\t MINT : {$data->TICK} : {$data->AMOUNT} : {$data->STATUS}";
 
     // Create record in mints table
-    createMint($data);
+    createMint($mint);
 
     // If this was a valid transaction, then mint any actual supply
     if($status=='valid'){
-
-        // Add the ticker to the tickers array
-        $tickers[$data->TICK] = 1;
-
-        // Add SOURCE address to the addresses array
-        $addresses[$data->SOURCE] = 1;
-
-        // Add DESTINATION address to the addresses array
-        if($data->DESTINATION)
-            $addresses[$data->DESTINATION] = 1;
 
         // Credit MINT_SUPPLY to source address
         if($data->AMOUNT){
@@ -140,7 +137,7 @@ function btnsMint($params=null, $data=null, $error=null){
         // If this is a reparse, bail out before updating balances and token information
         if($reparse)
             return;
-        
+
         // Update balances for addresses
         updateBalances([$data->SOURCE, $data->DESTINATION]);
 

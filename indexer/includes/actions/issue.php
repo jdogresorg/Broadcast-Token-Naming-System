@@ -36,7 +36,7 @@
  * 
  ********************************************************************/
 function btnsIssue( $params=null, $data=null, $error=null){
-    global $mysqli, $reparse, $tickers, $addresses;
+    global $mysqli, $reparse, $addresses, $tickers;
 
     // Define list of known FORMATS
     $formats = array(
@@ -98,15 +98,18 @@ function btnsIssue( $params=null, $data=null, $error=null){
         $error = 'invalid: GAS_ADDRESS';
 
     // Get information on BTNS token
-    $btInfo        = getTokenInfo($data->TICK);
+    $btInfo        = getTokenInfo($data->TICK, null, $data->BLOCK_INDEX, $data->TX_INDEX);
     $isDistributed = isDistributed($data->TICK);
+
+    // Clone the raw data for storage in issues table
+    $issue = clone($data);
 
     // Populate empty PARAMS with current setting
     if($btInfo){
         foreach($btInfo as $key => $value)
             if(!$data->{$key})
                 $data->{$key} = $value;
-    } 
+    }
 
     // If BTNS Token does not exist yet, do some additional validations
     if(!$btInfo){
@@ -164,11 +167,11 @@ function btnsIssue( $params=null, $data=null, $error=null){
     }
 
     // Verify MAX_SUPPLY min/max
-    if(!$error && isset($data->MAX_SUPPLY) && ($data->MAX_SUPPLY < MIN_TOKEN_SUPPLY || $data->MAX_SUPPLY > MAX_TOKEN_SUPPLY))
+    if(!$error && isset($data->MAX_SUPPLY) && $data->MAX_SUPPLY > 0 && ($data->MAX_SUPPLY < MIN_TOKEN_SUPPLY || $data->MAX_SUPPLY > MAX_TOKEN_SUPPLY))
         $error = 'invalid: MAX_SUPPLY (min/max)';
 
     // Verify MAX_SUPPLY is not set below current SUPPLY
-    if(!$error && isset($data->MAX_SUPPLY) && $data->MAX_SUPPLY < $data->SUPPLY)
+    if(!$error && isset($data->MAX_SUPPLY) && $data->MAX_SUPPLY > 0 && $data->MAX_SUPPLY < getTokenSupply($data->TICK, $data->BLOCK_INDEX, $data->TX_INDEX))
         $error = 'invalid: MAX_SUPPLY < SUPPLY';
 
     // Verify SUPPLY is at least MIN_TOKEN_SUPPLY before allowing LOCK_SUPPLY
@@ -272,26 +275,16 @@ function btnsIssue( $params=null, $data=null, $error=null){
         $error = 'invalid: MINT_STOP_BLOCK < MINT_START_BLOCK';
 
     // Determine final status
-    $data->STATUS = $status = ($error) ? $error : 'valid';
+    $data->STATUS = $issue->STATUS = $status = ($error) ? $error : 'valid';
 
     // Print status message 
     print "\n\t ISSUE : {$data->TICK} : {$data->STATUS}";
 
     // Create record in issues table
-    createIssue($data);
+    createIssue($issue);
 
     // If this was a valid transaction, then create the token record, and perform any additional actions
     if($status=='valid'){
-
-        // Add the ticker to the tickers array
-        $tickers[$data->TICK] = 1;
-
-        // Add any addresses to the addresses array
-        $addresses[$data->SOURCE] = 1;
-        if($data->TRANSFER)
-            $addresses[$data->TRANSFER] = 1;
-        if($data->TRANSFER_SUPPLY)
-            $addresses[$data->TRANSFER_SUPPLY] = 1;
 
         // Support token ownership transfers
         $data->OWNER  = (isset($data->TRANSFER)) ? $data->TRANSFER : $data->SOURCE;

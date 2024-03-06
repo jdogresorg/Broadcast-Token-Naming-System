@@ -17,7 +17,7 @@
  * 
  ********************************************************************/
 function btnsSend($params=null, $data=null, $error=null){
-    global $mysqli, $reparse, $tickers, $addresses;
+    global $mysqli, $reparse, $addresses, $tickers;
 
     // Define list of known FORMATS
     $formats = array(
@@ -87,15 +87,11 @@ function btnsSend($params=null, $data=null, $error=null){
             $ticks[$tick] = getTokenInfo($tick);
     }
 
-    // Get source address balances 
-    // TODO : add block index to get balances as of block X
-    $balances = getAddressBalances($data->SOURCE);
+    // Get source address balances
+    $balances = getAddressBalances($data->SOURCE, null, $data->BLOCK_INDEX, $data->TX_INDEX);
 
     // Store original error value
     $origError = $error;
-
-    // Add SOURCE address to the addresses array
-    $addresses[$data->SOURCE] = 1;
 
     // Array of credits and debits
     $credits = [];
@@ -178,11 +174,8 @@ function btnsSend($params=null, $data=null, $error=null){
         // If this was a valid transaction, then add records to the credits and debits array
         if($status=='valid'){
 
-            // Add ticker to tickers array
-            $tickers[$send->TICK] = 1; 
-
-            // Add destination address to addresses array
-            $addresses[$send->DESTINATION] = 1;
+            // Store the DESTINATION and TICK in addresses list
+            addAddressTicker($send->DESTINATION, $send->TICK);
 
             // Add ticker and amount to debits array
             array_push($debits,  array($send->TICK, $send->AMOUNT));
@@ -212,8 +205,10 @@ function btnsSend($params=null, $data=null, $error=null){
     if($reparse)
         return;
 
+    // Store the SOURCE and TICKERS in addresses list
+    addAddressTicker($send->SOURCE, $tickers);
+
     // Update address balances
-    // TODO: Optimize this to only update balances for ticks, not full balances... its way too slow now
     updateBalances(array_keys($addresses));
 }
 

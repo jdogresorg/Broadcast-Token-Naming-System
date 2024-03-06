@@ -74,12 +74,11 @@ function btnsReparse($block_index=null, $start_index=null){
         $block++;
     }    
 
-    // Notify user of the total reparse time
-    print "Total Execution time: " . $runtime->finish() ." seconds\n";
+    // Print out information on the total runtime
+    printRuntime($runtime->finish());
 
     // Notify user reparse is complete
     byeLog("Reparse complete.");
-
 }
 
 ?>
