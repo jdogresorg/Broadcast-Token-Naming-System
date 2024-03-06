@@ -62,6 +62,7 @@ Below is a list of the defined BTNS `ACTION` commands and the function of each:
 
 | ACTION                                | Description                                                                                       | 
 | ------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| [`ADDRESS`](./actions/ADDRESS.md)     | Configures address specific options.                                                              |
 | [`AIRDROP`](./actions/AIRDROP.md)     | Transfer/Distribute `token` supply to a `LIST`                                                    |
 | [`BATCH`](./actions/BATCH.md)         | Execute multiple BTNS `ACTION` commands in a single transaction                                   |
 | [`BET`](./actions/BET.md)             | Bet `token` on `broadcast` oracle feed outcomes                                                   |
