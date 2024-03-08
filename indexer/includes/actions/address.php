@@ -67,30 +67,6 @@ function btnsAddress($params=null, $data=null, $error=null){
     // Create record in addresses table
     createAddressOption($data);
 
-    // If this was a valid transaction, then mint any actual supply
-    if($status=='valid'){
-
-        // Credit MINT_SUPPLY to source address
-        if($data->AMOUNT){
-            createCredit('MINT', $data->BLOCK_INDEX, $data->TX_HASH, $data->TICK, $data->AMOUNT, $data->SOURCE);
-
-            // Transfer AMOUNT to DESTINATION address
-            if($data->DESTINATION){
-                createDebit('MINT', $data->BLOCK_INDEX, $data->TX_HASH, $data->TICK, $data->AMOUNT, $data->SOURCE);
-                createCredit('MINT', $data->BLOCK_INDEX, $data->TX_HASH, $data->TICK, $data->AMOUNT, $data->DESTINATION);
-            }
-        }
-
-        // If this is a reparse, bail out before updating balances and token information
-        if($reparse)
-            return;
-
-        // Update balances for addresses
-        updateBalances([$data->SOURCE, $data->DESTINATION]);
-
-        // Update supply for token
-        updateTokenInfo($data->TICK);
-    }
 }
 
 ?>
