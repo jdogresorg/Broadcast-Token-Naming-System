@@ -1280,12 +1280,9 @@ function updateTokenInfo( $tick=null ){
     $tick_id = createTicker($tick);
     // Lookup current token information
     $data = getTokenInfo($tick);
-    if($data){
-        // Get current token supply (current token supply)
-        $data->SUPPLY = getTokenSupply($tick);
-        // Update the record in `tokens` table
+    // Update the record in `tokens` table
+    if($data)
         createToken($data);
-    }
 }
 
 // Get token supply from credits/debits table (credits - debits = supply)
