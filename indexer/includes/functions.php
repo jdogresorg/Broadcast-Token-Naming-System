@@ -1382,6 +1382,7 @@ function isCryptoAddress( $address=null ){
 
 // Generalized function to invoke BTNS action commands
 function btnsAction($action=null, $params=null, $data=null, $error=null){
+    if($action=='ADDRESS')      btnsAddress($params, $data, $error);
     if($action=='AIRDROP')      btnsAirdrop($params, $data, $error);
     if($action=='BATCH')        btnsBatch($params, $data, $error);
     if($action=='BET')          btnsBet($params, $data, $error);
@@ -1959,9 +1960,19 @@ function processTransaction($tx=null){
     if(in_array($action,array('DEPLOY','MINT','TRANSFER')) && isLegacyBTNSFormat($params))
         array_splice($params, 0, 0, 0);
 
-    // Support old BRC20/SRC20 actions 
-    if($action=='TRANSFER') $action = 'SEND';
-    if($action=='DEPLOY')   $action = 'ISSUE';
+    // Define ACTION aliases
+    $aliases = array(
+        // Old BRC20/SRC20 actions 
+        'TRANSFER' => 'SEND',
+        'DEPLOY'   => 'ISSUE',
+        // Short action aliases
+        'ADDR'     => 'ADDRESS'
+    );
+
+    // Set ACTION for any aliases
+    foreach($aliases as $alias => $act)
+        if($action==$alias)
+            $action = $act;
 
     // Define basic BTNS transaction data object
     $data = (object) array(
@@ -2088,8 +2099,46 @@ function printRuntime($seconds){
     $ms    = explode(".",$seconds)[1];
     if($hours>0) $msg .= "{$hours} hours ";
     if($mins>0)  $msg .= "{$mins} minutes ";
-    if($secs>0)  $msg .= "{$secs}.{$ms} seconds";
+    if($secs>0||$ms>0)  $msg .= "{$secs}.{$ms} seconds";
     print "Total Execution time: {$msg}\n";
+}
+
+// Create record in `addresses` table
+function createAddressOption( $data=null ){
+    global $mysqli;
+    $source_id      = createAddress($data->SOURCE);
+    $tx_hash_id     = createTransaction($data->TX_HASH);
+    $block_index    = $mysqli->real_escape_string($data->BLOCK_INDEX);
+    $status_id      = createStatus($data->STATUS);
+    $tx_index       = $mysqli->real_escape_string($data->TX_INDEX);
+    $fee_preference = $mysqli->real_escape_string($data->FEE_PREFERENCE);
+    $require_memo   = $mysqli->real_escape_string($data->REQUIRE_MEMO);
+    // Check if record already exists
+    $results = $mysqli->query("SELECT tx_index FROM addresses WHERE tx_hash_id='{$tx_hash_id}'");
+    if($results){
+        if($results->num_rows){
+            // UPDATE record
+            $sql = "UPDATE
+                        addresses
+                    SET
+                        fee_preference='{$fee_preference}',
+                        require_memo='{$require_memo}',
+                        source_id='{$source_id}',
+                        block_index='{$block_index}',
+                        tx_index='{$tx_index}',
+                        status_id='{$status_id}'
+                    WHERE 
+                        tx_hash_id='{$tx_hash_id}'";
+        } else {
+            // INSERT record
+            $sql = "INSERT INTO addresses (tx_index, source_id, tx_hash_id, block_index, fee_preference, require_memo, status_id) values ('{$tx_index}', '{$source_id}', '{$tx_hash_id}', '{$block_index}', '{$fee_preference}', '{$require_memo}', '{$status_id}')";
+        }
+        $results = $mysqli->query($sql);
+        if(!$results)
+            byeLog('Error while trying to create / update a record in the addresses table');
+    } else {
+        byeLog('Error while trying to lookup record in addresses table');
+    }
 }
 
 ?>

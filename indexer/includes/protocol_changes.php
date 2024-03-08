@@ -11,6 +11,7 @@ $changes = array(
     // Define `ACTION` commands and `ACTIVATION_BLOCK` for each (ALL UPPER case)
     // BTNS-420 SPEC defines when things are ACTUALLY activated
     // active here just means active for testing / debugging
+    'ADDRESS'   => array(0,  10,   0,     9999999,      999999999),
     'AIRDROP'   => array(0,  10,   0,     9999999,      999999999),
     'BATCH'     => array(0,  10,   0,     9999999,      999999999),
     'BET'       => array(0,  10,   0,     9999999,      999999999),

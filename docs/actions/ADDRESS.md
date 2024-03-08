@@ -35,3 +35,5 @@ This example sets the address to require a `MEMO` on any received `SEND`
 - `3` = Donate `FEE` to community development
 
 ## Notes
+- `ADDR` `ACTION` can be used for shorter reference to `ADDRESS` `ACTION`
+

@@ -37,9 +37,13 @@ if(NETWORK=='mainnet'){
     // First block with BTNS transaction
     define("FIRST_BLOCK",789742);
 
-    // BTNS Address 
+    // BTNS Addresses
     define('BURN_ADDRESS', "1Muhahahahhahahahahahhahahauxh9QX");
     define('GAS_ADDRESS', "1BTNSGASK5En7rFurDJ79LQ8CVYo2ecLC8");
+
+    // Donation Addresses 
+    define('DONATE_ADDRESS_1', "1BTNSGASK5En7rFurDJ79LQ8CVYo2ecLC8"); // Protocol Development
+    define('DONATE_ADDRESS_2', "1BTNSGASK5En7rFurDJ79LQ8CVYo2ecLC8"); // Community Develoment
 }
 
 // Testnet config
@@ -50,6 +54,10 @@ if(NETWORK=='testnet'){
     // BTNS Address 
     define('BURN_ADDRESS', "mvCounterpartyXXXXXXXXXXXXXXW24Hef");
     define('GAS_ADDRESS', "mvThcDEbeqog2aJ7JNj1FefUPaNdYYGqHt");
+
+    // Donation Addresses 
+    define('DONATE_ADDRESS_1', "mvThcDEbeqog2aJ7JNj1FefUPaNdYYGqHt"); // Protocol Development
+    define('DONATE_ADDRESS_2', "mvThcDEbeqog2aJ7JNj1FefUPaNdYYGqHt"); // Community Develoment
 }
 
 // Database Credentials
@@ -71,6 +79,7 @@ require_once('reparse.php');
 require_once('protocol_changes.php');
 
 // BTNS Actions
+require_once('actions/address.php');
 require_once('actions/airdrop.php');
 require_once('actions/batch.php');
 require_once('actions/bet.php');
