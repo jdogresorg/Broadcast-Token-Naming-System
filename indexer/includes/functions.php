@@ -900,19 +900,20 @@ function getTokenInfo($tick=null, $tick_id=null, $block_index=null, $tx_index=nu
                 LEFT JOIN index_transactions t4 on (t4.id=t1.allow_list_id)
                 LEFT JOIN index_transactions t5 on (t5.id=t1.block_list_id),
                 index_tickers t2,
-                index_addresses a1
+                index_addresses a1,
+                index_statuses s1
             WHERE 
                 t2.id=t1.tick_id AND
                 a1.id=t1.source_id AND
-                t1.status_id=1 AND
+                s1.id=t1.status_id AND
+                s1.status='valid' AND
                 t1.tick_id='{$tick_id}' 
                 {$whereSql}
             ORDER BY tx_index ASC";
-    // print $sql;
     $results = $mysqli->query($sql);
     if($results){
         if($results->num_rows){
-            // Loop through issues before tx_index
+            // Loop through issues 
             while($row = $results->fetch_assoc()){
                 $row  = (object) $row;
                 $arr  = array(
@@ -2032,7 +2033,16 @@ function getBroadcastTransactions($block){
 function getFirstIssuanceTxIndex($tick=null){
     global $mysqli;
     $tick_id = createTicker($tick);
-    $sql = "SELECT tx_index FROM issues WHERE tick_id={$tick_id} AND status_id=1 ORDER BY tx_index ASC LIMIT 1";
+    $sql = "SELECT 
+                tx_index 
+            FROM 
+                issues i,
+                index_statuses s
+            WHERE 
+                i.tick_id={$tick_id} AND 
+                s.id=i.status_id AND
+                s.status='valid'
+            ORDER BY tx_index ASC LIMIT 1";
     $results = $mysqli->query($sql);
     if($results){
         if($results->num_rows){
