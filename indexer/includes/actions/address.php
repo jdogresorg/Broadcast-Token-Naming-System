@@ -12,7 +12,7 @@
  * 
  ********************************************************************/
 function btnsAddress($params=null, $data=null, $error=null){
-    global $mysqli, $reparse, $addresses, $tickers;
+    global $mysqli, $reparse;
 
     // Define list of known FORMATS
     $formats = array(
