@@ -13,7 +13,7 @@ This command creates or issues a `BTNS` `token`
 | `MINT_SUPPLY`      | String | Amount of token supply to mint in immediately (default:0)                                   |
 | `TRANSFER`         | String | Address to transfer ownership of the `token` to (owner can perform future actions on token) |
 | `TRANSFER_SUPPLY`  | String | Address to transfer `MINT_SUPPLY` to (mint initial supply and transfer to address)          |
-| `LOCK_SUPPLY`      | String | Lock `MAX_SUPPLY` permanently (cannot increase `MAX_SUPPLY`)                                |
+| `LOCK_MAX_SUPPLY`  | String | Lock `MAX_SUPPLY` permanently (cannot increase `MAX_SUPPLY`)                                |
 | `LOCK_MAX_MINT`    | String | Lock `MAX_MINT` permanently (cannot edit `MAX_MINT`)                                        |
 | `LOCK_MINT`        | String | Lock `token` against `MINT` command                                                         |
 | `LOCK_DESCRIPTION` | String | Lock `token` against `DESCRIPTION` changes                                                  |
@@ -33,7 +33,7 @@ This command creates or issues a `BTNS` `token`
 ## Formats
 
 ### Version `0`
-- `VERSION|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_SUPPLY|LOCK_MAX_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT|ALLOW_LIST|BLOCK_LIST|MINT_ADDRESS_MAX|MINT_START_BLOCK|MINT_STOP_BLOCK|LOCK_MINT`
+- `VERSION|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_MAX_SUPPLY|LOCK_MAX_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT|ALLOW_LIST|BLOCK_LIST|MINT_ADDRESS_MAX|MINT_START_BLOCK|MINT_STOP_BLOCK|LOCK_MINT`
 
 ### Version `1` - Edit `DESCRIPTION`
 - `VERSION|TICK|DESCRIPTION`
@@ -42,7 +42,7 @@ This command creates or issues a `BTNS` `token`
 - `VERSION|TICK|MAX_MINT|MINT_SUPPLY|TRANSFER_SUPPLY|MINT_ADDRESS_MAX|MINT_START_BLOCK|MINT_STOP_BLOCK`
 
 ### Version `3` - Edit `LOCK` `PARAMS`
-- `VERSION|TICK|LOCK_SUPPLY|LOCK_MAX_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|LOCK_MINT`
+- `VERSION|TICK|LOCK_MAX_SUPPLY|LOCK_MAX_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|LOCK_MINT`
 
 ### Version `4` - Edit `CALLBACK` `PARAMS`
 - `VERSION|TICK|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK`
@@ -58,7 +58,7 @@ This example issues a JDOG token
 
 ```
 bt:ISSUE|0|JDOG|1||||1|||1
-This example issues a JDOG token with MAX_SUPPLY set to 1, Mints 1 token via MINT_SUPPLY, and has LOCK_SUPPLY set to 1 to permanently lock the MAX_SUPPLY
+This example issues a JDOG token with MAX_SUPPLY set to 1, Mints 1 token via MINT_SUPPLY, and has LOCK_MAX_SUPPLY set to 1 to permanently lock the MAX_SUPPLY
 ```
 
 ```
@@ -108,12 +108,12 @@ This example issues a TEST token with a max supply of 100, and a maximum mint of
 - `DECIMALS` can not be changed after `token` supply is issued and/or minted
 - `MAX_SUPPLY` max value is 1,000,000,000,000,000,000,000 (1 Sextillion)
 - `MAX_SUPPLY` can not be set below existing supply
-- `LOCK_SUPPLY` can not be set to `1` and permanently locked until `MIN_TOKEN_SUPPLY` supply exists.
+- `LOCK_MAX_SUPPLY` can not be set to `1` and permanently locked until `MIN_TOKEN_SUPPLY` supply exists.
 
 ## Notes
 - `ISSUE` `TICK` with `MAX_SUPPLY` and `MINT_SUPPLY` set to any non `0` value, to mint supply until `MAX_SUPPLY` is reached (owner can mint beyond `MAX_MINT`)
 - `ISSUE` `TICK` with `MAX_SUPPLY` and `MAX_MINT` set to any non `0` value, to enable user minting (fair minting)
-- `ISSUE` `TICK` with `LOCK_SUPPLY` set to `1` to permanently lock `MAX_SUPPLY`
+- `ISSUE` `TICK` with `LOCK_MAX_SUPPLY` set to `1` to permanently lock `MAX_SUPPLY`
 - `ISSUE` `TICK` with `LOCK_MAX_MINT` set to `1` to permanently lock `MAX_MINT`
 - `ISSUE` `TICK` with `LOCK_MINT` set to `1` to permanently prevent use of the `MINT` command
 - `ISSUE` `TICK` with `LOCK_RUG` set to `1` to permanently prevent use of the `RUG` command
