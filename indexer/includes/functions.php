@@ -247,6 +247,7 @@ function createIssue( $data=null ){
     $lock_supply        = ($data->LOCK_SUPPLY==1) ? 1 : 0;
     $lock_supply        = ($data->LOCK_SUPPLY==1) ? 1 : 0;
     $lock_mint          = ($data->LOCK_MINT==1) ? 1 : 0;
+    $lock_max_mint      = ($data->LOCK_MAX_MINT==1) ? 1 : 0;
     $lock_description   = ($data->LOCK_DESCRIPTION==1) ? 1 : 0;
     $lock_rug           = ($data->LOCK_RUG==1) ? 1 : 0;
     $lock_sleep         = ($data->LOCK_SLEEP==1) ? 1 : 0;
@@ -281,6 +282,7 @@ function createIssue( $data=null ){
                         transfer_supply_id='{$transfer_supply_id}',
                         lock_supply='{$lock_supply}',
                         lock_mint='{$lock_mint}',
+                        lock_max_mint='{$lock_max_mint}',
                         lock_description='{$lock_description}',
                         lock_rug='{$lock_rug}',
                         lock_sleep='{$lock_sleep}',
@@ -301,7 +303,7 @@ function createIssue( $data=null ){
                         tx_hash_id='{$tx_hash_id}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO issues (tick_id, max_supply, max_mint, decimals, description, mint_supply, transfer_id, transfer_supply_id, lock_supply, lock_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, allow_list_id, block_list_id, mint_address_max, mint_start_block, mint_stop_block, source_id, tx_hash_id, block_index, tx_index, status_id) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$mint_supply}', '{$transfer_id}', '{$transfer_supply_id}', '{$lock_supply}', '{$lock_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$allow_list_id}', '{$block_list_id}', '{$mint_address_max}', '{$mint_start_block}', '{$mint_stop_block}', '{$source_id}', '{$tx_hash_id}', '{$block_index}', '{$tx_index}', '{$status_id}')";
+            $sql = "INSERT INTO issues (tick_id, max_supply, max_mint, decimals, description, mint_supply, transfer_id, transfer_supply_id, lock_supply, lock_mint, lock_max_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, allow_list_id, block_list_id, mint_address_max, mint_start_block, mint_stop_block, source_id, tx_hash_id, block_index, tx_index, status_id) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$mint_supply}', '{$transfer_id}', '{$transfer_supply_id}', '{$lock_supply}', '{$lock_mint}', '{$lock_max_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$allow_list_id}', '{$block_list_id}', '{$mint_address_max}', '{$mint_start_block}', '{$mint_stop_block}', '{$source_id}', '{$tx_hash_id}', '{$block_index}', '{$tx_index}', '{$status_id}')";
         }
         // print $sql;
         $results = $mysqli->query($sql);
@@ -490,6 +492,7 @@ function createToken( $data=null ){
     $lock_supply        = ($data->LOCK_SUPPLY==1) ? 1 : 0;
     $lock_supply        = ($data->LOCK_SUPPLY==1) ? 1 : 0;
     $lock_mint          = ($data->LOCK_MINT==1) ? 1 : 0;
+    $lock_max_mint      = ($data->LOCK_MAX_MINT==1) ? 1 : 0;
     $lock_description   = ($data->LOCK_DESCRIPTION==1) ? 1 : 0;
     $lock_rug           = ($data->LOCK_RUG==1) ? 1 : 0;
     $lock_sleep         = ($data->LOCK_SLEEP==1) ? 1 : 0;
@@ -515,6 +518,7 @@ function createToken( $data=null ){
                         description='{$description}',
                         lock_supply='{$lock_supply}',
                         lock_mint='{$lock_mint}',
+                        lock_max_mint='{$lock_max_mint}',
                         lock_description='{$lock_description}',
                         lock_rug='{$lock_rug}',
                         lock_sleep='{$lock_sleep}',
@@ -533,7 +537,7 @@ function createToken( $data=null ){
                         tick_id='{$tick_id}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO tokens (tick_id, max_supply, max_mint, decimals, description, lock_supply, lock_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, allow_list_id, block_list_id, mint_address_max, mint_start_block, mint_stop_block, owner_id, supply, block_index) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$lock_supply}', '{$lock_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$allow_list_id}', '{$block_list_id}', '{$mint_address_max}', '{$mint_start_block}', '{$mint_stop_block}', '{$owner_id}','{$supply}', '{$block_index}')";
+            $sql = "INSERT INTO tokens (tick_id, max_supply, max_mint, decimals, description, lock_supply, lock_mint, lock_max_mint, lock_description, lock_rug, lock_sleep, lock_callback, callback_block, callback_tick_id, callback_amount, allow_list_id, block_list_id, mint_address_max, mint_start_block, mint_stop_block, owner_id, supply, block_index) values ('{$tick_id}', '{$max_supply}', '{$max_mint}', '{$decimals}', '{$description}', '{$lock_supply}', '{$lock_mint}', '{$lock_max_mint}', '{$lock_description}', '{$lock_rug}', '{$lock_sleep}', '{$lock_callback}', '{$callback_block}', '{$callback_tick_id}', '{$callback_amount}', '{$allow_list_id}', '{$block_list_id}', '{$mint_address_max}', '{$mint_start_block}', '{$mint_stop_block}', '{$owner_id}','{$supply}', '{$block_index}')";
         }
         // print $sql;
         $results = $mysqli->query($sql);
@@ -879,6 +883,7 @@ function getTokenInfo($tick=null, $tick_id=null, $block_index=null, $tx_index=nu
                 t1.block_index,
                 t1.lock_supply,
                 t1.lock_mint,
+                t1.lock_max_mint,
                 t1.lock_description,
                 t1.lock_rug,
                 t1.lock_sleep,
@@ -926,6 +931,7 @@ function getTokenInfo($tick=null, $tick_id=null, $block_index=null, $tx_index=nu
                     'OWNER'             => $row->owner,
                     'LOCK_SUPPLY'       => $row->lock_supply,
                     'LOCK_MINT'         => $row->lock_mint,
+                    'LOCK_MAX_MINT'     => $row->lock_max_mint,
                     'LOCK_DESCRIPTION'  => $row->lock_description,
                     'LOCK_RUG'          => $row->lock_rug,
                     'LOCK_SLEEP'        => $row->lock_sleep,

@@ -68,6 +68,14 @@ function btnsMint($params=null, $data=null, $error=null){
     }
 
     /*****************************************************************
+     * ACTION Validations
+     ****************************************************************/
+
+    // Verify MINT is allowed
+    if(!$error && isset($btInfo->LOCK_MINT) && $btInfo->LOCK_MINT==1)
+        $error = "invalid: LOCK_MINT";
+
+    /*****************************************************************
      * FORMAT Validations
      ****************************************************************/
 
