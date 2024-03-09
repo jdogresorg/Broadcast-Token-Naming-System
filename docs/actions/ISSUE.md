@@ -16,6 +16,7 @@ This command creates or issues a `BTNS` `token`
 | `LOCK_MAX_SUPPLY`  | String | Lock `MAX_SUPPLY` permanently (cannot increase `MAX_SUPPLY`)                                |
 | `LOCK_MAX_MINT`    | String | Lock `MAX_MINT` permanently (cannot edit `MAX_MINT`)                                        |
 | `LOCK_MINT`        | String | Lock `token` against `MINT` command                                                         |
+| `LOCK_MINT_SUPPLY` | String | Lock `token` against issuing additional supply via `MINT_SUPPLY`                            |
 | `LOCK_DESCRIPTION` | String | Lock `token` against `DESCRIPTION` changes                                                  |
 | `LOCK_RUG`         | String | Lock `token` against `RUG` command                                                          |
 | `LOCK_SLEEP`       | String | Lock `token` against `SLEEP` command                                                        |
@@ -33,7 +34,7 @@ This command creates or issues a `BTNS` `token`
 ## Formats
 
 ### Version `0`
-- `VERSION|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_MAX_SUPPLY|LOCK_MAX_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT|ALLOW_LIST|BLOCK_LIST|MINT_ADDRESS_MAX|MINT_START_BLOCK|MINT_STOP_BLOCK|LOCK_MINT`
+- `VERSION|TICK|MAX_SUPPLY|MAX_MINT|DECIMALS|DESCRIPTION|MINT_SUPPLY|TRANSFER|TRANSFER_SUPPLY|LOCK_MAX_SUPPLY|LOCK_MAX_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT|ALLOW_LIST|BLOCK_LIST|MINT_ADDRESS_MAX|MINT_START_BLOCK|MINT_STOP_BLOCK|LOCK_MINT|LOCK_MINT_SUPPLY`
 
 ### Version `1` - Edit `DESCRIPTION`
 - `VERSION|TICK|DESCRIPTION`
@@ -42,7 +43,7 @@ This command creates or issues a `BTNS` `token`
 - `VERSION|TICK|MAX_MINT|MINT_SUPPLY|TRANSFER_SUPPLY|MINT_ADDRESS_MAX|MINT_START_BLOCK|MINT_STOP_BLOCK`
 
 ### Version `3` - Edit `LOCK` `PARAMS`
-- `VERSION|TICK|LOCK_MAX_SUPPLY|LOCK_MAX_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|LOCK_MINT`
+- `VERSION|TICK|LOCK_MAX_SUPPLY|LOCK_MAX_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|LOCK_MINT|LOCK_MINT_SUPPLY`
 
 ### Version `4` - Edit `CALLBACK` `PARAMS`
 - `VERSION|TICK|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK`

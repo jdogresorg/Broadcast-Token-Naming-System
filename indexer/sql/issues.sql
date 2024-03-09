@@ -11,6 +11,7 @@ CREATE TABLE issues (
     transfer_supply_id  INTEGER UNSIGNED,                     -- id of record in index_addresses table
     lock_max_supply     TINYINT(1) NOT NULL DEFAULT 0,        -- Locks MAX_SUPPLY
     lock_mint           TINYINT(1) NOT NULL DEFAULT 0,        -- Locks MINT
+    lock_mint_supply    TINYINT(1) NOT NULL DEFAULT 0,        -- Locks MINT_SUPPLY
     lock_max_mint       TINYINT(1) NOT NULL DEFAULT 0,        -- Locks MAX_MINT
     lock_description    TINYINT(1) NOT NULL DEFAULT 0,        -- Locks DESCRIPTION
     lock_rug            TINYINT(1) NOT NULL DEFAULT 0,        -- Locks RUG
