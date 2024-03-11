@@ -36,6 +36,7 @@ CREATE        INDEX tick_id            ON issues (tick_id);
 CREATE        INDEX source_id          ON issues (source_id);
 CREATE        INDEX transfer_id        ON issues (transfer_id);
 CREATE        INDEX transfer_supply_id ON issues (transfer_supply_id);
+CREATE        INDEX block_index        ON issues (block_index);
 CREATE        INDEX status_id          ON issues (status_id);
 CREATE        INDEX tx_hash_id         ON issues (tx_hash_id);
 CREATE        INDEX callback_tick_id   ON issues (callback_tick_id);

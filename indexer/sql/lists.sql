@@ -10,8 +10,14 @@ CREATE TABLE lists (
     status_id           INTEGER UNSIGNED           -- id of record in index_statuses table
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-
-
+CREATE UNIQUE INDEX tx_index        ON lists (tx_index);
+CREATE        INDEX block_index     ON lists (block_index);
+CREATE        INDEX type            ON lists (type);
+CREATE        INDEX edit            ON lists (edit);
+CREATE        INDEX list_tx_hash_id ON lists (list_tx_hash_id);
+CREATE        INDEX tx_hash_id      ON lists (tx_hash_id);
+CREATE        INDEX source_id       ON lists (source_id);
+CREATE        INDEX status_id       ON lists (status_id);
 
 
 
