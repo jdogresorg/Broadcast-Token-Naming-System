@@ -1949,7 +1949,8 @@ function processTransaction($tx=null){
     $error     = false;
     $tx        = (object) $tx;
     $prefixes  = array('/^bt:/','/^btns:/');
-    $params    = explode('|',preg_replace($prefixes,'',$tx->text));
+    $tx->raw   = preg_replace($prefixes,'',$tx->text);
+    $params    = explode('|',$tx->raw);
     $version   = $tx->version;  // Project Version
     $source    = $tx->source;   // Source address
 
@@ -1984,10 +1985,11 @@ function processTransaction($tx=null){
 
     // Define basic BTNS transaction data object
     $data = (object) array(
-        'ACTION'      => $action,           // Action (ISSUE, MINT, SEND, etc)
+        'ACTION'      => $action,          // Action (ISSUE, MINT, SEND, etc)
         'BLOCK_INDEX' => $tx->block_index, // Block index 
         'SOURCE'      => $tx->source,      // Source/Broadcasting address
-        'TX_HASH'     => $tx->tx_hash      // Transaction Hash
+        'TX_HASH'     => $tx->tx_hash,     // Transaction Hash
+        'TX_RAW'      => $tx->raw          // Raw TX string
     );
 
     // Validate Action
@@ -2148,5 +2150,40 @@ function createAddressOption( $data=null ){
         byeLog('Error while trying to lookup record in addresses table');
     }
 }
+
+// Create record in `batches` table
+function createBatch( $data=null ){
+    global $mysqli;
+    $source_id      = createAddress($data->SOURCE);
+    $tx_hash_id     = createTransaction($data->TX_HASH);
+    $block_index    = $mysqli->real_escape_string($data->BLOCK_INDEX);
+    $status_id      = createStatus($data->STATUS);
+    $tx_index       = $mysqli->real_escape_string($data->TX_INDEX);
+    // Check if record already exists
+    $results = $mysqli->query("SELECT tx_index FROM batches WHERE tx_hash_id='{$tx_hash_id}'");
+    if($results){
+        if($results->num_rows){
+            // UPDATE record
+            $sql = "UPDATE
+                        batches
+                    SET
+                        source_id='{$source_id}',
+                        block_index='{$block_index}',
+                        tx_index='{$tx_index}',
+                        status_id='{$status_id}'
+                    WHERE 
+                        tx_hash_id='{$tx_hash_id}'";
+        } else {
+            // INSERT record
+            $sql = "INSERT INTO batches (tx_index, source_id, tx_hash_id, block_index, status_id) values ('{$tx_index}', '{$source_id}', '{$tx_hash_id}', '{$block_index}', '{$status_id}')";
+        }
+        $results = $mysqli->query($sql);
+        if(!$results)
+            byeLog('Error while trying to create / update a record in the batches table');
+    } else {
+        byeLog('Error while trying to lookup record in batches table');
+    }
+}
+
 
 ?>
