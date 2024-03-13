@@ -17,7 +17,17 @@ function btnsBatch($params=null, $data=null, $error=null){
         0 => 'VERSION|COMMAND'
     );
 
-    // Clone the raw data for storage in mints table
+    // Define list of ACTIONS and usage limits
+    $limits = array(
+        'BATCH' => 0,
+        'MINT'  => 1,
+        'ISSUE' => 1
+    );
+
+    // Define list of ACTIONS and count of usage within BATCH
+    $actions = array();
+
+    // Clone the raw data for storage in batches table
     $batch = clone($data);
 
     /*****************************************************************
@@ -30,19 +40,36 @@ function btnsBatch($params=null, $data=null, $error=null){
     if(!$error && ($format===NULL || !in_array($format,array_keys($formats))))
         $error = 'invalid: VERSION (unknown)';
 
-    // Get list of commands (after removing BATCH/VERSION)
-    $commands = explode(';',str_replace('BATCH|0|','',$data->TX_RAW));
-    if(!$error && count($commands)==0)
+    // Get list of commands
+    $commands = explode(';',$data->TX_RAW);
+    if(!$error && count($commands)==0){
         $error = 'invalid: COMMAND (unknown)';
+    } else {
+        // Trim BATCH/VERSION from first command
+        $commands[0] = str_replace("BATCH|{$format}|",'',$commands[0]);
+    }
+
+    // Build out array of ACTIONs and count of times used in BATCH
+    foreach($commands as $command){
+        $action = explode('|',$command)[0];
+        if(!$actions[$action])
+            $actions[$action] = 0;
+        $actions[$action]++;
+    }
 
     /*****************************************************************
      * General Validations
      ****************************************************************/
 
-    // Verify all actions are valid
+    // Verify all command ACTIONs are valid
     foreach($commands as $command)
         if(!$error && !array_key_exists(explode('|',$command)[0],PROTOCOL_CHANGES))
             $error = 'invalid: ACTION (unknown)';
+
+    // Verify command ACTION limits
+    foreach($actions as $action => $limit)
+        if(!$error && array_key_exists($action,$limits) && $actions[$action]>$limits[$action])
+            $error = "invalid: {$action} (limit)";
 
     // Determine final status
     $batch->STATUS = $status = ($error) ? $error : 'valid';
@@ -50,7 +77,7 @@ function btnsBatch($params=null, $data=null, $error=null){
     // Print status message 
     print "\n\t BATCH : {$data->SOURCE} : {$batch->STATUS}";
 
-    // Create record in addresses table
+    // Create record in batches table
     createBatch($batch);
 
     // Handle processing the specific BTNS ACTION commands
