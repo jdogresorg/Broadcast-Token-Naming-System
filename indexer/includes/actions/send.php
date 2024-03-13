@@ -84,7 +84,7 @@ function btnsSend($params=null, $data=null, $error=null){
     foreach($sends as $send){
         $tick = $send[0];
         if(!$ticks[$tick])
-            $ticks[$tick] = getTokenInfo($tick);
+            $ticks[$tick] = getTokenInfo($tick, null, $data->BLOCK_INDEX, $data->TX_INDEX);
     }
 
     // Get source address balances
