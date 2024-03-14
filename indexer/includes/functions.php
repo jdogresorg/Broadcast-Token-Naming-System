@@ -1518,13 +1518,10 @@ function isEnabled($name=null, $network=null, $block_index=null){
         $mainnet_block_index = $info[3];
         $testnet_block_index = $info[4];
         $enable_block_index  = ${$network . '_block_index'};
-        // if(VERSION_MAJOR < $version_major) return false;
-        // if(VERSION_MINOR < $version_minor) return false;
-        // if(VERSION_REVISION < $version_revision) return false;
-        if($block_index >= $enable_block_index) 
-            return true;
+        if(VERSION_MAJOR >= $version_major && VERSION_MINOR >= $version_minor && VERSION_REVISION >= $version_revision && $block_index >= $enable_block_index)
+            return 1;
     }
-    return false;
+    return 0;
 }
 
 // Handle returning integer format version
@@ -1727,7 +1724,8 @@ function sanityCheck( $block=null ){
                 // Only perform sanity checks on ACTIONS that are active in protocol_changes
                 if(isEnabled($row->type, $network, $block)){
                     // Ignore certain tx types
-                    if(in_array($row->type,array('LIST')))
+                    // TODO: Come back through and get this working with BATCH and AIRDROP commands
+                    if(in_array($row->type,array('LIST','BATCH')))
                         continue;
                     // Loop through tables and get ticker and supply
                     $table = strtolower($row->type) . 's';
@@ -1946,6 +1944,7 @@ function getBlockHashes($block=null){
 // @param {$tx->tx_hash}     string     Transaction hash
 // @param {$tx->block_index} string     Block index of tx
 function processTransaction($tx=null){
+    global $network;
     $error     = false;
     $tx        = (object) $tx;
     $prefixes  = array('/^bt:/','/^btns:/');
@@ -1993,16 +1992,14 @@ function processTransaction($tx=null){
     );
 
     // Validate Action
-    if(!array_key_exists($action,PROTOCOL_CHANGES))
+    if(!array_key_exists($action,PROTOCOL_CHANGES)){
         $error = 'invalid: Unknown ACTION';
+        $data->ACTION = $action = 'UNKNOWN';
+    }
 
     // Verify action is activated (past ACTIVATION_BLOCK)
-    if(!$error && !isEnabled($action, $network, $block))
+    if(!$error && !isEnabled($action, $network, $tx->block_index))
         $error = 'invalid: ACTIVATION_BLOCK';
-
-    // Set action to UNKNOWN if we detect error
-    if($error)
-        $data->ACTION = $action = 'UNKNOWN';
 
     // Create a record of this transaction in the transactions table
     createTxIndex($data);
