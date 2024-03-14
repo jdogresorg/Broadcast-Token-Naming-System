@@ -1706,59 +1706,34 @@ function sanityCheck( $block=null ){
     $tickers     = []; // Assoc array of tickers
     $supply      = []; // Assoc array of supplys
     $block_index = $mysqli->real_escape_string($block);
-    // Get list of tables to check for transactions / tickers
-    $sql = "SELECT 
-                distinct(t2.type) as type
-            FROM
-                transactions t1,
-                index_tx_types t2
+    // Get list of tickers and supply from credits/debits/tokens tables using block_index
+    $sql = "SELECT
+                DISTINCT(x.tick_id),
+                t2.tick,
+                t1.supply 
+            FROM 
+                (
+                    SELECT tick_id FROM credits WHERE block_index='{$block_index}' UNION
+                    SELECT tick_id FROM debits  WHERE block_index='{$block_index}'
+                ) as x,
+                tokens t1,
+                index_tickers t2
             WHERE
-                t2.id=t1.type_id AND
-                t2.type!='UNKNOWN' AND
-                t1.block_index='{$block_index}'";
+                t1.tick_id=x.tick_id AND
+                t2.id=x.tick_id
+            ORDER BY t2.tick ASC";
     $results = $mysqli->query($sql);
     if($results){
         if($results->num_rows){
             while($row = $results->fetch_assoc()){
                 $row = (object) $row;
-                // Only perform sanity checks on ACTIONS that are active in protocol_changes
-                if(isEnabled($row->type, $network, $block)){
-                    // Ignore certain tx types
-                    // TODO: Come back through and get this working with BATCH and AIRDROP commands
-                    if(in_array($row->type,array('LIST','BATCH','AIRDROP')))
-                        continue;
-                    // Loop through tables and get ticker and supply
-                    $table = strtolower($row->type) . 's';
-                    $sql = "SELECT 
-                                t2.id,
-                                t2.tick,
-                                t1.supply
-                            FROM
-                                {$table} m LEFT JOIN tokens t1 on (t1.tick_id=m.tick_id),
-                                index_tickers t2
-                            WHERE
-                                t2.id=m.tick_id AND
-                                m.block_index='{$block_index}'";
-                    // print $sql;
-                    $results2 = $mysqli->query($sql);
-                    if($results2){
-                        if($results2->num_rows){
-                            while($row2 = $results2->fetch_assoc()){
-                                $row2 = (object) $row2;
-                                // Add ticker and supply info to assoc arrays
-                                $tickers[$row2->tick] = $row2->id;
-                                $supply[$row2->tick]  = (!is_null($row2->supply)) ? $row2->supply : "0";
-                            }
-                        }
-                    } else {
-                        byeLog("Error while trying to lookup tickers in block : {$block}");
-                    }                    
-                }
-
+                // Add ticker and supply info to assoc arrays
+                $tickers[$row->tick] = $row->tick_id;
+                $supply[$row->tick]  = (!is_null($row->supply)) ? $row->supply : "0";
             }
         }
     } else {
-        byeLog("Error while trying to lookup transactions in block : {$block}");
+        byeLog("Error while trying to lookup credits/debits in block : {$block}");
     }
     // Loop through the tickers and validate token supply match credits/debits/balances info
     foreach($tickers as $tick => $tick_id){
