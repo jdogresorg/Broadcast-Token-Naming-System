@@ -1725,7 +1725,7 @@ function sanityCheck( $block=null ){
                 if(isEnabled($row->type, $network, $block)){
                     // Ignore certain tx types
                     // TODO: Come back through and get this working with BATCH and AIRDROP commands
-                    if(in_array($row->type,array('LIST','BATCH')))
+                    if(in_array($row->type,array('LIST','BATCH','AIRDROP')))
                         continue;
                     // Loop through tables and get ticker and supply
                     $table = strtolower($row->type) . 's';
