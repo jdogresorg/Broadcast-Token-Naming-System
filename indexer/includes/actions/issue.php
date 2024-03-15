@@ -100,7 +100,7 @@ function btnsIssue( $params=null, $data=null, $error=null){
 
     // Get information on BTNS token
     $btInfo        = getTokenInfo($data->TICK, null, $data->BLOCK_INDEX, $data->TX_INDEX);
-    $isDistributed = isDistributed($data->TICK);
+    $isDistributed = isDistributed($data->TICK, $data->BLOCK_INDEX, $data->TX_INDEX);
 
     // Clone the raw data for storage in issues table
     $issue = clone($data);

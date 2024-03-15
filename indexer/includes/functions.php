@@ -1608,50 +1608,85 @@ function setActionParams($data=null, $params=null, $format=null){
     return $data;
 }
 
-// Handle getting a list of holders
-// @param {tick}  string   TICK or ASSET name
-// @param {type}  integer  Holder Type (1=TICK, 2=ASSET)
-function getHolders( $tick=null, $type=null){
+// Handle getting a list of TICK holders and amounts
+// @param {tick}            string  Ticker name
+// @param {block_index}     integer Block Index 
+// @param {tx_index}        integer tx_index of transaction
+function getHolders( $tick=null, $block_index=null, $tx_index=null ){
     global $mysqli, $dbase;
     $holders = [];
-    $type = ($type>1) ? $type : 1;
-    $tick = $mysqli->real_escape_string($tick);
-    // Query TICK Holders
-    if($type==1){
-        $sql = "SELECT
-                    a.address,
-                    b.amount
-                FROM
-                    balances b,
-                    index_tickers t,
-                    index_addresses a
-                WHERE
-                    t.id=b.tick_id AND
-                    a.id=b.address_id AND
-                    t.tick='{$tick}'";
-    }
-    // Query ASSET holders
-    if($type==2){
-        // Handle CP ASSETS here... coming soon
-    }
+    $block   = (is_numeric($block_index)) ? $block_index : 99999999999999;
+    $tick_id = createTicker($tick);
+    // Get info on decimal precision
+    $decimals = getTokenDecimalPrecision($tick_id);
+    $whereSql = "";
+    // Filter by block_index
+    if(is_numeric($block))
+        $whereSql .= " AND m.block_index <= '{$block}'";
+    // Filter by tx_index
+    if(is_numeric($tx_index))
+        $whereSql .= " AND t.tx_index < {$tx_index}";
+    // Get Credits 
+    $sql = "SELECT 
+                CAST(SUM(m.amount) AS DECIMAL(60,$decimals)) as credits,
+                a.address
+            FROM 
+                credits m,
+                transactions t,
+                index_addresses a
+            WHERE 
+                m.event_id=t.tx_hash_id AND
+                m.address_id=a.id AND
+                m.tick_id='{$tick_id}'
+                {$whereSql}
+            GROUP BY a.address";
     $results = $mysqli->query($sql);
     if($results){
         if($results->num_rows){
             while($row = $results->fetch_assoc()){
                 $row = (object) $row;
-                $holders[$row->address] = $row->amount;
+                $holders[$row->address] = $row->credits;
             }
         }
     } else {
-        byeLog("Error while trying to lookup holders of : {$tick}");
+        byeLog('Error while trying to get list of credits');
+    }
+    // Get Debits 
+    $sql = "SELECT 
+                CAST(SUM(m.amount) AS DECIMAL(60,$decimals)) as debits,
+                a.address
+            FROM 
+                debits m,
+                transactions t,
+                index_addresses a
+            WHERE 
+                m.event_id=t.tx_hash_id AND
+                m.address_id=a.id AND
+                m.tick_id='{$tick_id}'
+                {$whereSql}
+            GROUP BY a.address";
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows){
+            while($row = $results->fetch_assoc()){
+                $row = (object) $row;
+                $balance = bcsub($holders[$row->address], $row->debits, $decimals);
+                if($balance > 0)
+                    $holders[$row->address] = $balance;
+                else
+                    unset($holders[$row->address]);
+            }
+        }
+    } else {
+        byeLog('Error while trying to get list of debits');
     }
     return $holders;
 }
 
 // Determine if an ticker is distributed to users (held by more than owner)
-function isDistributed($tick=null){
-    $info    = getTokenInfo($tick);
-    $holders = ($info) ? getHolders($data->TICK) : [];
+function isDistributed($tick=null, $block_index=null, $tx_index=null){
+    $info    = getTokenInfo($tick, $block_index, $tx_index);
+    $holders = ($info) ? getHolders($tick, $block_index, $tx_index) : [];
     // More than one holder
     if(count($holders)>1)
         return true;
