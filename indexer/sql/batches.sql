@@ -3,7 +3,7 @@ CREATE TABLE batches (
     tx_index       INTEGER UNSIGNED, -- Unique transaction index
     source_id      INTEGER UNSIGNED, -- id of record in index_addresses table
     tx_hash_id     INTEGER UNSIGNED, -- id of record in index_transactions
-    block_index    INTEGER UNSIGNED, -- block index of ADDRESS transaction
+    block_index    INTEGER UNSIGNED, -- block index of BATCH transaction
     status_id      INTEGER UNSIGNED  -- id of record in index_statuses table
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
