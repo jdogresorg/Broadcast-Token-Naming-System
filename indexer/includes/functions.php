@@ -2095,7 +2095,14 @@ function addAddressTicker($address=null, $tick=null){
     $list = (isset($addresses[$address])) ? $addresses[$address] : [];
     // If $tick is an array, use the array
     if($type=="array"){
-        $list = $tick;
+        foreach($tick as $t){
+            // Add TICK to $addresses
+            if(!in_array($t, $list))
+                array_push($list, $t);
+            // Add TICK to $tickers
+            if(!in_array($t, $tickers))
+                array_push($tickers, $t);
+        }
     } else {
         // Add TICK to $addresses
         if(!in_array($tick, $list))
@@ -2191,6 +2198,160 @@ function createBatch( $data=null ){
         byeLog('Error while trying to lookup record in batches table');
     }
 }
+
+// Determine if a tx hash is valid or not
+function isValidTransactionHash($hash=null){
+    if(strlen($hash)==64)
+        return 1;
+    return 0;
+}
+
+// Create record in `airdrops` table
+function createAirdrop( $data=null ){
+    global $mysqli;
+    $tick_id        = createTicker($data->TICK);
+    $source_id      = createAddress($data->SOURCE);
+    $tx_hash_id     = createTransaction($data->TX_HASH);
+    $list_id        = createMemo($data->LIST);
+    $memo_id        = createMemo($data->MEMO);
+    $status_id      = createStatus($data->STATUS);
+    $tx_index       = $mysqli->real_escape_string($data->TX_INDEX);
+    $amount         = $mysqli->real_escape_string($data->AMOUNT);
+    $block_index    = $mysqli->real_escape_string($data->BLOCK_INDEX);
+    // Check if record already exists
+    $sql = "SELECT
+                tx_index
+            FROM
+                airdrops
+            WHERE
+                tick_id='{$tick_id}' AND
+                source_id='{$source_id}' AND
+                list_id='{$list_id}' AND
+                amount='{$amount}' AND
+                tx_hash_id='{$tx_hash_id}'";
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows){
+            // UPDATE record
+            $sql = "UPDATE
+                        airdrops
+                    SET
+                        tx_index='{$tx_index}',
+                        block_index='{$block_index}',
+                        memo_id='{$memo_id}',
+                        status_id='{$status_id}'
+                    WHERE 
+                        tick_id='{$tick_id}' AND
+                        source_id='{$source_id}' AND
+                        list_id='{$list_id}' AND
+                        amount='{$amount}' AND
+                        tx_hash_id='{$tx_hash_id}'";
+        } else {
+            // INSERT record
+            $sql = "INSERT INTO airdrops (tx_index, tick_id, source_id, list_id, amount, memo_id, tx_hash_id, block_index, status_id) values ('{$tx_index}','{$tick_id}', '{$source_id}', '{$list_id}', '{$amount}','{$memo_id}', '{$tx_hash_id}', '{$block_index}', '{$status_id}')";
+        }
+        $results = $mysqli->query($sql);
+        if(!$results)
+            byeLog('Error while trying to create / update a record in the airdrops table');
+    } else {
+        byeLog('Error while trying to lookup record in airdrops table');
+    }
+}
+
+
+// Get address preferences for a given address
+function getAddressPreferences($address=null, $block_index=null, $tx_index=null){
+    global $mysqli;
+    $address_id = createAddress($address);
+    // Set default address preferences
+    $data = (object)[
+        'FEE_PREFERENCE' => 2, // 2=Donate FEES to development
+        'REQUIRE_MEMO'   => 0  // Require memo on SENDs to this address
+    ];
+    // Get users ADDRESS preferences right before this tx
+    $whereSql = "";
+    if(isset($block_index) && is_numeric($block_index))
+        $whereSql .= " AND block_index <= {$block_index}";
+    if(isset($tx_index) && is_numeric($tx_index))
+        $whereSql .= " AND tx_index < '{$tx_index}'";
+    $sql = "SELECT
+                fee_preference,
+                require_memo
+            FROM
+                addresses a
+            WHERE
+                source_id='{$address_id}'
+                {$whereSql}
+            ORDER BY tx_index DESC
+            LIMIT 1";
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows){
+            $row = (object) $results->fetch_assoc();
+            $data->FEE_PREFERENCE = $row->fee_preference;
+            $data->REQUIRE_MEMO   = $row->require_memo;
+        }
+    } else {
+        byeLog('Error while trying to lookup record in addresses table');
+    }
+    return $data;
+}
+
+// Calculate Transaction fee based on number of database hits
+// TODO: Make this code modular, so we can configure fees on actions on a per-chain basis
+function getTransactionFee($db_hits=0){
+    $cost = 10000;                          // Cost in sats per DB hit
+    $sats = bcmul($db_hits, $cost , 0);     // FEE in sats (integer)
+    $fee  = bcmul($sats, '0.00000001', 8);  // FEE in decimal (divisible)
+    return $fee;
+}
+
+// Create record in `fees` table
+function createFeeRecord( $data=null ){
+    global $mysqli;
+    $tick_id        = createTicker($data->TICK);
+    $source_id      = createAddress($data->SOURCE);
+    $destination_id = createAddress($data->DESTINATION);
+    $tx_index       = $mysqli->real_escape_string($data->TX_INDEX);
+    $amount         = $mysqli->real_escape_string($data->AMOUNT);
+    $method         = $mysqli->real_escape_string($data->METHOD);
+    $block_index    = $mysqli->real_escape_string($data->BLOCK_INDEX);
+    // Check if record already exists
+    $sql = "SELECT
+                tx_index
+            FROM
+                fees
+            WHERE
+                tx_index='{$tx_index}'";
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows){
+            // UPDATE record
+            $sql = "UPDATE
+                        fees
+                    SET
+                        tick_id='{$tick_id}',
+                        source_id='{$source_id}',
+                        destination_id='{$destination_id}',
+                        amount='{$amount}',
+                        method='{$method}',
+                        block_index='{$block_index}'
+                    WHERE 
+                        tx_index='{$tx_index}'";
+        } else {
+            // INSERT record
+            $sql = "INSERT INTO fees (tx_index, block_index, source_id, tick_id, amount, method, destination_id) values ('{$tx_index}', '{$block_index}', '{$source_id}', '{$tick_id}', '{$amount}', '{$method}', '{$destination_id}')";
+        }
+        $results = $mysqli->query($sql);
+        if(!$results)
+            byeLog('Error while trying to create / update a record in the fees table');
+    } else {
+        byeLog('Error while trying to lookup record in fees table');
+    }
+}
+
+
+
 
 
 ?>
