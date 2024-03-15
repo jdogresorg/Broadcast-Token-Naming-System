@@ -8,10 +8,13 @@ function btnsRollback($block_index=null){
     $block_index = (int) $block_index;
 
     $tables = [
+        'addresses',
+        'batches',
         'blocks',
         'credits',
         'debits',
         'destroys',
+        'fees',
         'issues',
         'lists',
         'mints',
