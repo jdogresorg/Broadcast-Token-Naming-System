@@ -30,7 +30,7 @@ function btnsAirdrop($params=null, $data=null, $error=null){
     /*****************************************************************
      * DEBUGGING - Force params
      ****************************************************************/
-    // $str = '0|AIRDROPTEST1|1|fbe2a4946dfefb232571d56ed1c84dd85299736ba356dc300296d65d59991362|test'; // ADDRESS LIST
+    // $str = '0|AIRDROPTEST1|1|fbe2a4946dfefb232571d56ed1c84dd85299736ba356dc300296d65d59991362|test';    // ADDRESS LIST
     // $str = '0|AIRDROPTEST2|1|55cd98493c0fe46aed95225d909a82793a9ba7b480dccdb3170a9cd1ce081093|test';    // TICK LIST
     // $str = '0|AIRDROPTEST3|1|afd33c2042cd43b229a44c406f03bcc940702f9736f5a222dfa53295b641a00d|test';    // ASSET LIST
     // $params = explode('|',$str);
@@ -160,24 +160,27 @@ function btnsAirdrop($params=null, $data=null, $error=null){
         if(!$error && $type===false)
             $error = 'invalid: LIST (unknown)';
 
-        // Verify LIST type is supported (TICK and ADDRESS only for now)
-        if(!$error && !in_array($type,array(1,3)))
+        // Verify LIST type is supported
+        if(!$error && !in_array($type,array(1,2,3)))
             $error = 'invalid: LIST TYPE (unsupported)';
 
-        // Handle ADDRESS LIST by passing forward addresses to recipients list
-        if(!$error && $type==3)
-            $recipients = $list;
-
-        // Handle TICK LIST by looking up holders and adding to recipients list
-        if(!$error && $type==1){
+        // Handle ASSET / TICK LIST by looking up holders and adding to recipients list
+        if(!$error && in_array($type,array(1,2))){
             foreach($list as $tick){
-                $holders = getHolders($tick, $data->BLOCK_INDEX, $data->TX_INDEX);
+                if($type==1)
+                    $holders = getHolders($tick, $data->BLOCK_INDEX, $data->TX_INDEX);
+                if($type==2)
+                    $holders = getAssetHolders($tick, $data->BLOCK_INDEX);
                 foreach($holders as $address => $amount){
                     if(!in_array($address, $recipients))
                         array_push($recipients, $address);
                 }
             }
         }
+
+        // Handle ADDRESS LIST by passing forward addresses to recipients list
+        if(!$error && $type==3)
+            $recipients = $list;
 
         // Determine total DEBIT
         $airdrop->DEBIT = bcmul(count($recipients),$airdrop->AMOUNT,$btInfo->DECIMALS);
@@ -244,6 +247,9 @@ function btnsAirdrop($params=null, $data=null, $error=null){
                 array_push($credits, array($airdrop->FEE_TICK, $airdrop->FEE_AMOUNT, $address));
             } 
 
+            // Create record of FEE in `fees` table
+            createFeeRecord($fees);
+
             // Loop through recipient addresses
             foreach($recipients as $address){
 
@@ -271,9 +277,6 @@ function btnsAirdrop($params=null, $data=null, $error=null){
         [$tick, $amount, $destination] = $credit;
         createCredit('AIRDROP', $data->BLOCK_INDEX, $data->TX_HASH, $tick, $amount, $destination);
     }
-
-    // Create record of FEE in `fees` table
-    createFeeRecord($fees);
 
     // If this is a reparse, bail out before updating balances
     if($reparse)

@@ -8,6 +8,7 @@ function btnsRollback($block_index=null){
     $block_index = (int) $block_index;
 
     $tables = [
+        'airdrops',
         'addresses',
         'batches',
         'blocks',

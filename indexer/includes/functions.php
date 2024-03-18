@@ -1683,6 +1683,71 @@ function getHolders( $tick=null, $block_index=null, $tx_index=null ){
     return $holders;
 }
 
+// Handle getting a list of ASSET holders and amounts
+// @param {asset}           string  Asset name
+// @param {block_index}     integer Block Index 
+function getAssetHolders( $asset=null, $block_index=null ){
+    global $mysqli, $dbase;
+    $holders  = [];
+    $block    = (is_numeric($block_index)) ? $block_index : 99999999999999;
+    $asset_id = getAssetId($asset);
+    // Filter by block_index
+    if(is_numeric($block))
+        $whereSql .= " AND m.block_index <= '{$block}'";
+    // Get Credits 
+    $sql = "SELECT 
+                CAST(SUM(m.quantity) AS DECIMAL(60,0)) as credits,
+                a.address
+            FROM 
+                {$dbase}.credits m,
+                {$dbase}.index_addresses a
+            WHERE 
+                m.address_id=a.id AND
+                m.asset_id='{$asset_id}'
+                {$whereSql}
+            GROUP BY a.address";
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows){
+            while($row = $results->fetch_assoc()){
+                $row = (object) $row;
+                $holders[$row->address] = $row->credits;
+            }
+        }
+    } else {
+        byeLog('Error while trying to get list of credits');
+    }
+    // Get Debits 
+    $sql = "SELECT 
+                CAST(SUM(m.quantity) AS DECIMAL(60,0)) as debits,
+                a.address
+            FROM 
+                {$dbase}.debits m,
+                {$dbase}.index_addresses a
+            WHERE 
+                m.address_id=a.id AND
+                m.asset_id='{$asset_id}'
+                {$whereSql}
+            GROUP BY a.address";
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows){
+            while($row = $results->fetch_assoc()){
+                $row = (object) $row;
+                $balance = bcsub($holders[$row->address], $row->debits, 0);
+                if($balance > 0)
+                    $holders[$row->address] = $balance;
+                else
+                    unset($holders[$row->address]);
+            }
+        }
+    } else {
+        byeLog('Error while trying to get list of debits');
+    }
+    return $holders;
+}
+
+
 // Determine if an ticker is distributed to users (held by more than owner)
 function isDistributed($tick=null, $block_index=null, $tx_index=null){
     $info    = getTokenInfo($tick, $block_index, $tx_index);
@@ -2300,7 +2365,7 @@ function getAddressPreferences($address=null, $block_index=null, $tx_index=null)
 // Calculate Transaction fee based on number of database hits
 // TODO: Make this code modular, so we can configure fees on actions on a per-chain basis
 function getTransactionFee($db_hits=0){
-    $cost = 10000;                          // Cost in sats per DB hit
+    $cost = 1000;                           // Cost in sats per DB hit
     $sats = bcmul($db_hits, $cost , 0);     // FEE in sats (integer)
     $fee  = bcmul($sats, '0.00000001', 8);  // FEE in decimal (divisible)
     return $fee;
