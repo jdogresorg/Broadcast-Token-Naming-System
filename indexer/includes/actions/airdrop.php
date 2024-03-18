@@ -11,7 +11,7 @@
  * 
  * FORMATS:
  * - 0 = Single Airdrop
- * - 1 = Multi-Airdrop (brief)
+ * - 1 = Multi-Airdrop (Brief)
  * - 2 = Multi-Airdrop (Full)
  * - 3 = Multi-Airdrop (Full) with Multiple Memos
  * 
@@ -30,9 +30,16 @@ function btnsAirdrop($params=null, $data=null, $error=null){
     /*****************************************************************
      * DEBUGGING - Force params
      ****************************************************************/
-    // $str = '0|AIRDROPTEST1|1|fbe2a4946dfefb232571d56ed1c84dd85299736ba356dc300296d65d59991362|test';    // ADDRESS LIST
-    // $str = '0|AIRDROPTEST2|1|55cd98493c0fe46aed95225d909a82793a9ba7b480dccdb3170a9cd1ce081093|test';    // TICK LIST
-    // $str = '0|AIRDROPTEST3|1|afd33c2042cd43b229a44c406f03bcc940702f9736f5a222dfa53295b641a00d|test';    // ASSET LIST
+    // Single Airdrop
+    // $str = '0|AIRDROPTEST1|1|fbe2a4946dfefb232571d56ed1c84dd85299736ba356dc300296d65d59991362|test'; // ADDRESS LIST
+    // $str = '0|AIRDROPTEST2|1|55cd98493c0fe46aed95225d909a82793a9ba7b480dccdb3170a9cd1ce081093|test'; // TICK LIST
+    // $str = '0|AIRDROPTEST3|1|afd33c2042cd43b229a44c406f03bcc940702f9736f5a222dfa53295b641a00d|test'; // ASSET LIST
+    // Multi-Airdrop (brief)
+    // $str = '1|fbe2a4946dfefb232571d56ed1c84dd85299736ba356dc300296d65d59991362|AIRDROPTEST1|1|AIRDROPTEST2|2|test brief';
+    // Multi-Airdrop (Full)
+    // $str = '2|AIRDROPTEST1|1|fbe2a4946dfefb232571d56ed1c84dd85299736ba356dc300296d65d59991362|AIRDROPTEST2|2|55cd98493c0fe46aed95225d909a82793a9ba7b480dccdb3170a9cd1ce081093|test full';
+    // Multi-Airdrop (Full) w multiple memos
+    // $str = '3|AIRDROPTEST1|1|fbe2a4946dfefb232571d56ed1c84dd85299736ba356dc300296d65d59991362|memo1|AIRDROPTEST2|2|55cd98493c0fe46aed95225d909a82793a9ba7b480dccdb3170a9cd1ce081093|memo2|AIRDROPTEST3|3|afd33c2042cd43b229a44c406f03bcc940702f9736f5a222dfa53295b641a00d|memo3';
     // $params = explode('|',$str);
 
     // Validate that broadcast format is known
@@ -60,7 +67,7 @@ function btnsAirdrop($params=null, $data=null, $error=null){
 
         // Multi-Airdrop (brief)
         if($format==1 && $idx>1 && $idx%2==1)
-            array_push($airdrops,[$params[1], $params[$idx-1], $params[$idx], $memo]);
+            array_push($airdrops,[$params[$idx-1], $params[$idx], $params[1], $memo]);
 
         // Multi-Airdrop (Full)
         if($format==2 && $idx>0 && $idx%3==1 && $idx < $lastIdx)
