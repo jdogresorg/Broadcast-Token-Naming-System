@@ -1711,7 +1711,8 @@ function getAssetHolders( $asset=null, $block_index=null ){
         if($results->num_rows){
             while($row = $results->fetch_assoc()){
                 $row = (object) $row;
-                $holders[$row->address] = $row->credits;
+                if(isCryptoAddress($row->address))
+                    $holders[$row->address] = $row->credits;
             }
         }
     } else {
