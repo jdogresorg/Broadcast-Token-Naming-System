@@ -213,47 +213,46 @@ function createAction( $action=null ){
 // Create record in `issues` table
 function createIssue( $data=null ){
     global $mysqli;
-    // Convert supply amounts to integers
-    $max_supply         = (isset($data->MAX_SUPPLY) && is_numeric($data->MAX_SUPPLY)) ? $data->MAX_SUPPLY : 0;
-    $max_mint           = (isset($data->MAX_MINT) && is_numeric($data->MAX_MINT)) ? $data->MAX_MINT : 0;
-    $mint_supply        = (isset($data->MINT_SUPPLY) && is_numeric($data->MINT_SUPPLY)) ? $data->MINT_SUPPLY : 0;
-    $mint_address_max   = (isset($data->MINT_ADDRESS_MAX) && is_numeric($data->MINT_ADDRESS_MAX)) ? $data->MINT_ADDRESS_MAX : 0;
-    $mint_start_block   = (isset($data->MINT_START_BLOCK) && is_numeric($data->MINT_START_BLOCK)) ? $data->MINT_START_BLOCK : 0;
-    $mint_stop_block    = (isset($data->MINT_STOP_BLOCK) && is_numeric($data->MINT_STOP_BLOCK)) ? $data->MINT_STOP_BLOCK : 0;
-    $callback_amount    = (isset($data->CALLBACK_AMOUNT) && is_numeric($data->CALLBACK_AMOUNT)) ? $data->CALLBACK_AMOUNT : 0;
-    $decimals           = (isset($data->DECIMALS)) ? $data->DECIMALS : 0;
-    // Truncate description to 250 chars 
-    $description        = substr($data->DESCRIPTION,0,250);
-    // Force any amount values to the correct decimal precision
-    if(is_numeric($decimals) && $decimals>=0 && $decimals<=18){
-        $max_supply       = bcmul($max_supply,1,$decimals);
-        $max_mint         = bcmul($max_mint,1,$decimals);
-        $mint_supply      = bcmul($mint_supply,1,$decimals);
-        $mint_address_max = bcmul($mint_address_max,1,$decimals);
-        $callback_amount  = bcmul($callback_amount,1,$decimals);
-    }
-    $max_supply         = $mysqli->real_escape_string($max_supply);
-    $max_mint           = $mysqli->real_escape_string($max_mint);
-    $mint_supply        = $mysqli->real_escape_string($mint_supply);
-    $mint_address_max   = $mysqli->real_escape_string($mint_address_max);
-    $mint_start_block   = $mysqli->real_escape_string($mint_start_block);
-    $mint_stop_block    = $mysqli->real_escape_string($mint_stop_block);
-    $decimals           = $mysqli->real_escape_string($decimals);
-    $description        = $mysqli->real_escape_string($description);
+    // Define list of LOCK fields
+    $locks = array(
+        'LOCK_MAX_SUPPLY',
+        'LOCK_MINT',
+        'LOCK_MINT_SUPPLY',
+        'LOCK_MAX_MINT',
+        'LOCK_DESCRIPTION',
+        'LOCK_RUG',
+        'LOCK_SLEEP',
+        'LOCK_CALLBACK'
+    );
+    // Unset any LOCK fields with invalid values
+    foreach($locks as $lock)
+        if(!in_array($data->{$lock},array(0,1)))
+            unset($data->{$lock});
+    // Unset DECIMALS if it is outside of the acceptable range
+    if(isset($data->DECIMALS) && ($data->DECIMALS < MIN_TOKEN_DECIMALS || $data->DECIMALS > MAX_TOKEN_DECIMALS))
+        unset($data->DECIMALS);
+    // Make data safe for use in SQL queries
+    $description        = $mysqli->real_escape_string(substr($data->DESCRIPTION,0,250)); // Truncate description to 250 chars 
+    $max_supply         = $mysqli->real_escape_string($data->MAX_SUPPLY);
+    $max_mint           = $mysqli->real_escape_string($data->MAX_MINT);
+    $mint_supply        = $mysqli->real_escape_string($data->MINT_SUPPLY);
+    $mint_address_max   = $mysqli->real_escape_string($data->MINT_ADDRESS_MAX);
+    $mint_start_block   = $mysqli->real_escape_string($data->MINT_START_BLOCK);
+    $mint_stop_block    = $mysqli->real_escape_string($data->MINT_STOP_BLOCK);
+    $decimals           = $mysqli->real_escape_string($data->DECIMALS);
     $block_index        = $mysqli->real_escape_string($data->BLOCK_INDEX);
     $tx_index           = $mysqli->real_escape_string($data->TX_INDEX);
     $status             = $mysqli->real_escape_string($data->STATUS);
-    // Force lock fields to integer values 
-    $lock_max_supply    = ($data->LOCK_MAX_SUPPLY==1) ? 1 : 0;
-    $lock_mint          = ($data->LOCK_MINT==1) ? 1 : 0;
-    $lock_mint_supply   = ($data->LOCK_MINT_SUPPLY==1) ? 1 : 0;
-    $lock_max_mint      = ($data->LOCK_MAX_MINT==1) ? 1 : 0;
-    $lock_description   = ($data->LOCK_DESCRIPTION==1) ? 1 : 0;
-    $lock_rug           = ($data->LOCK_RUG==1) ? 1 : 0;
-    $lock_sleep         = ($data->LOCK_SLEEP==1) ? 1 : 0;
-    $lock_callback      = ($data->LOCK_CALLBACK==1) ? 1 : 0;
-    $callback_block     = ($data->CALLBACK_BLOCK>0) ? $data->CALLBACK_BLOCK : 0;
-    $callback_amount    = $mysqli->real_escape_string($callback_amount);
+    $lock_max_supply    = $mysqli->real_escape_string($data->LOCK_MAX_SUPPLY);
+    $lock_mint          = $mysqli->real_escape_string($data->LOCK_MINT);
+    $lock_mint_supply   = $mysqli->real_escape_string($data->LOCK_MINT_SUPPLY);
+    $lock_max_mint      = $mysqli->real_escape_string($data->LOCK_MAX_MINT);
+    $lock_description   = $mysqli->real_escape_string($data->LOCK_DESCRIPTION);
+    $lock_rug           = $mysqli->real_escape_string($data->LOCK_RUG);
+    $lock_sleep         = $mysqli->real_escape_string($data->LOCK_SLEEP);
+    $lock_callback      = $mysqli->real_escape_string($data->LOCK_CALLBACK);
+    $callback_block     = $mysqli->real_escape_string($data->CALLBACK_BLOCK);
+    $callback_amount    = $mysqli->real_escape_string($data->CALLBACK_AMOUNT);
     $callback_tick_id   = createTicker($data->CALLBACK_TICK);
     $tick_id            = createTicker($data->TICK);
     $source_id          = createAddress($data->SOURCE);
@@ -471,7 +470,7 @@ function createToken( $data=null ){
     $mint_start_block   = (isset($data->MINT_START_BLOCK) && is_numeric($data->MINT_START_BLOCK)) ? $data->MINT_START_BLOCK : 0;
     $mint_stop_block    = (isset($data->MINT_STOP_BLOCK) && is_numeric($data->MINT_STOP_BLOCK)) ? $data->MINT_STOP_BLOCK : 0;
     $callback_amount    = (isset($data->CALLBACK_AMOUNT) && is_numeric($data->CALLBACK_AMOUNT)) ? $data->CALLBACK_AMOUNT : 0;
-    $decimals           = (isset($data->DECIMALS)) ? $data->DECIMALS : 0;
+    $decimals           = (isset($data->DECIMALS) && is_numeric($data->DECIMALS)) ? intval($data->DECIMALS) : 0;
     // Force any amount values to the correct decimal precision
     if(is_numeric($decimals) && $decimals>=0 && $decimals<=18){
         $max_supply       = bcmul($max_supply,1,$decimals);
@@ -864,8 +863,9 @@ function deleteLists($list=null, $rollback=null){
 // Handle getting token information using issues table
 function getTokenInfo($tick=null, $tick_id=null, $block_index=null, $tx_index=null){
     global $mysqli;
-    $data    = false;
+    $data     = false;
     $whereSql = "";
+    // Get the tick_id for the given ticker
     if(!is_null($tick) && is_null($tick_id))
         $tick_id = createTicker($tick);
     // If a block index was given, only lookup tokens created before or in given block
@@ -927,7 +927,7 @@ function getTokenInfo($tick=null, $tick_id=null, $block_index=null, $tx_index=nu
                     'OWNER'             => ($row->transfer) ? $row->transfer : $row->owner,
                     'MAX_SUPPLY'        => $row->max_supply,
                     'MAX_MINT'          => $row->max_mint,
-                    'DECIMALS'          => $row->decimals,
+                    'DECIMALS'          => (isset($row->decimals)) ? intval($row->decimals) : 0,
                     'DESCRIPTION'       => $row->description,
                     'OWNER'             => $row->owner,
                     'LOCK_MAX_SUPPLY'   => $row->lock_max_supply,
@@ -954,6 +954,9 @@ function getTokenInfo($tick=null, $tick_id=null, $block_index=null, $tx_index=nu
                     if(substr($key,0,5)=='LOCK_')
                         if($data[$key]==1)
                             continue;
+                    // Skip setting value if value is null
+                    if(in_array($key,array('MAX_SUPPLY','MAX_MINT')) && !isset($value))
+                        continue;
                     $data[$key] = $value;
                 }
             }
@@ -963,7 +966,7 @@ function getTokenInfo($tick=null, $tick_id=null, $block_index=null, $tx_index=nu
     }
     if($data){
         // Get token supply at the given tx_index
-        $data['SUPPLY'] = getTokenSupply($tick, null, $tx_index); 
+        $data['SUPPLY'] = getTokenSupply($tick, $tick_id, null, $tx_index); 
         $data = (object) $data;
     }
     return $data;
@@ -1054,8 +1057,33 @@ function getAssetInfo($asset=null, $block_index=null){
 
 // Handle getting decimal precision for a given tick_id
 function getTokenDecimalPrecision($tick_id=null){
-    $info = getTokenInfo(null, $tick_id);
-    $decimals = ($info) ? $info->DECIMALS : 0;
+    global $mysqli;
+    // print "getTokenDecimalPrecision tick_id={$tick_id}\n";
+    // Lookup decimal precision using the issues table 
+    // DO NOT lookup precision using getTokenInfo() (avoid recursive queries)
+    $decimals = 0;
+    $sql = "SELECT
+                i.decimals
+            FROM
+                issues i,
+                index_statuses s
+            WHERE
+                i.status_id=s.id AND
+                i.tick_id='{$tick_id}' AND
+                s.status='valid'";
+    // print $sql;
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows){
+            while($row = $results->fetch_assoc()){
+                $row = (object) $row;
+                if(isset($row->decimals) && $row->decimals > $decimals)
+                    $decimals = $row->decimals;
+            }
+        }
+    } else {
+        byeLog("Error while trying to lookup decimal precision from the issues table for tick: {$tick_id}");
+    }                
     return $decimals;
 }
 
@@ -1297,13 +1325,15 @@ function updateTokenInfo( $tick=null ){
 // @param {tick}            string  Ticker name
 // @param {block_index}     integer Block Index 
 // @param {tx_index}        integer tx_index of transaction
-function getTokenSupply( $tick=null, $block_index=null, $tx_index=null ){
+function getTokenSupply( $tick=null, $tick_id=null, $block_index=null, $tx_index=null ){
     global $mysqli;
     $credits = 0;
     $debits  = 0;
     $supply  = 0;
     $block   = (is_numeric($block_index)) ? $block_index : 99999999999999;
-    $tick_id = createTicker($tick);
+    // Get the tick_id for the given ticker
+    if(!is_null($tick) && is_null($tick_id))
+        $tick_id = createTicker($tick);
     // Get info on decimal precision
     $decimals = getTokenDecimalPrecision($tick_id);
     $whereSql = "";
@@ -1751,7 +1781,7 @@ function getAssetHolders( $asset=null, $block_index=null ){
 
 // Determine if an ticker is distributed to users (held by more than owner)
 function isDistributed($tick=null, $block_index=null, $tx_index=null){
-    $info    = getTokenInfo($tick, $block_index, $tx_index);
+    $info    = getTokenInfo($tick, null, $block_index, $tx_index);
     $holders = ($info) ? getHolders($tick, $block_index, $tx_index) : [];
     // More than one holder
     if(count($holders)>1)
@@ -2040,10 +2070,6 @@ function processTransaction($tx=null){
     // Extract ACTION from PARAMS
     $action = strtoupper(array_shift($params)); 
 
-    // Support legacy BTNS format with no VERSION on DEPLOY/MINT/TRANSFER actions (default to VERSION 0)
-    if(in_array($action,array('DEPLOY','MINT','TRANSFER')) && isLegacyBTNSFormat($params))
-        array_splice($params, 0, 0, 0);
-
     // Define ACTION aliases
     $aliases = array(
         // Old BRC20/SRC20 actions 
@@ -2057,6 +2083,10 @@ function processTransaction($tx=null){
     foreach($aliases as $alias => $act)
         if($action==$alias)
             $action = $act;
+
+    // Support legacy BTNS format with no VERSION (default to VERSION 0)
+    if(in_array($action,array('ISSUE','MINT','SEND')) && isLegacyBTNSFormat($params))
+        array_splice($params, 0, 0, 0);
 
     // Define basic BTNS transaction data object
     $data = (object) array(
@@ -2415,9 +2445,5 @@ function createFeeRecord( $data=null ){
         byeLog('Error while trying to lookup record in fees table');
     }
 }
-
-
-
-
 
 ?>

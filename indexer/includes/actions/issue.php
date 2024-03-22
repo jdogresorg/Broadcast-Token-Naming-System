@@ -172,7 +172,7 @@ function btnsIssue( $params=null, $data=null, $error=null){
         $error = 'invalid: MAX_SUPPLY (min/max)';
 
     // Verify MAX_SUPPLY is not set below current SUPPLY
-    if(!$error && isset($data->MAX_SUPPLY) && $data->MAX_SUPPLY > 0 && $data->MAX_SUPPLY < getTokenSupply($data->TICK, $data->BLOCK_INDEX, $data->TX_INDEX))
+    if(!$error && isset($data->MAX_SUPPLY) && $data->MAX_SUPPLY > 0 && $data->MAX_SUPPLY < getTokenSupply($data->TICK, null, $data->BLOCK_INDEX, $data->TX_INDEX))
         $error = 'invalid: MAX_SUPPLY < SUPPLY';
 
     // Verify SUPPLY is at least MIN_TOKEN_SUPPLY before allowing LOCK_MAX_SUPPLY
