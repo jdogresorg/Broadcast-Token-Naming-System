@@ -8,8 +8,10 @@ CREATE TABLE tokens (
     max_mint           VARCHAR(250),                         -- Supply minted
     decimals           TINYINT(2),                           -- 0=non-divisible, 1-18=divisible
     description        VARCHAR(250),                         -- URL to icon 
-    lock_supply        TINYINT(1) NOT NULL DEFAULT 0,        -- Locks MAX_SUPPLY
-    lock_mint          TINYINT(1) NOT NULL DEFAULT 0,        -- Locks MAX_MINT
+    lock_max_supply    TINYINT(1) NOT NULL DEFAULT 0,        -- Locks MAX_SUPPLY
+    lock_mint          TINYINT(1) NOT NULL DEFAULT 0,        -- Locks MINT
+    lock_mint_supply   TINYINT(1) NOT NULL DEFAULT 0,        -- Locks MINT_SUPPLY
+    lock_max_mint      TINYINT(1) NOT NULL DEFAULT 0,        -- Locks MAX_MINT
     lock_description   TINYINT(1) NOT NULL DEFAULT 0,        -- Locks DESCRIPTION
     lock_rug           TINYINT(1) NOT NULL DEFAULT 0,        -- Locks RUG
     lock_sleep         TINYINT(1) NOT NULL DEFAULT 0,        -- Locks SLEEP
@@ -28,8 +30,10 @@ CREATE TABLE tokens (
 
 CREATE        INDEX tick_id            ON tokens (tick_id);
 CREATE        INDEX owner_id           ON tokens (owner_id);
-CREATE        INDEX lock_supply        ON tokens (lock_supply);
+CREATE        INDEX lock_max_supply    ON tokens (lock_max_supply);
 CREATE        INDEX lock_mint          ON tokens (lock_mint);
+CREATE        INDEX lock_max_mint      ON tokens (lock_max_mint);
+CREATE        INDEX lock_mint_supply   ON tokens (lock_mint_supply);
 CREATE        INDEX lock_description   ON tokens (lock_description);
 CREATE        INDEX lock_rug           ON tokens (lock_rug);
 CREATE        INDEX lock_sleep         ON tokens (lock_sleep);

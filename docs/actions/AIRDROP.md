@@ -39,6 +39,7 @@ This example airdops 1 GAS to every holder on a list and 2 BRRR to every holder 
 ## Rules
 
 ## Notes
+- `DROP` `ACTION` can be used for shorter reference to `AIRDROP` `ACTION`
 - `AIRDROP` to `address` `LIST` sends `AMOUNT` of `token` to each address on the list
 - `AIRDROP` to `token` `LIST` sends `AMOUNT` of `token` to holders of each `token` on the list
 - `AIRDROP` to `ASSET` `LIST` sends `AMOUNT` of `token` to holders of each `ASSET` on the list

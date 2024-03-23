@@ -1,5 +1,16 @@
 CHANGELOG
 ---
+0.12.0
+- Added support for `--reparse`
+- Optimized ledger hashing
+- `ADDRESS` support
+- Renamed `LOCK_MINT` param to `LOCK_MAX_MINT`
+- Renamed `LOCK_SUPPLY` param to `LOCK_MAX_SUPPLY`
+- Added `LOCK_MINT` param to lock against `MINT` command
+- Added `LOCK_MINT_SUPPLY` param
+- `BATCH` support
+- `AIRDROP` support
+
 0.11.1
 - Added support for `MINT_START_BLOCK`
 - Added support for `MINT_STOP_BLOCK`

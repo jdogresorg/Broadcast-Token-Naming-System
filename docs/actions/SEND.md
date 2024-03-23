@@ -13,16 +13,16 @@ This command sends/transfers one or more `token`s between addresses
 
 ## Formats
 
-### Version `0`
+### Version `0` - Single Send
 - `VERSION|TICK|AMOUNT|DESTINATION|MEMO`
 
-### Version `1`
+### Version `1` - Multi-Send (Brief)
 - `VERSION|TICK|AMOUNT|DESTINATION|AMOUNT|DESTINATION|MEMO`
 
-### Version `2`
+### Version `2` - Multi-Send (Full)
 - `VERSION|TICK|AMOUNT|DESTINATION|TICK|AMOUNT|DESTINATION|MEMO`
 
-### Version `3`
+### Version `3` - Multi-Send (Full) with Multiple Memos
 - `VERSION|TICK|AMOUNT|DESTINATION|MEMO|TICK|AMOUNT|DESTINATION|MEMO`
 
 

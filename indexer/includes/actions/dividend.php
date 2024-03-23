@@ -12,7 +12,7 @@
  * 0 = VERSION|TICK|DIVIDEND_TICK|AMOUNT
  ********************************************************************/
 function btnsDividend($params=null, $data=null, $error=null){
-    global $mysqli;
+    global $mysqli, $reparse;
     // Coming soon
 }
 

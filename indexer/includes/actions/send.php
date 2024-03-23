@@ -17,7 +17,7 @@
  * 
  ********************************************************************/
 function btnsSend($params=null, $data=null, $error=null){
-    global $mysqli, $tickers, $addresses;
+    global $mysqli, $reparse, $addresses, $tickers;
 
     // Define list of known FORMATS
     $formats = array(
@@ -84,17 +84,14 @@ function btnsSend($params=null, $data=null, $error=null){
     foreach($sends as $send){
         $tick = $send[0];
         if(!$ticks[$tick])
-            $ticks[$tick] = getTokenInfo($tick);
+            $ticks[$tick] = getTokenInfo($tick, null, $data->BLOCK_INDEX, $data->TX_INDEX);
     }
 
-    // Get source address balances 
-    $balances = getAddressBalances($data->SOURCE);
+    // Get source address balances
+    $balances = getAddressBalances($data->SOURCE, null, $data->BLOCK_INDEX, $data->TX_INDEX);
 
     // Store original error value
     $origError = $error;
-
-    // Add SOURCE address to the addresses array
-    $addresses[$data->SOURCE] = 1;
 
     // Array of credits and debits
     $credits = [];
@@ -177,11 +174,8 @@ function btnsSend($params=null, $data=null, $error=null){
         // If this was a valid transaction, then add records to the credits and debits array
         if($status=='valid'){
 
-            // Add ticker to tickers array
-            $tickers[$send->TICK] = 1; 
-
-            // Add destination address to addresses array
-            $addresses[$send->DESTINATION] = 1;
+            // Store the DESTINATION and TICK in addresses list
+            addAddressTicker($send->DESTINATION, $send->TICK);
 
             // Add ticker and amount to debits array
             array_push($debits,  array($send->TICK, $send->AMOUNT));
@@ -206,6 +200,13 @@ function btnsSend($params=null, $data=null, $error=null){
         [$tick, $amount, $destination] = $credit;
         createCredit('SEND', $data->BLOCK_INDEX, $data->TX_HASH, $tick, $amount, $destination);
     }
+
+    // If this is a reparse, bail out before updating balances
+    if($reparse)
+        return;
+
+    // Store the SOURCE and TICKERS in addresses list
+    addAddressTicker($send->SOURCE, $tickers);
 
     // Update address balances
     updateBalances(array_keys($addresses));
