@@ -11,7 +11,7 @@
  * 0 = VERSION|TICK|RESUME_BLOCK
  ********************************************************************/
 function btnsSleep($params=null, $data=null, $error=null){
-    global $mysqli;
+    global $mysqli, $reparse;
     // Coming soon
 }
 

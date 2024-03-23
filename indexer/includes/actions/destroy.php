@@ -15,7 +15,7 @@
  *
  ********************************************************************/
 function btnsDestroy($params=null, $data=null, $error=null){
-    global $mysqli, $tickers, $addresses;
+    global $mysqli, $reparse, $addresses, $tickers;
 
     // Define list of known FORMATS
     $formats = array(
@@ -69,17 +69,14 @@ function btnsDestroy($params=null, $data=null, $error=null){
     foreach($destroys as $destroy){
         $tick = $destroy[0];
         if(!$ticks[$tick])
-            $ticks[$tick] = getTokenInfo($tick);
+            $ticks[$tick] = getTokenInfo($tick, null, $data->BLOCK_INDEX, $data->TX_INDEX);
     }
 
-    // Get source address balances 
-    $balances = getAddressBalances($data->SOURCE);
+    // Get source address balances at the time of the tx
+    $balances = getAddressBalances($data->SOURCE, null, $data->BLOCK_INDEX, $data->TX_INDEX);
 
     // Store original error value
     $origError = $error;
-
-    // Add SOURCE address to the addresses array
-    $addresses[$data->SOURCE] = 1;
 
     // Array of debits
     $debits  = [];
@@ -148,8 +145,8 @@ function btnsDestroy($params=null, $data=null, $error=null){
         // If this was a valid transaction, then create debit record
         if($status=='valid'){
 
-            // Add ticker to tickers array
-            $tickers[$destroy->TICK] = 1; 
+            // Store the SOURCE and TICK in addresses list
+            addAddressTicker($destroy->SOURCE, $destroy->TICK);
 
             // Add ticker and amount to debits array
             array_push($debits,  array($destroy->TICK, $destroy->AMOUNT));
@@ -165,11 +162,15 @@ function btnsDestroy($params=null, $data=null, $error=null){
         createDebit('DESTROY', $data->BLOCK_INDEX, $data->TX_HASH, $tick, $amount, $data->SOURCE);
     }
 
+    // If this is a reparse, bail out before updating balances
+    if($reparse)
+        return;
+
     // Update address balances
     updateBalances(array_keys($addresses));
 
     // Update supply for tokens
-    updateTokens(array_keys($ticks));
+    updateTokens($tickers);
 }
 
 ?>

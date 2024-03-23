@@ -13,7 +13,7 @@
  * 0 = VERSION|DESTINATION|SWEEP_BALANCES|SWEEP_OWNERSHIP|MEMO
  ********************************************************************/
 function btnsSweep($params=null, $data=null, $error=null){
-    global $mysqli;
+    global $mysqli, $reparse;
     // Coming soon
 }
 

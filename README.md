@@ -32,9 +32,9 @@ Name                          | Title                                     |  Aut
 
 | ACTION                                     | Description                                                                                       | 
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| [`ADDRESS`](./docs/actions/ADDRESS.md)     | Configure address specific options                                                                |
 | [`AIRDROP`](./docs/actions/AIRDROP.md)     | Transfer/Distribute `token` supply to a `LIST`                                                    |
 | [`BATCH`](./docs/actions/BATCH.md)         | Execute multiple BTNS `ACTION` commands in a single transaction                                   |
-| [`BET`](./docs/actions/BET.md)             | Bet `token` on `broadcast` oracle feed outcomes                                                   |
 | [`CALLBACK`](./docs/actions/CALLBACK.md)   | Return all `token` supply to owner address after a set block, in exchange for a different `token` |
 | [`DESTROY`](./docs/actions/DESTROY.md)     | Destroy `token` supply forever                                                                    |
 | [`DISPENSER`](./docs/actions/DISPENSER.md) | Create a dispenser (vending machine) to dispense a `token` when triggered                         |

@@ -10,7 +10,7 @@
  * 0 = VERSION|TICK
  ********************************************************************/
 function btnsRug($params=null, $data=null, $error=null){
-    global $mysqli;
+    global $mysqli, $reparse;
     // Coming soon
 }
 

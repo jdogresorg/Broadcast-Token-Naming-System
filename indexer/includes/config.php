@@ -9,8 +9,8 @@ define("NETWORK", $network);
 
 // BTNS Indexer Version
 define("VERSION_MAJOR", 0);
-define("VERSION_MINOR", 11);
-define("VERSION_REVISION",1);
+define("VERSION_MINOR", 12);
+define("VERSION_REVISION",0);
 define("VERSION_STRING", VERSION_MAJOR . '.' . VERSION_MINOR . '.' . VERSION_REVISION);
 
 // TICK constants
@@ -37,9 +37,13 @@ if(NETWORK=='mainnet'){
     // First block with BTNS transaction
     define("FIRST_BLOCK",4717389);
 
-    // BTNS Address 
+    // BTNS Addresses
     define('BURN_ADDRESS', "DDogepartyxxxxxxxxxxxxxxxxxxw1dfzr");
     define('GAS_ADDRESS', "DBTNSGAShfRb6tHe4uzZHgHGhio9VdfmyM");
+
+    // Donation Addresses 
+    define('DONATE_ADDRESS_1', "DBTNSGAShfRb6tHe4uzZHgHGhio9VdfmyM"); // Protocol Development
+    define('DONATE_ADDRESS_2', "DBTNSGAShfRb6tHe4uzZHgHGhio9VdfmyM"); // Community Develoment
 }
 
 // Testnet config
@@ -50,6 +54,10 @@ if(NETWORK=='testnet'){
     // BTNS Address 
     define('BURN_ADDRESS', "ndogepartyxxxxxxxxxxxxxxxxxxwpsZCH");
     define('GAS_ADDRESS', "niV5qKrqwsJyhR7SVrPnpuz2TC3aDKTWgU");
+
+    // Donation Addresses 
+    define('DONATE_ADDRESS_1', "niV5qKrqwsJyhR7SVrPnpuz2TC3aDKTWgU"); // Protocol Development
+    define('DONATE_ADDRESS_2', "niV5qKrqwsJyhR7SVrPnpuz2TC3aDKTWgU"); // Community Develoment
 }
 
 // Database Credentials
@@ -64,10 +72,14 @@ require_once('profiler.php');
 // Rollback code
 require_once('rollback.php');
 
+// Reparse code
+require_once('reparse.php');
+
 // Protocol Changes / Activation blocks
 require_once('protocol_changes.php');
 
 // BTNS Actions
+require_once('actions/address.php');
 require_once('actions/airdrop.php');
 require_once('actions/batch.php');
 require_once('actions/bet.php');
