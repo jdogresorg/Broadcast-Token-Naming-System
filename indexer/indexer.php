@@ -24,8 +24,7 @@
  * --testnet    Load data from testnet
  * --block=#    Load data for given block
  * --rollback=# Rollback data to a given block
- * --reparse    Reparse ALL data 
- * --reparse=#  Reparse data from a given block
+ * --reparse    Reparse transaction data 
  * --single     Load single block
  ********************************************************************/
 
@@ -35,8 +34,8 @@ error_reporting(E_ERROR|E_PARSE);
 // Parse in any command line args and set basic runtime flags
 $args     = getopt("", array("testnet::", "block::", "single::", "rollback::", "reparse::"));
 $testnet  = (isset($args['testnet'])) ? true : false;
-$single   = (isset($args['single'])) ? true : false;  
-$reparse  = (isset($args['reparse'])) ? ((is_numeric($args['reparse'])) ? $args['reparse'] : true) : false;
+$single   = (isset($args['single'])) ? true : false;
+$reparse  = (isset($args['reparse'])) ? true : false;
 $block    = (is_numeric($args['block'])) ? intval($args['block']) : false;
 $network  = ($testnet) ? 'testnet' : 'mainnet';
 $rollback = (is_numeric($args['rollback'])) ? intval($args['rollback']) : false;
@@ -94,7 +93,7 @@ if(file_exists($lockfile))
 
 // Handle reparses
 if($reparse)
-    btnsReparse($current, $reparse);
+    btnsReparse($current, $block);
 
 // Loop through the blocks until we are current
 while($block <= $current){
