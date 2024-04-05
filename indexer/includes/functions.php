@@ -1437,28 +1437,6 @@ function btnsAction($action=null, $params=null, $data=null, $error=null){
     if($action=='SWEEP')        btnsSweep($params, $data, $error);
 }
 
-// Create records in the 'tx_index_types' table and return record id
-function createTxType( $type=null ){
-    global $mysqli;
-    $type    = $mysqli->real_escape_string($type);
-    $results = $mysqli->query("SELECT id FROM index_tx_types WHERE type='{$type}' LIMIT 1");
-    if($results){
-        if($results->num_rows){
-            $row = $results->fetch_assoc();
-            return $row['id'];
-        } else {
-            $results = $mysqli->query("INSERT INTO index_tx_types (type) values ('{$type}')");
-            if($results){
-                return $mysqli->insert_id;
-            } else {
-                byeLog('Error while trying to create record in index_tx_types table');
-            }
-        }
-    } else {
-        byeLog('Error while trying to lookup record in index_tx_types table');
-    }
-}
-
 // Handles returning the highest tx_index from transactions table
 function getNextTxIndex(){
     global $mysqli;
@@ -1493,12 +1471,12 @@ function createTxIndex( $data=null ){
     // Get highest tx_index
     $block_index = $data->BLOCK_INDEX;
     $tx_hash_id  = createTransaction($data->TX_HASH);
-    $type_id     = createTxType($data->ACTION); 
+    $action_id   = createAction($data->ACTION); 
     $tx_index    = getNextTxIndex();
-    $results  = $mysqli->query("SELECT type_id FROM transactions WHERE tx_hash_id='{$tx_hash_id}' LIMIT 1");
+    $results  = $mysqli->query("SELECT action_id FROM transactions WHERE tx_hash_id='{$tx_hash_id}' LIMIT 1");
     if($results){
         if($results->num_rows==0){
-            $results = $mysqli->query("INSERT INTO transactions (tx_index, block_index, tx_hash_id, type_id) values ('{$tx_index}','{$block_index}','{$tx_hash_id}', '{$type_id}')");
+            $results = $mysqli->query("INSERT INTO transactions (tx_index, block_index, tx_hash_id, action_id) values ('{$tx_index}','{$block_index}','{$tx_hash_id}', '{$action_id}')");
             if(!$results)
                 byeLog('Error while trying to create record in transactions table');
         }
