@@ -152,9 +152,8 @@ function btnsRollback($block_index=null){
     // Delete items from list_{items,edits} tables
     deleteLists($transactions, true);
 
-    // Report time to process block
-    $time = $timer->finish();
-    print " Done [{$time}sec]\n";
+    // Print out information on the total runtime
+    printRuntime($runtime->finish());
 
     // Notify user rollback is complete
     byeLog("Rollback to block {$block_index} complete.");
