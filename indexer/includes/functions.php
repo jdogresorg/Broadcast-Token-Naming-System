@@ -954,8 +954,8 @@ function getTokenInfo($tick=null, $tick_id=null, $block_index=null, $tx_index=nu
                     if(substr($key,0,5)=='LOCK_')
                         if($data[$key]==1)
                             continue;
-                    // Skip setting value if value is null
-                    if(in_array($key,array('MAX_SUPPLY','MAX_MINT')) && !isset($value))
+                    // Skip setting value if value is null or empty
+                    if(in_array($key,array('MAX_SUPPLY','MAX_MINT')) && (!isset($value) || $value==''))
                         continue;
                     $data[$key] = $value;
                 }
@@ -1583,6 +1583,9 @@ function isValidLock($btInfo=null, $data=null, $lock=null){
     $value = $data->{$lock};
     // If we dont have any info on the token, it hasn't been created yet, so all flags are valid
     if(!isset($btInfo))
+        return true;
+    // If token exists and lock value does not exist yet, its valid
+    if($btInfo->{$lock}=="")
         return true;
     // If lock value is not changing, its valid
     if(isset($value) && $btInfo->{$lock}==$value)
