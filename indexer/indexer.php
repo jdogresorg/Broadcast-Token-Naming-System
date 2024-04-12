@@ -32,10 +32,11 @@
 error_reporting(E_ERROR|E_PARSE);
 
 // Parse in any command line args and set basic runtime flags
-$args     = getopt("", array("testnet::", "block::", "single::", "rollback::", "reparse::"));
+$args     = getopt("", array("testnet::", "block::", "single::", "rollback::", "reparse::", "compare::"));
 $testnet  = (isset($args['testnet'])) ? true : false;
 $single   = (isset($args['single'])) ? true : false;
 $reparse  = (isset($args['reparse'])) ? true : false;
+$compare  = (isset($args['compare'])) ? $args['compare'] : false;
 $block    = (is_numeric($args['block'])) ? intval($args['block']) : false;
 $network  = ($testnet) ? 'testnet' : 'mainnet';
 $rollback = (is_numeric($args['rollback'])) ? intval($args['rollback']) : false;
@@ -68,6 +69,10 @@ $tickers   = [];
 // Handle rollbacks
 if($rollback)
     btnsRollback($rollback);
+
+// Handle compares
+if($compare)
+    btnsCompare($compare);
 
 // If no block given, load last block from state file, or use first block with BTNX tx
 if(!$block){
