@@ -3,7 +3,7 @@
  * rollback.php - Handles rolling back database updates safely
  ********************************************************************/
 function btnsRollback($block_index=null){
-    global $mysqli, $addresses, $tickers;
+    global $mysqli, $runtime, $addresses, $tickers;
 
     $block_index = (int) $block_index;
 
