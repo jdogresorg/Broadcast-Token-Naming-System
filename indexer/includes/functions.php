@@ -1102,10 +1102,12 @@ function getAddressCreditDebit($table=null, $address=null, $action=null, $block=
     $whereSql = "";
     if(isset($action))
         $whereSql .= " AND t1.action_id={$action_id}";
-    if(isset($block) && is_numeric($block))
-        $whereSql .= " AND t1.block_index < {$block}";
-    if(isset($tx_index) && is_numeric($tx_index))
+    // Query using either block_index OR tx_index
+    if(isset($tx_index) && is_numeric($tx_index)){
         $whereSql .= " AND t3.tx_index < {$tx_index}";
+    } else if(isset($block) && is_numeric($block)){
+        $whereSql .= " AND t1.block_index < {$block}";
+    }
     if(in_array($table,array('credits','debits'))){
         // Get data from the table
         $sql = "SELECT 
@@ -1135,8 +1137,7 @@ function getAddressCreditDebit($table=null, $address=null, $action=null, $block=
             byeLog("Error while trying to lookup address {$table} for : {$address}");
         }
     }
-    return $data;    
-
+    return $data;
 }
 
 // Get address balances using credits/debits table data
