@@ -79,6 +79,9 @@ if(!$block){
     $last  = file_get_contents(LASTFILE);
     $first = FIRST_BLOCK; // First block a BTNS transaction is seen
     $block = (isset($last) && $last>=$first) ? (intval($last) + 1) : $first;
+    // If not reparse block is given, start reparse at first block
+    if($reparse)
+        $block = $first;
 }
 
 // Get the current block index from status info
