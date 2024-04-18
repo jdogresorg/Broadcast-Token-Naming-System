@@ -929,7 +929,6 @@ function getTokenInfo($tick=null, $tick_id=null, $block_index=null, $tx_index=nu
                     'MAX_MINT'          => $row->max_mint,
                     'DECIMALS'          => (isset($row->decimals)) ? intval($row->decimals) : 0,
                     'DESCRIPTION'       => $row->description,
-                    'OWNER'             => $row->owner,
                     'LOCK_MAX_SUPPLY'   => $row->lock_max_supply,
                     'LOCK_MINT_SUPPLY'  => $row->lock_mint_supply,
                     'LOCK_MINT'         => $row->lock_mint,
