@@ -10,6 +10,7 @@ CHANGELOG
 - Removed `index_tx_types` table (duplicated via `index_actions`)
 - Removed `createTxType()` function
 - Updated `getAddressCreditDebit()` to lookup balances using `block_index` or `tx_index` 
+- Updated `getTokenInfo()` to removed duplicated `OWNER` array item
 
 0.12.0
 - Added support for `--reparse`
