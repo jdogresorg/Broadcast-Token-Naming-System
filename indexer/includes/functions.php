@@ -953,8 +953,8 @@ function getTokenInfo($tick=null, $tick_id=null, $block_index=null, $tx_index=nu
                     if(substr($key,0,5)=='LOCK_')
                         if($data[$key]==1)
                             continue;
-                    // Skip setting value if value is null or empty
-                    if(in_array($key,array('MAX_SUPPLY','MAX_MINT')) && (!isset($value) || $value==''))
+                    // Skip setting value if value is null or empty (use last explicit value)
+                    if(!isset($value) || $value=='')
                         continue;
                     $data[$key] = $value;
                 }
