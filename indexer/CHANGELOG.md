@@ -11,6 +11,8 @@ CHANGELOG
 - Removed `createTxType()` function
 - Updated `getAddressCreditDebit()` to lookup balances using `block_index` or `tx_index` 
 - Updated `getTokenInfo()` to removed duplicated `OWNER` array item
+- Cleanup `MINT_START/STOP_BLOCK` logic
+- Updated `--compare=DB` to ignore missing txs in compare ledger
 
 0.12.0
 - Added support for `--reparse`
