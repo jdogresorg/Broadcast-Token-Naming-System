@@ -1,5 +1,19 @@
 CHANGELOG
 ---
+0.13.0
+- Added support for `--compare=DB`
+- start using `—block=#` instead of `—reparse=#`
+- Updated `createTxIndex()` to call on `createAction()` instead of `createTxType()`
+- Updated `transactions` table to change `type_id` to `action_id`
+- Updated `isValidLock()` so unset lock values are valid
+- Updated `getTokenInfo()` so empty values are ignored
+- Removed `index_tx_types` table (duplicated via `index_actions`)
+- Removed `createTxType()` function
+- Updated `getAddressCreditDebit()` to lookup balances using `block_index` or `tx_index` 
+- Updated `getTokenInfo()` to removed duplicated `OWNER` array item
+- Cleanup `MINT_START/STOP_BLOCK` logic
+- Updated `--compare=DB` to ignore missing txs in compare ledger
+
 0.12.0
 - Added support for `--reparse`
 - Optimized ledger hashing
