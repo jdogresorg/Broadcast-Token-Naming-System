@@ -24,8 +24,7 @@
  * --testnet    Load data from testnet
  * --block=#    Load data for given block
  * --rollback=# Rollback data to a given block
- * --reparse    Reparse ALL data 
- * --reparse=#  Reparse data from a given block
+ * --reparse    Reparse transaction data 
  * --single     Load single block
  ********************************************************************/
 
@@ -33,10 +32,11 @@
 error_reporting(E_ERROR|E_PARSE);
 
 // Parse in any command line args and set basic runtime flags
-$args     = getopt("", array("testnet::", "block::", "single::", "rollback::", "reparse::"));
+$args     = getopt("", array("testnet::", "block::", "single::", "rollback::", "reparse::", "compare::"));
 $testnet  = (isset($args['testnet'])) ? true : false;
-$single   = (isset($args['single'])) ? true : false;  
-$reparse  = (isset($args['reparse'])) ? ((is_numeric($args['reparse'])) ? $args['reparse'] : true) : false;
+$single   = (isset($args['single'])) ? true : false;
+$reparse  = (isset($args['reparse'])) ? true : false;
+$compare  = (isset($args['compare'])) ? $args['compare'] : false;
 $block    = (is_numeric($args['block'])) ? intval($args['block']) : false;
 $network  = ($testnet) ? 'testnet' : 'mainnet';
 $rollback = (is_numeric($args['rollback'])) ? intval($args['rollback']) : false;
@@ -70,11 +70,18 @@ $tickers   = [];
 if($rollback)
     btnsRollback($rollback);
 
+// Handle compares
+if($compare)
+    btnsCompare($compare);
+
 // If no block given, load last block from state file, or use first block with BTNX tx
 if(!$block){
     $last  = file_get_contents(LASTFILE);
     $first = FIRST_BLOCK; // First block a BTNS transaction is seen
     $block = (isset($last) && $last>=$first) ? (intval($last) + 1) : $first;
+    // If not reparse block is given, start reparse at first block
+    if($reparse)
+        $block = $first;
 }
 
 // Get the current block index from status info
@@ -94,7 +101,7 @@ if(file_exists($lockfile))
 
 // Handle reparses
 if($reparse)
-    btnsReparse($current, $reparse);
+    btnsReparse($current, $block);
 
 // Loop through the blocks until we are current
 while($block <= $current){

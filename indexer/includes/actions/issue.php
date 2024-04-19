@@ -268,15 +268,15 @@ function btnsIssue( $params=null, $data=null, $error=null){
         $error = 'invalid: BLOCK_LIST (bad list)';
 
     // Verify MINT_START_BLOCK is greater than or equal to current block
-    if(!$error && isset($data->MINT_START_BLOCK) && $data->MINT_START_BLOCK > 0 && $data->MINT_START_BLOCK < $data->BLOCK_INDEX)
+    if(!$error && isset($issue->MINT_START_BLOCK) && $issue->MINT_START_BLOCK > 0 && $issue->MINT_START_BLOCK < $issue->BLOCK_INDEX)
         $error = 'invalid: MINT_START_BLOCK < BLOCK_INDEX';
 
     // Verify MINT_STOP_BLOCK is greater than or equal to current block
-    if(!$error && isset($data->MINT_STOP_BLOCK) && $data->MINT_STOP_BLOCK > 0 && $data->MINT_STOP_BLOCK < $data->BLOCK_INDEX)
+    if(!$error && isset($issue->MINT_STOP_BLOCK) && $issue->MINT_STOP_BLOCK > 0 && $issue->MINT_STOP_BLOCK < $issue->BLOCK_INDEX)
         $error = 'invalid: MINT_STOP_BLOCK < BLOCK_INDEX';
 
     // Verify MINT_STOP_BLOCK is greater than or equal to MINT_START_BLOCK
-    if(!$error && isset($data->MINT_STOP_BLOCK) && $data->MINT_START_BLOCK > 0 && $data->MINT_STOP_BLOCK > 0 && $data->MINT_STOP_BLOCK < $data->MINT_START_BLOCK)
+    if(!$error && isset($issue->MINT_STOP_BLOCK) && $issue->MINT_START_BLOCK > 0 && $issue->MINT_STOP_BLOCK > 0 && $issue->MINT_STOP_BLOCK < $issue->MINT_START_BLOCK)
         $error = 'invalid: MINT_STOP_BLOCK < MINT_START_BLOCK';
 
     // Determine final status

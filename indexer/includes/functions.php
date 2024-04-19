@@ -929,7 +929,6 @@ function getTokenInfo($tick=null, $tick_id=null, $block_index=null, $tx_index=nu
                     'MAX_MINT'          => $row->max_mint,
                     'DECIMALS'          => (isset($row->decimals)) ? intval($row->decimals) : 0,
                     'DESCRIPTION'       => $row->description,
-                    'OWNER'             => $row->owner,
                     'LOCK_MAX_SUPPLY'   => $row->lock_max_supply,
                     'LOCK_MINT_SUPPLY'  => $row->lock_mint_supply,
                     'LOCK_MINT'         => $row->lock_mint,
@@ -954,8 +953,8 @@ function getTokenInfo($tick=null, $tick_id=null, $block_index=null, $tx_index=nu
                     if(substr($key,0,5)=='LOCK_')
                         if($data[$key]==1)
                             continue;
-                    // Skip setting value if value is null
-                    if(in_array($key,array('MAX_SUPPLY','MAX_MINT')) && !isset($value))
+                    // Skip setting value if value is null or empty (use last explicit value)
+                    if(!isset($value) || $value=='')
                         continue;
                     $data[$key] = $value;
                 }
@@ -1102,10 +1101,12 @@ function getAddressCreditDebit($table=null, $address=null, $action=null, $block=
     $whereSql = "";
     if(isset($action))
         $whereSql .= " AND t1.action_id={$action_id}";
-    if(isset($block) && is_numeric($block))
-        $whereSql .= " AND t1.block_index < {$block}";
-    if(isset($tx_index) && is_numeric($tx_index))
+    // Query using either block_index OR tx_index
+    if(isset($tx_index) && is_numeric($tx_index)){
         $whereSql .= " AND t3.tx_index < {$tx_index}";
+    } else if(isset($block) && is_numeric($block)){
+        $whereSql .= " AND t1.block_index < {$block}";
+    }
     if(in_array($table,array('credits','debits'))){
         // Get data from the table
         $sql = "SELECT 
@@ -1135,8 +1136,7 @@ function getAddressCreditDebit($table=null, $address=null, $action=null, $block=
             byeLog("Error while trying to lookup address {$table} for : {$address}");
         }
     }
-    return $data;    
-
+    return $data;
 }
 
 // Get address balances using credits/debits table data
@@ -1437,28 +1437,6 @@ function btnsAction($action=null, $params=null, $data=null, $error=null){
     if($action=='SWEEP')        btnsSweep($params, $data, $error);
 }
 
-// Create records in the 'tx_index_types' table and return record id
-function createTxType( $type=null ){
-    global $mysqli;
-    $type    = $mysqli->real_escape_string($type);
-    $results = $mysqli->query("SELECT id FROM index_tx_types WHERE type='{$type}' LIMIT 1");
-    if($results){
-        if($results->num_rows){
-            $row = $results->fetch_assoc();
-            return $row['id'];
-        } else {
-            $results = $mysqli->query("INSERT INTO index_tx_types (type) values ('{$type}')");
-            if($results){
-                return $mysqli->insert_id;
-            } else {
-                byeLog('Error while trying to create record in index_tx_types table');
-            }
-        }
-    } else {
-        byeLog('Error while trying to lookup record in index_tx_types table');
-    }
-}
-
 // Handles returning the highest tx_index from transactions table
 function getNextTxIndex(){
     global $mysqli;
@@ -1493,12 +1471,12 @@ function createTxIndex( $data=null ){
     // Get highest tx_index
     $block_index = $data->BLOCK_INDEX;
     $tx_hash_id  = createTransaction($data->TX_HASH);
-    $type_id     = createTxType($data->ACTION); 
+    $action_id   = createAction($data->ACTION); 
     $tx_index    = getNextTxIndex();
-    $results  = $mysqli->query("SELECT type_id FROM transactions WHERE tx_hash_id='{$tx_hash_id}' LIMIT 1");
+    $results  = $mysqli->query("SELECT action_id FROM transactions WHERE tx_hash_id='{$tx_hash_id}' LIMIT 1");
     if($results){
         if($results->num_rows==0){
-            $results = $mysqli->query("INSERT INTO transactions (tx_index, block_index, tx_hash_id, type_id) values ('{$tx_index}','{$block_index}','{$tx_hash_id}', '{$type_id}')");
+            $results = $mysqli->query("INSERT INTO transactions (tx_index, block_index, tx_hash_id, action_id) values ('{$tx_index}','{$block_index}','{$tx_hash_id}', '{$action_id}')");
             if(!$results)
                 byeLog('Error while trying to create record in transactions table');
         }
@@ -1605,6 +1583,9 @@ function isValidLock($btInfo=null, $data=null, $lock=null){
     $value = $data->{$lock};
     // If we dont have any info on the token, it hasn't been created yet, so all flags are valid
     if(!isset($btInfo))
+        return true;
+    // If token exists and lock value does not exist yet, its valid
+    if($btInfo->{$lock}=="")
         return true;
     // If lock value is not changing, its valid
     if(isset($value) && $btInfo->{$lock}==$value)

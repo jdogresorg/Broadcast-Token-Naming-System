@@ -9,7 +9,7 @@ define("NETWORK", $network);
 
 // BTNS Indexer Version
 define("VERSION_MAJOR", 0);
-define("VERSION_MINOR", 12);
+define("VERSION_MINOR", 13);
 define("VERSION_REVISION",0);
 define("VERSION_STRING", VERSION_MAJOR . '.' . VERSION_MINOR . '.' . VERSION_REVISION);
 
@@ -69,11 +69,10 @@ require_once('functions.php');
 // Tracks Execution Time
 require_once('profiler.php');
 
-// Rollback code
+// Ledger Management / Maintenance
 require_once('rollback.php');
-
-// Reparse code
 require_once('reparse.php');
+require_once('compare.php');
 
 // Protocol Changes / Activation blocks
 require_once('protocol_changes.php');
