@@ -108,7 +108,7 @@ function btnsCompare($database=null){
 
         // Compare basic transaction data (tx_index, tx_hash, action)
         foreach(array_keys($info) as $field)
-            if(!$error && $data['compare']['transactions'][$tx_index][$field]!=$info[$field])
+            if(!$error && isset($data['compare']['transactions'][$tx_index]) && $data['compare']['transactions'][$tx_index][$field]!=$info[$field])
                 $error = "ERROR: Found ledger {$field} difference at tx_index {$tx_index}! ({$info[$field]} != {$data['compare']['transactions'][$tx_index][$field]})";
 
         // Lookup transaction statuses for records related to this transaction
@@ -157,7 +157,7 @@ function btnsCompare($database=null){
                     if(!$error){
                         foreach($data['current']['txinfo'] as $idx => $nfo){
                             foreach(array_keys($nfo) as $field)
-                                if(!$error && $data['compare']['txinfo'][$idx][$field]!=$nfo[$field])
+                                if(!$error && isset($data['compare']['txinfo'][$idx]) && $data['compare']['txinfo'][$idx][$field]!=$nfo[$field])
                                     $error = "ERROR: Found ledger {$field} difference at tx_index {$tx_index}! ({$nfo[$field]} != {$data['compare']['txinfo'][$idx][$field]})";
                         }
                     }
