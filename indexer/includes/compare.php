@@ -68,7 +68,7 @@ function btnsCompare($database=null){
                     {$limitSql}";
             // Support OLD style database with index_tx_types instead of index_actions
             // TODO: Remove
-            if(in_array($db,array('BTNS_Counterparty_Old','BTNS_Counterparty_Testnet_Old'))){
+            if(in_array($db,array('BTNS_Counterparty_Old','BTNS_Counterparty_Testnet_Old','BTNS_Dogeparty_Old','BTNS_Dogeparty_Testnet_Old'))){
                 $sql = "SELECT
                             t1.tx_index,
                             t2.hash as tx_hash,
