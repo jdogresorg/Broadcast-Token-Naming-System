@@ -2427,4 +2427,56 @@ function createFeeRecord( $data=null ){
     }
 }
 
+// Create record in `dividends` table
+function createDividend( $data=null ){
+    global $mysqli;
+    $tick_id          = createTicker($data->TICK);
+    $dividend_tick_id = createTicker($data->DIVIDEND_TICK);
+    $source_id        = createAddress($data->SOURCE);
+    $tx_hash_id       = createTransaction($data->TX_HASH);
+    $memo_id          = createMemo($data->MEMO);
+    $status_id        = createStatus($data->STATUS);
+    $tx_index         = $mysqli->real_escape_string($data->TX_INDEX);
+    $amount           = $mysqli->real_escape_string($data->AMOUNT);
+    $block_index      = $mysqli->real_escape_string($data->BLOCK_INDEX);
+    // Check if record already exists
+    $sql = "SELECT
+                tx_index
+            FROM
+                dividends
+            WHERE
+                tick_id='{$tick_id}' AND
+                dividend_tick_id='{$dividend_tick_id}' AND
+                source_id='{$source_id}' AND
+                amount='{$amount}' AND
+                tx_hash_id='{$tx_hash_id}'";
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows){
+            // UPDATE record
+            $sql = "UPDATE
+                        dividends
+                    SET
+                        tx_index='{$tx_index}',
+                        block_index='{$block_index}',
+                        memo_id='{$memo_id}',
+                        status_id='{$status_id}'
+                    WHERE 
+                        tick_id='{$tick_id}' AND
+                        dividend_tick_id='{$dividend_tick_id}' AND
+                        source_id='{$source_id}' AND
+                        amount='{$amount}' AND
+                        tx_hash_id='{$tx_hash_id}'";
+        } else {
+            // INSERT record
+            $sql = "INSERT INTO dividends (tx_index, tick_id, source_id, dividend_tick_id, amount, memo_id, tx_hash_id, block_index, status_id) values ('{$tx_index}','{$tick_id}', '{$source_id}', '{$dividend_tick_id}', '{$amount}','{$memo_id}', '{$tx_hash_id}', '{$block_index}', '{$status_id}')";
+        }
+        $results = $mysqli->query($sql);
+        if(!$results)
+            byeLog('Error while trying to create / update a record in the dividends table');
+    } else {
+        byeLog('Error while trying to lookup record in dividends table');
+    }
+}
+
 ?>
