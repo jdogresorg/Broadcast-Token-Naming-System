@@ -1795,8 +1795,9 @@ function hasBalance($balances=null, $tick=null, $amount=null){
 
 // Handle deducting TICK AMOUNT from balances and return updated balances array
 function debitBalances($balances=null, $tick=null, $amount=null){
-    $balance = (isset($balances[$tick])) ? $balances[$tick] : 0;
-    $balances[$tick] = $balance - $amount;
+    $tick_id = createTicker($tick);
+    $balance = (isset($balances[$tick_id])) ? $balances[$tick_id] : 0;
+    $balances[$tick_id] = $balance - $amount;
     return $balances;
 }
 
@@ -1853,9 +1854,9 @@ function sanityCheck( $block=null ){
         $supplyB = getTokenSupplyBalance($tick); // Supply from balances table
         $supplyC = getTokenSupply($tick);        // Supply from credits/debits tables
         if($supplyA!=$supplyB)
-            byeLog("SanityError: balances table supply does not match token supply : {$tick}");
+            byeLog("SanityError: balances table supply does not match token supply : {$tick} ({$supplyB} != {$supplyA})");
         if($supplyA!=$supplyC)
-            byeLog("SanityError: credits/debits table supply does not match token supply : {$tick}");
+            byeLog("SanityError: credits/debits table supply does not match token supply : {$tick} ({$supplyC} != {$supplyA})");
     }
 }
 
@@ -2478,5 +2479,114 @@ function createDividend( $data=null ){
         byeLog('Error while trying to lookup record in dividends table');
     }
 }
+
+// Get list of tokens owned by a given address
+function getAddressOwnership($address=null, $block_index=null, $tx_index=null){
+    global $mysqli;
+    $address_id = createAddress($address);
+    $data       = [];
+    $whereSql   = "";
+    if(isset($block_index) && is_numeric($block_index))
+        $whereSql .= " AND block_index <= {$block_index}";
+    if(isset($tx_index) && is_numeric($tx_index))
+        $whereSql .= " AND tx_index < '{$tx_index}'";
+    // get list of issuances where address is SOURCE or TRANSFER (list of tokens)
+    $sql = "SELECT
+                t.tick,
+                i.tick_id
+            FROM
+                issues i,
+                index_tickers t
+            WHERE
+                t.id=i.tick_id AND
+                (source_id='{$address_id}' OR transfer_id='{$address_id}')
+                {$whereSql}
+            ORDER BY tick DESC";
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows){
+            while($row = $results->fetch_assoc()){
+                $row  = (object) $row;
+                $info = getTokenInfo($row->tick, null, $block_index, $tx_index);
+                if($info->OWNER==$address)
+                    array_push($data, $row->tick);
+            }
+        }
+    } else {
+        byeLog('Error while trying to lookup records in issues table');
+    }
+    return $data;
+}
+
+
+// Create record in `sweeps` table
+function createSweep( $data=null ){
+    global $mysqli;
+    $tick_id          = createTicker($data->TICK);
+    $source_id        = createAddress($data->SOURCE);
+    $destination_id   = createAddress($data->DESTINATION);
+    $tx_hash_id       = createTransaction($data->TX_HASH);
+    $memo_id          = createMemo($data->MEMO);
+    $status_id        = createStatus($data->STATUS);
+    $tx_index         = $mysqli->real_escape_string($data->TX_INDEX);
+    $balances         = $mysqli->real_escape_string($data->BALANCES);
+    $ownerships       = $mysqli->real_escape_string($data->OWNERSHIPS);
+    $block_index      = $mysqli->real_escape_string($data->BLOCK_INDEX);
+    // Check if record already exists
+    $sql = "SELECT
+                tx_index
+            FROM
+                sweeps
+            WHERE
+                source_id='{$source_id}' AND
+                tx_hash_id='{$tx_hash_id}'";
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows){
+            // UPDATE record
+            $sql = "UPDATE
+                        sweeps
+                    SET
+                        tx_index='{$tx_index}',
+                        block_index='{$block_index}',
+                        destination_id='{$destination_id}',
+                        balances='{$balances}',
+                        ownerships='{$ownerships}',
+                        memo_id='{$memo_id}',
+                        status_id='{$status_id}'
+                    WHERE 
+                        source_id='{$source_id}' AND
+                        tx_hash_id='{$tx_hash_id}'";
+        } else {
+            // INSERT record
+            $sql = "INSERT INTO sweeps (tx_index, source_id, destination_id, balances, ownerships, memo_id, tx_hash_id, block_index, status_id) values ('{$tx_index}', '{$source_id}','{$destination_id}', '{$balances}', '{$ownerships}', '{$memo_id}', '{$tx_hash_id}', '{$block_index}', '{$status_id}')";
+        }
+        $results = $mysqli->query($sql);
+        if(!$results)
+            byeLog('Error while trying to create / update a record in the dividends table');
+    } else {
+        byeLog('Error while trying to lookup record in dividends table');
+    }
+}
+
+// Get TICK for a given tick_id
+function getTicker( $tick_id=null ){
+    global $mysqli;
+    if(!isset($tick_id) || $tick_id=='')
+        return 0;
+    // Truncate description to 250 chars 
+    $tick_id = $mysqli->real_escape_string($tick_id);
+    $results = $mysqli->query("SELECT tick FROM index_tickers WHERE id='{$tick_id}' LIMIT 1");
+    if($results){
+        if($results->num_rows){
+            $row = $results->fetch_assoc();
+            return $row['tick'];
+        }
+    } else {
+        byeLog('Error while trying to lookup ticker in index_tickers table');
+    }
+}
+
+
 
 ?>

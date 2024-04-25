@@ -25,7 +25,7 @@ $changes = array(
     'RUG'       => array(0,  10,   0,     9999999,      999999999),
     'SEND'      => array(0,  10,   0,     789742,       2473585),
     'SLEEP'     => array(0,  10,   0,     9999999,      999999999),
-    'SWEEP'     => array(0,  10,   0,     9999999,      999999999),
+    'SWEEP'     => array(0,  10,   0,     789742,       2473585),
 
     // Define protocol changes (ALL LOWER Case)
     // 'name' => array(0,  10,   0,     0,      0),
