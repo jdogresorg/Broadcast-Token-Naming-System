@@ -34,3 +34,4 @@ This example pays a dividend of 1 BACON token to every holder of 1 TEST token
 - `UNIT` - A specific unit of measure (1 or 1.0)
 - To send large amounts of `tokens` to users, see the `AIRDROP` or `SEND` commands
 - If `TICK` is divisible and `DIVIDEND_TICK` is non-divisble, quantities under 1.0 will receive no `DIVIDEND_TICK`
+- `SOURCE` address is excluded from receiving dividends
