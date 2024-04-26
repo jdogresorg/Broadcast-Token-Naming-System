@@ -2587,6 +2587,63 @@ function getTicker( $tick_id=null ){
     }
 }
 
+// Create the basic $fees object used to calculate platform transaction fees
+function createFeesObject($data=null){
+    // Get SOURCE address preferences
+    $preferences = getAddressPreferences($data->SOURCE, $data->BLOCK_INDEX, $data->TX_INDEX);
+    // Copy base BTNS transaction data object into fees object
+    $fees = clone($data);
+    $fees->TICK   = 'GAS';
+    $fees->AMOUNT = 0;
+    $fees->METHOD = ($preferences->FEE_PREFERENCE==1) ? 1 : 2; // 1=Destroy, 2=Donate
+    return $fees;
+}
 
+// Process any transaction FEE according the user's ADDRESS preferences
+function processTransactionFees($action=null, $fees=null){
+    global $credits, $debits;
+    $immediate = true;
+    if(in_array($action,array('AIRDROP')))
+        $immediate = false;
+    // Debit FEE from SOURCE
+    if($immediate){
+        createDebit($action, $fees->BLOCK_INDEX, $fees->TX_HASH, $fees->TICK, $fees->AMOUNT, $fees->SOURCE);
+    } else {
+        array_push($debits, array($fees->TICK, $fees->AMOUNT));
+    }
+    // Handle using FEE according the the users ADDRESS preferences
+    if($fees->METHOD>1){
+        // Determine what address to donate to
+        $fees->DESTINATION = ($fees->METHOD==2) ? DONATE_ADDRESS_1 : DONATE_ADDRESS_2;
+        // Store the donation ADDRESS and TICK in addresses list
+        addAddressTicker($fees->DESTINATION, $fees->TICK);
+        // Credit donation address with FEE
+        if($immediate){
+            createCredit($action, $fees->BLOCK_INDEX, $fees->TX_HASH, $fees->TICK, $fees->AMOUNT, $fees->DESTINATION);
+        } else {
+            array_push($credits, array($fees->TICK, $fees->AMOUNT, $fees->DESTINATION));
+        }
+    } 
+    // Create record of FEE in `fees` table
+    createFeeRecord($fees);
+}
+
+// Process any transaction credit/debit records
+function processTransactionCreditsDebits($action=null, $data=null){
+    global $credits, $debits;
+    // Consolidate the credit and debit records to write as few records as possible
+    $debits  = consolidateCreditDebitRecords('debits', $debits);
+    $credits = consolidateCreditDebitRecords('credits', $credits);
+    // Create records in debits table
+    foreach($debits as $debit){
+        [$tick, $amount] = $debit;
+        createDebit($action, $data->BLOCK_INDEX, $data->TX_HASH, $tick, $amount, $data->SOURCE);
+    }
+    // Create records in credits table
+    foreach($credits as $credit){
+        [$tick, $amount, $destination] = $credit;
+        createCredit($action, $data->BLOCK_INDEX, $data->TX_HASH, $tick, $amount, $destination);
+    }
+}    
 
 ?>

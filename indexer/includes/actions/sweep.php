@@ -35,18 +35,14 @@ function btnsSweep($params=null, $data=null, $error=null){
     if(!$error)
         $data = setActionParams($data, $params, $formats[$format]);
 
-    // Get SOURCE address preferences, balances, and ownership information
-    $preferences = getAddressPreferences($data->SOURCE, $data->BLOCK_INDEX, $data->TX_INDEX);
+    // Get SOURCE address balances and ownership information
     $balances    = getAddressBalances($data->SOURCE, null, $data->BLOCK_INDEX, $data->TX_INDEX);
     $ownerships  = getAddressOwnership($data->SOURCE, null, $data->BLOCK_INDEX, $data->TX_INDEX);
 
-    // Copy base BTNS transaction data object into fees object
-    $fees = clone($data);
-    $fees->TICK   = 'GAS';
-    $fees->AMOUNT = 0;
-    $fees->METHOD = ($preferences->FEE_PREFERENCE==1) ? 1 : 2; // 1=Destroy, 2=Donate
+    // Create the fees object 
+    $fees = createFeesObject($data);
 
-     /*****************************************************************
+    /*****************************************************************
      * FORMAT Validations
      ****************************************************************/
 
@@ -87,16 +83,15 @@ function btnsSweep($params=null, $data=null, $error=null){
     $db_hits += ($data->OWNERSHIP) ? count($ownerships) : 0;          // 1 issues
 
     // Determine total transaction FEE based on database hits
-    $data->FEE_TICK   = 'GAS';
-    $data->FEE_AMOUNT = getTransactionFee($db_hits, $data->FEE_TICK);
+    $fees->AMOUNT = getTransactionFee($db_hits, $fees->TICK);
 
     // Verify SOURCE has enough balances to cover FEE AMOUNT
-    if(!$error && !hasBalance($balances, $data->FEE_TICK, $data->FEE_AMOUNT))
+    if(!$error && !hasBalance($balances, $fees->TICK, $fees->AMOUNT))
         $error = 'invalid: insufficient funds (FEE)';
 
     // Adjust balances to reduce by FEE amount
     if(!$error)
-        $balances = debitBalances($balances, $data->FEE_TICK, $data->FEE_AMOUNT);
+        $balances = debitBalances($balances, $fees->TICK, $fees->AMOUNT);
 
     // Determine final status
     $data->STATUS = $sweep->STATUS = $status = ($error) ? $error : 'valid';
@@ -111,10 +106,10 @@ function btnsSweep($params=null, $data=null, $error=null){
     if($status=='valid'){
 
         // Store the SOURCE and FEE_TICK in addresses and tickers arrays
-        addAddressTicker($data->SOURCE, $data->FEE_TICK);
+        addAddressTicker($data->SOURCE, $fees->TICK);
 
-        // Debit FEE_AMOUNT from SOURCE address
-        createDebit('SWEEP', $data->BLOCK_INDEX, $data->TX_HASH, $data->FEE_TICK, $data->FEE_AMOUNT, $data->SOURCE);
+        // Handle any transaction FEE according the users's ADDRESS preferences
+        processTransactionFees('SWEEP', $fees);
 
         // Transfer Balances
         if($data->BALANCES==1){
@@ -146,28 +141,6 @@ function btnsSweep($params=null, $data=null, $error=null){
                 addAddressTicker($data->DESTINATION, $tick);
             }
         }
-
-        // Update FEES object with to AMOUNT
-        $fees->AMOUNT = bcadd($fees->AMOUNT, $data->FEE_AMOUNT, 8);
-
-        // Handle using FEE according the the users ADDRESS preferences
-        if($preferences->FEE_PREFERENCE>1){
-
-            // Determine what address to donate to
-            $address = ($preferences->FEE_PREFERENCE==2) ? DONATE_ADDRESS_1 : DONATE_ADDRESS_2;
-
-            // Update the $fees object with the destination address
-            $fees->DESTINATION = $address;
-
-            // Store the donation ADDRESS and TICK in addresses list
-            addAddressTicker($address, $data->FEE_TICK);
-
-            // Credit donation address with FEE_AMOUNT
-            createCredit('SWEEP', $data->BLOCK_INDEX, $data->TX_HASH, $data->FEE_TICK, $data->FEE_AMOUNT, $fees->DESTINATION);
-        } 
-
-        // Create record of FEE in `fees` table
-        createFeeRecord($fees);
 
         // If this is a reparse, bail out before updating balances and token information
         if($reparse)

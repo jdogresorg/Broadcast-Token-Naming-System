@@ -46,14 +46,8 @@ function btnsDividend($params=null, $data=null, $error=null){
     // Clone the raw data for storage in dividends table
     $dividend = clone($data);
 
-    // Get SOURCE address preferences
-    $preferences = getAddressPreferences($data->SOURCE, $data->BLOCK_INDEX, $data->TX_INDEX);
-
-    // Copy base BTNS transaction data object into fees object
-    $fees = clone($data);
-    $fees->TICK   = 'GAS';
-    $fees->AMOUNT = 0;
-    $fees->METHOD = ($preferences->FEE_PREFERENCE==1) ? 1 : 2; // 1=Destroy, 2=Donate
+    // Create the fees object 
+    $fees = createFeesObject($data);
 
     // Validate TICK exists
     if(!$error && !$btInfo)
@@ -130,16 +124,15 @@ function btnsDividend($params=null, $data=null, $error=null){
     $db_hits += 4;                   // 1 debits,  1 balances, 1 dividend
 
     // Determine total transaction FEE based on database hits
-    $data->FEE_TICK   = 'GAS';
-    $data->FEE_AMOUNT = getTransactionFee($db_hits, $data->FEE_TICK);
+    $fees->AMOUNT = getTransactionFee($db_hits, $fees->TICK);
 
     // Verify SOURCE has enough balances to cover FEE AMOUNT
-    if(!$error && !hasBalance($balances, $data->FEE_TICK, $data->FEE_AMOUNT))
+    if(!$error && !hasBalance($balances, $fees->TICK, $fees->AMOUNT))
         $error = 'invalid: insufficient funds (FEE)';
 
     // Adjust balances to reduce by FEE amount
     if(!$error)
-        $balances = debitBalances($balances, $data->FEE_TICK, $data->FEE_AMOUNT);
+        $balances = debitBalances($balances, $fees->TICK, $fees->AMOUNT);
 
     // Determine final status
     $data->STATUS = $dividend->STATUS = $status = ($error) ? $error : 'valid';
@@ -159,8 +152,8 @@ function btnsDividend($params=null, $data=null, $error=null){
         // Debit DIVIDEND_TOTAL from SOURCE address
         createDebit('DIVIDEND', $data->BLOCK_INDEX, $data->TX_HASH, $data->DIVIDEND_TICK, $data->DIVIDEND_TOTAL, $data->SOURCE);
 
-        // Debit FEE_AMOUNT from SOURCE address
-        createDebit('DIVIDEND', $data->BLOCK_INDEX, $data->TX_HASH, $data->FEE_TICK, $data->FEE_AMOUNT, $data->SOURCE);
+        // Handle any transaction FEE according the users's ADDRESS preferences
+        processTransactionFees('DIVIDEND', $fees);
 
         // Loop through TICK holders and credit them with DIVIDEND_TICK amount
         foreach($holders as $address => $amount){
@@ -172,28 +165,6 @@ function btnsDividend($params=null, $data=null, $error=null){
             // Store the recipient ADDRESS and TICK in addresses list
             addAddressTicker($address, $data->DIVIDEND_TICK);
         }
-
-        // Update FEES object with to AMOUNT
-        $fees->AMOUNT = bcadd($fees->AMOUNT, $data->FEE_AMOUNT, 8);
-
-        // Handle using FEE according the the users ADDRESS preferences
-        if($preferences->FEE_PREFERENCE>1){
-
-            // Determine what address to donate to
-            $address = ($preferences->FEE_PREFERENCE==2) ? DONATE_ADDRESS_1 : DONATE_ADDRESS_2;
-
-            // Update the $fees object with the destination address
-            $fees->DESTINATION = $address;
-
-            // Store the donation ADDRESS and TICK in addresses list
-            addAddressTicker($address, $data->FEE_TICK);
-
-            // Credit donation address with FEE_AMOUNT
-            createCredit('DIVIDEND', $data->BLOCK_INDEX, $data->TX_HASH, $data->FEE_TICK, $data->FEE_AMOUNT, $fees->DESTINATION);
-        } 
-
-        // Create record of FEE in `fees` table
-        createFeeRecord($fees);
     }
 
     // If this is a reparse, bail out before updating balances
