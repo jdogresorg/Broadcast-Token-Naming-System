@@ -146,8 +146,8 @@ function btnsDividend($params=null, $data=null, $error=null){
     // If this was a valid transaction, then add records to the credits and debits array
     if($status=='valid'){
 
-        // Store the SOURCE, DIVIDEND_TICK, and FEE_TICK in addresses list
-        addAddressTicker($data->SOURCE, [$data->DIVIDEND_TICK, $data->FEE_TICK]);
+        // Store the SOURCE, DIVIDEND_TICK, and fee TICK in addresses list
+        addAddressTicker($data->SOURCE, [$data->DIVIDEND_TICK, $fees->TICK]);
 
         // Debit DIVIDEND_TOTAL from SOURCE address
         createDebit('DIVIDEND', $data->BLOCK_INDEX, $data->TX_HASH, $data->DIVIDEND_TICK, $data->DIVIDEND_TOTAL, $data->SOURCE);
