@@ -105,7 +105,7 @@ function btnsSweep($params=null, $data=null, $error=null){
     // If this was a valid transaction, then handle the actual sweep actions
     if($status=='valid'){
 
-        // Store the SOURCE and FEE_TICK in addresses and tickers arrays
+        // Store the SOURCE and fee TICK in addresses and tickers arrays
         addAddressTicker($data->SOURCE, $fees->TICK);
 
         // Handle any transaction FEE according the users's ADDRESS preferences
