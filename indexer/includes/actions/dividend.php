@@ -90,18 +90,9 @@ function btnsDividend($params=null, $data=null, $error=null){
     // Remove SOURCE address from the TICK holders list
     unset($holders[$data->SOURCE]);
 
-    // Handle TICK and DIVIDEND_TICK divisibility mismatches by cleaning up the holders list
-    if(!$error && $divisible!=$divisible2){
-        foreach($holders as $addr => $amount){
-
-            // Convert amount to integer
-            $holders[$addr] = bcadd($amount,0,0);
-
-            // Remove any 0 quantity records
-            if($holders[$addr]<1)
-                unset($holders[$addr]);
-        }
-    }
+    // Handle TICK and DIVIDEND_TICK divisibility mismatches by cleaning up the holders list (only deal with integer amounts)
+    if(!$error && $divisible!=$divisible2)
+        $holders = cleanupHolders($holders);
 
     // Determine total amount of TICK
     $data->HOLDER_TOTAL = 0;

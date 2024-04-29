@@ -1623,6 +1623,7 @@ function setActionParams($data=null, $params=null, $format=null){
 // @param {tick}            string  Ticker name
 // @param {block_index}     integer Block Index 
 // @param {tx_index}        integer tx_index of transaction
+// TODO: Add support for 'escrowed' tokens (dispensers, orders, bets)
 function getHolders( $tick=null, $block_index=null, $tx_index=null ){
     global $mysqli, $dbase;
     $holders = [];
@@ -2518,7 +2519,6 @@ function getAddressOwnership($address=null, $block_index=null, $tx_index=null){
     return $data;
 }
 
-
 // Create record in `sweeps` table
 function createSweep( $data=null ){
     global $mysqli;
@@ -2645,5 +2645,15 @@ function processTransactionCreditsDebits($action=null, $data=null){
         createCredit($action, $data->BLOCK_INDEX, $data->TX_HASH, $tick, $amount, $destination);
     }
 }    
+
+// Handle cleaning up the holders list to only deal with integer amounts
+function cleanupHolders($holders){
+    foreach($holders as $addr => $amount){
+        $holders[$addr] = bcadd($amount,0,0);
+        if($holders[$addr]<1)
+            unset($holders[$addr]);
+    }
+    return $holders;
+}
 
 ?>
