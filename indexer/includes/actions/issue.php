@@ -243,12 +243,8 @@ function btnsIssue( $params=null, $data=null, $error=null){
     if(!$error && $btInfo && $btnInfo->LOCK_CALLBACK && isset($data->CALLBACK_AMOUNT) && $data->CALLBACK_AMOUNT!=$btnInfo->CALLBACK_AMOUNT)
         $error = 'invalid: CALLBACK_AMOUNT (locked)';
 
-    // Verify CALLBACK_BLOCK only increases in value
-    if(!$error && $btInfo && isset($data->CALLBACK_BLOCK) && $data->CALLBACK_BLOCK < $btnInfo->CALLBACK_BLOCK)
-        $error = 'invalid: CALLBACK_BLOCK (decreased)';
-
     // Verify CALLBACK_BLOCK is greater than current block index
-    if(!$error && $btInfo && isset($data->CALLBACK_BLOCK) && $data->CALLBACK_BLOCK > $data->BLOCK_INDEX)
+    if(!$error && $btInfo && isset($data->CALLBACK_BLOCK) && $data->CALLBACK_BLOCK < $data->BLOCK_INDEX)
         $error = 'invalid: CALLBACK_BLOCK (block index)';
 
     // Verify CALLBACK_BLOCK can not be changed if supply is distributed
