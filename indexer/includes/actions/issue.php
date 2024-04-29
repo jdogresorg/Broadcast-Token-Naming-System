@@ -251,6 +251,10 @@ function btnsIssue( $params=null, $data=null, $error=null){
     if(!$error && $btInfo && isset($data->CALLBACK_BLOCK) && $data->CALLBACK_BLOCK > $data->BLOCK_INDEX)
         $error = 'invalid: CALLBACK_BLOCK (block index)';
 
+    // Verify CALLBACK_BLOCK can not be changed if supply is distributed
+    if(!$error && isset($data->CALLBACK_BLOCK) && $data->CALLBACK_BLOCK!=$btnInfo->CALLBACK_BLOCK && $isDistributed)
+        $error = 'invalid: CALLBACK_BLOCK (supply distributed)';
+
     // Verify CALLBACK_TICK can not be changed if supply is distributed
     if(!$error && isset($data->CALLBACK_TICK) && $data->CALLBACK_TICK!=$btnInfo->CALLBACK_TICK && $isDistributed)
         $error = 'invalid: CALLBACK_TICK (supply distributed)';
