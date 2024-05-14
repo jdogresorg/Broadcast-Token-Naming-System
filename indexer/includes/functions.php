@@ -927,6 +927,7 @@ function getTokenInfo($tick=null, $tick_id=null, $block_index=null, $tx_index=nu
                     'OWNER'             => ($row->transfer) ? $row->transfer : $row->owner,
                     'MAX_SUPPLY'        => $row->max_supply,
                     'MAX_MINT'          => $row->max_mint,
+                    // Force decimal precision to a integer value
                     'DECIMALS'          => (isset($row->decimals)) ? intval($row->decimals) : 0,
                     'DESCRIPTION'       => $row->description,
                     'LOCK_MAX_SUPPLY'   => $row->lock_max_supply,
@@ -953,6 +954,9 @@ function getTokenInfo($tick=null, $tick_id=null, $block_index=null, $tx_index=nu
                     if(substr($key,0,5)=='LOCK_')
                         if($data[$key]==1)
                             continue;
+                    // Prevent changing decimal precision 
+                    if($key=='DECIMALS' && $data[$key]>$value)
+                        continue;
                     // Skip setting value if value is null or empty (use last explicit value)
                     if(!isset($value) || $value=='')
                         continue;
