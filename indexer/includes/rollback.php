@@ -12,14 +12,17 @@ function btnsRollback($block_index=null){
         'addresses',
         'batches',
         'blocks',
+        'callbacks',
         'credits',
         'debits',
         'destroys',
+        'dividends',
         'fees',
         'issues',
         'lists',
         'mints',
         'sends',
+        'sweeps',
         'tokens',
         'transactions'
     ];
