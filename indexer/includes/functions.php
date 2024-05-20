@@ -477,7 +477,7 @@ function createToken( $data=null ){
         $max_mint         = bcmul($max_mint,1,$decimals);
         $mint_supply      = bcmul($mint_supply,1,$decimals);
         $mint_address_max = bcmul($mint_address_max,1,$decimals);
-        $callback_amount  = bcmul($callback_amount,1,$decimals);
+        // $callback_amount  = bcmul($callback_amount,1,$decimals);
     }
     $supply             = $mysqli->real_escape_string($supply);
     $max_supply         = $mysqli->real_escape_string($max_supply);
