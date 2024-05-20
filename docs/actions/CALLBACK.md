@@ -6,11 +6,12 @@ This command performs a callback on a `token`.
 | --------- | ------ | ----------------------------- |
 | `VERSION` | String | Broadcast Format Version      |
 | `TICK`    | String | 1 to 250 characters in length |
+| `MEMO`    | String | An optional memo to include   |
 
 ## Formats
 
 ### Version `0`
-- `VERSION|TICK`
+- `VERSION|TICK|MEMO`
 
 ## Examples
 ```

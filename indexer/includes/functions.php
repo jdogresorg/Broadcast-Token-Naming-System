@@ -1386,6 +1386,9 @@ function getTokenSupply( $tick=null, $tick_id=null, $block_index=null, $tx_index
         byeLog('Error while trying to get list of debits');
     }
     $supply = bcsub($credits, $debits, $decimals);
+    // print "credits={$credits}\n";
+    // print "debits={$debits}\n";
+    // print "supply={$supply}\n";
     return $supply;
 }
 
@@ -1858,6 +1861,10 @@ function sanityCheck( $block=null ){
         $supplyA = $supply[$tick];               // Supply from tokens table
         $supplyB = getTokenSupplyBalance($tick); // Supply from balances table
         $supplyC = getTokenSupply($tick);        // Supply from credits/debits tables
+        // print "\nTick={$tick} tick_id={$tick_id}\n";
+        // print "token        supply = {$supplyA}\n";
+        // print "balances     supply = {$supplyB}\n";
+        // print "credit/debit supply = {$supplyC}\n";
         if($supplyA!=$supplyB)
             byeLog("SanityError: balances table supply does not match token supply : {$tick} ({$supplyB} != {$supplyA})");
         if($supplyA!=$supplyC)
@@ -2658,6 +2665,53 @@ function cleanupHolders($holders){
             unset($holders[$addr]);
     }
     return $holders;
+}
+
+// Create record in `callbacks` table
+function createCallback( $data=null ){
+    global $mysqli;
+    $tick_id          = createTicker($data->TICK);
+    $callback_tick_id = createTicker($data->CALLBACK_TICK);
+    $source_id        = createAddress($data->SOURCE);
+    $tx_hash_id       = createTransaction($data->TX_HASH);
+    $memo_id          = createMemo($data->MEMO);
+    $status_id        = createStatus($data->STATUS);
+    $tx_index         = $mysqli->real_escape_string($data->TX_INDEX);
+    $block_index      = $mysqli->real_escape_string($data->BLOCK_INDEX);
+    $callback_amount  = $mysqli->real_escape_string($data->CALLBACK_AMOUNT);
+    // Check if record already exists
+    $sql = "SELECT
+                tx_index
+            FROM
+                callbacks
+            WHERE
+                source_id='{$source_id}' AND
+                tx_hash_id='{$tx_hash_id}'";
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows){
+            // UPDATE record
+            $sql = "UPDATE
+                        callbacks
+                    SET
+                        tx_index='{$tx_index}',
+                        block_index='{$block_index}',
+                        tick_id='{$tick_id}',
+                        memo_id='{$memo_id}',
+                        status_id='{$status_id}'
+                    WHERE 
+                        source_id='{$source_id}' AND
+                        tx_hash_id='{$tx_hash_id}'";
+        } else {
+            // INSERT record
+            $sql = "INSERT INTO callbacks (tx_index, source_id, tick_id, callback_tick_id, callback_amount, memo_id, tx_hash_id, block_index, status_id) values ('{$tx_index}', '{$source_id}', '{$tick_id}', '{$callback_tick_id}', '{$callback_amount}', '{$memo_id}', '{$tx_hash_id}', '{$block_index}', '{$status_id}')";
+        }
+        $results = $mysqli->query($sql);
+        if(!$results)
+            byeLog('Error while trying to create / update a record in the callbacks table');
+    } else {
+        byeLog('Error while trying to lookup record in callbacks table');
+    }
 }
 
 ?>
