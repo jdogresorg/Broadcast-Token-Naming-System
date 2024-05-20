@@ -18,7 +18,7 @@ CREATE TABLE tokens (
     lock_callback      TINYINT(1) NOT NULL DEFAULT 0,        -- Locks CALLBACK_BLOCK/TICK/AMOUNT
     callback_block     INTEGER UNSIGNED,                     -- block_index after which CALLBACK cand be used
     callback_tick_id   INTEGER UNSIGNED,                     -- id of record in index_tickers table
-    callback_amount    BIGINT UNSIGNED,                      -- AMOUNT users get if CALLBACK
+    callback_amount    VARCHAR(250),                         -- AMOUNT users get if CALLBACK
     allow_list_id      INTEGER UNSIGNED NOT NULL default 0,  -- id of record in index_transactions table
     block_list_id      INTEGER UNSIGNED NOT NULL default 0,  -- id of record in index_transactions table
     mint_address_max   VARCHAR(250),                         -- Maximum amount of supply an address can MINT

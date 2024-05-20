@@ -143,7 +143,7 @@ function btnsIssue( $params=null, $data=null, $error=null){
         $divisible = ($btInfo->DECIMALS==0) ? 0 : 1;
 
     // Set CALLBACK_TICK divisibillity flag
-    $divisible2 = ($cbInfo->DECIMALS==0) ? 0 : 1;
+    $divisible2 = ($cbInfo && $cbInfo->DECIMALS>0) ? 1 : 0;
 
     // Verify AMOUNT field formats
     foreach($fieldList['AMOUNT'] as $name){
