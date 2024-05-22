@@ -87,6 +87,17 @@ function btnsSend($params=null, $data=null, $error=null){
             $ticks[$tick] = getTokenInfo($tick, null, $data->BLOCK_INDEX, $data->TX_INDEX);
     }
 
+    // Consolidate sends by DESTINATION and TICK
+    $keys = [];
+    foreach($sends as $info){
+        [$tick, $amount, $destination, $memo] = $info;
+        $key = $destination . '|' . $tick;
+        if(isset($keys[$key]))
+            $amount = bcadd($amount, strval($keys[$key][1]), $ticks[$tick]->DECIMALS);
+        $keys[$key] = array($tick, $amount, $destination, $memo);
+    }
+    $sends = array_values($keys);
+
     // Get source address balances
     $balances = getAddressBalances($data->SOURCE, null, $data->BLOCK_INDEX, $data->TX_INDEX);
 

@@ -20,7 +20,7 @@ This command creates or issues a `BTNS` `token`
 | `LOCK_DESCRIPTION` | String | Lock `token` against `DESCRIPTION` changes                                                  |
 | `LOCK_RUG`         | String | Lock `token` against `RUG` command                                                          |
 | `LOCK_SLEEP`       | String | Lock `token` against `SLEEP` command                                                        |
-| `LOCK_CALLBACK`    | String | Lock `token` `CALLBACK` info                                                                |
+| `LOCK_CALLBACK`    | String | Lock `token` against `CALLBACK` command                                                     |
 | `CALLBACK_BLOCK`   | String | Enable `CALLBACK` command after `CALLBACK_BLOCK`                                            |
 | `CALLBACK_TICK`    | String | `TICK` `token` users get when `CALLBACK` command is used                                    |
 | `CALLBACK_AMOUNT`  | String | `TICK` `token` amount that users get when `CALLBACK` command is used                        |
@@ -46,7 +46,7 @@ This command creates or issues a `BTNS` `token`
 - `VERSION|TICK|LOCK_MAX_SUPPLY|LOCK_MAX_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|LOCK_MINT|LOCK_MINT_SUPPLY`
 
 ### Version `4` - Edit `CALLBACK` `PARAMS`
-- `VERSION|TICK|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK`
+- `VERSION|TICK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT`
 
 ### Version `5` - Edit `LIST` `PARAMS`
 - `VERSION|TICK|ALLOW_LIST|BLOCK_LIST`
@@ -119,11 +119,11 @@ This example issues a TEST token with a max supply of 100, and a maximum mint of
 - `ISSUE` `TICK` with `LOCK_MINT` set to `1` to permanently prevent use of the `MINT` command
 - `ISSUE` `TICK` with `LOCK_RUG` set to `1` to permanently prevent use of the `RUG` command
 - `ISSUE` `TICK` with `LOCK_SLEEP` set to `1` to permanently prevent use of the `SLEEP` command
-- `ISSUE` `TICK` with `LOCK_CALLBACK` set to `1` to permanently lock `CALLBACK_BLOCK`, `CALLBACK_TICK`, and `CALLBACK_AMOUNT`
+- `ISSUE` `TICK` with `LOCK_CALLBACK` set to `1` to permanently prevent use of the `CALLBACK` command
 - `DESCRIPTION` can contain a URL to a an icon to use for this token (48x48 standard size)
 - `DESCRIPTION` can contain a URL to a JSON file with additional information
 - `DESCRIPTION` can NOT contain any pipe `|` or semi-colon `;` characters, as these are reserved
-- `CALLBACK_BLOCK`, `CALLBACK_TICK`, and `CALLBACK_AMOUNT` can be edited via `ISSUE` action until `LOCK_CALLBACK` is set to `1`
+- `CALLBACK_BLOCK`, `CALLBACK_TICK`, and `CALLBACK_AMOUNT` can be edited via `ISSUE` action if `token` supply is NOT distributed
 - `DEPLOY` `ACTION` can be used for backwards-compatability with BRC20/SRC20 `DEPLOY`
 - By default any address can interact with a BTNS token, to change this behavior use `ALLOW_LIST` and `BLOCK_LIST`
 - If `TICK` contains any unicode characters, then `TICK` should be `base64` encoded

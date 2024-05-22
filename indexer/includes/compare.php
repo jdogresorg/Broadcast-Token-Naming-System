@@ -66,25 +66,6 @@ function btnsCompare($database=null){
                         {$whereSql}
                     ORDER BY tx_index ASC
                     {$limitSql}";
-            // Support OLD style database with index_tx_types instead of index_actions
-            // TODO: Remove
-            if(in_array($db,array('BTNS_Counterparty_Old','BTNS_Counterparty_Testnet_Old','BTNS_Dogeparty_Old','BTNS_Dogeparty_Testnet_Old'))){
-                $sql = "SELECT
-                            t1.tx_index,
-                            t2.hash as tx_hash,
-                            a.type as action
-                        FROM
-                            {$db}.transactions t1,
-                            {$db}.index_transactions t2,
-                            {$db}.index_tx_types a
-                        WHERE 
-                            a.id=t1.type_id AND
-                            t2.id=t1.tx_hash_id
-                            {$whereSql}
-                        ORDER BY tx_index ASC
-                        {$limitSql}";
-            } 
-
             $results = $mysqli->query($sql);
             if($results){
                 if($results->num_rows){

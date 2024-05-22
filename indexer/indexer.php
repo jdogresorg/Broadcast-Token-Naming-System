@@ -65,6 +65,9 @@ createLockFile();
 // Define global assoc arrays to track address/ticker changes
 $addresses = [];
 $tickers   = [];
+// Define global assoc arrays to track debits/credits changes
+$credits   = [];
+$debits    = [];
 
 // Handle rollbacks
 if($rollback)

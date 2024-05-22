@@ -18,14 +18,14 @@ $changes = array(
     'CALLBACK'  => array(0,  10,   0,     9999999,      999999999),
     'DESTROY'   => array(0,  10,   0,     789742,       2473585),
     'DISPENSER' => array(0,  10,   0,     9999999,      999999999),
-    'DIVIDEND'  => array(0,  10,   0,     9999999,      999999999),
+    'DIVIDEND'  => array(0,  10,   0,     789742,       2473585),
     'ISSUE'     => array(0,  10,   0,     789742,       2473585),
     'LIST'      => array(0,  10,   0,     789742,       2473585),
     'MINT'      => array(0,  10,   0,     789742,       2473585),
     'RUG'       => array(0,  10,   0,     9999999,      999999999),
     'SEND'      => array(0,  10,   0,     789742,       2473585),
     'SLEEP'     => array(0,  10,   0,     9999999,      999999999),
-    'SWEEP'     => array(0,  10,   0,     9999999,      999999999),
+    'SWEEP'     => array(0,  10,   0,     789742,       2473585),
 
     // Define protocol changes (ALL LOWER Case)
     // 'name' => array(0,  10,   0,     0,      0),

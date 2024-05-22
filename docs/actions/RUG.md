@@ -1,11 +1,18 @@
 # RUG command
-This command performs a rug pull on a `token`
+This command performs a rug pull on a `token` using various methods
 
 ## PARAMS
-| Name      | Type   | Description                   |
-| --------- | ------ | ----------------------------- |
-| `VERSION` | String | Broadcast Format Version      |
-| `TICK`    | String | 1 to 250 characters in length |
+| Name                 | Type   | Description                                                           |
+| -------------------- | ------ | ----------------------------------------------------------------      |
+| `VERSION`            | String | Broadcast Format Version                                              |
+| `TICK`               | String | 1 to 250 characters in length                                         |
+| `MINT_MAX_SUPPLY`    | String | Mint `token` supply to `MAX_SUPPLY`                                   |
+| `SLEEP_FOREVER`      | String | `SLEEP` token actions permanently (`SLEEP` with `value` set to `-1`)  |
+| `CLOSE_DISPENSERS`   | String | Close any open dispensers immediately                                 |
+| `RECALL_SUPPLY`      | String | Recall all `token` balances to `SOURCE` address                       |
+| `BURN_OWNERSHIP`     | String | Burn `token` ownership permanently (send to `BURN_ADDRESSS`)          |
+| `BURN_SUPPLY`        | String | Burn any `token` supply in `SOURCE` address (send to `BURN_ADDRESSS`) |
+| `DESTROY_SUPPLY`     | String | Destroy any `token` supply in `SOURCE` address                        |
 
 ## Formats
 
@@ -19,11 +26,8 @@ This example does a rugpull on the BRRR `token`
 ```
 
 ## Rules
-- Mints `token` supply up to `MAX_SUPPLY`
-- Locks `MAX_SUPPLY` via `LOCK_SUPPLY`
-- Locks `MAX_MINT` via `LOCK_MINT`
-- Cancels all future BTNS `ACTION` commands for `token` 
-- Transfers `token` ownership to burn address
-- Destroys all `TICK` `token` supply (including `tokens` held in addresses)
+
 
 ## Notes
+- This is a _HIGHLY DANGEROUS_ function, built for entertainment purposes only!
+- `ISSUE` `TICK` with `LOCK_RUG` set to `1` to permanently prevent use of the `RUG` command on a `token`

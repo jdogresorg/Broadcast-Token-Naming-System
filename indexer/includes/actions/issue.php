@@ -45,7 +45,7 @@ function btnsIssue( $params=null, $data=null, $error=null){
         1 => 'VERSION|TICK|DESCRIPTION',
         2 => 'VERSION|TICK|MAX_MINT|MINT_SUPPLY|TRANSFER_SUPPLY|MINT_ADDRESS_MAX|MINT_START_BLOCK|MINT_STOP_BLOCK',
         3 => 'VERSION|TICK|LOCK_MAX_SUPPLY|LOCK_MAX_MINT|LOCK_DESCRIPTION|LOCK_RUG|LOCK_SLEEP|LOCK_CALLBACK|LOCK_MINT|LOCK_MINT_SUPPLY',
-        4 => 'VERSION|TICK|LOCK_CALLBACK|CALLBACK_BLOCK|CALLBACK_TICK'
+        4 => 'VERSION|TICK|CALLBACK_BLOCK|CALLBACK_TICK|CALLBACK_AMOUNT'
     );
 
     // Define list of AMOUNT and LOCK fields (used in validations)
@@ -129,6 +129,10 @@ function btnsIssue( $params=null, $data=null, $error=null){
         }
     }
 
+    // Get information on CALLBACK_TICK
+    if($data->CALLBACK_TICK)
+        $cbInfo = getTokenInfo($data->CALLBACK_TICK, null, $data->BLOCK_INDEX, $data->TX_INDEX);
+
     /*****************************************************************
      * FORMAT Validations
      ****************************************************************/
@@ -136,12 +140,16 @@ function btnsIssue( $params=null, $data=null, $error=null){
     // Set divisible first based on if token exist, if not, use DECIMALS in request
     $divisible = ($data->DECIMALS==0) ? 0 : 1;
     if($btInfo)
-        $divisible = ($btInfo->DECIMALS==0) ? 0 : 1; 
+        $divisible = ($btInfo->DECIMALS==0) ? 0 : 1;
+
+    // Set CALLBACK_TICK divisibillity flag
+    $divisible2 = ($cbInfo && $cbInfo->DECIMALS>0) ? 1 : 0;
 
     // Verify AMOUNT field formats
     foreach($fieldList['AMOUNT'] as $name){
         $value = $issue->{$name};
-        if(!$error && isset($value) && !isValidAmountFormat($divisible, $value))
+        $div   = ($name=='CALLBACK_AMOUNT') ? $divisible2 : $divisible;
+        if(!$error && isset($value) && !isValidAmountFormat($div, $value))
             $error = "invalid: {$name} (format)";
     }
 
@@ -184,7 +192,7 @@ function btnsIssue( $params=null, $data=null, $error=null){
         $error = 'invalid: DECIMALS (min/max)';
 
     // Verify DECIMALS cannot be changed after supply has been issued
-    if(!$error && isset($data->DECIMALS) && $btnInfo->SUPPLY > 0 && $data->DECIMALS!=$btnInfo->DECIMALS)
+    if(!$error && isset($data->DECIMALS) && $btInfo->SUPPLY > 0 && $data->DECIMALS!=$btInfo->DECIMALS)
         $error = 'invalid: DECIMALS (locked)';
 
     // Verify TRANSFER addresses
@@ -216,11 +224,11 @@ function btnsIssue( $params=null, $data=null, $error=null){
         $error = 'invalid: MINT_ADDRESS_MAX < MAX_MINT';
 
     // Verify MAX_SUPPLY can not be changed if LOCK_MAX_SUPPLY is enabled
-    if(!$error && $btInfo && $btnInfo->LOCK_MAX_SUPPLY && isset($data->MAX_SUPPLY) && $data->MAX_SUPPLY!=$btnInfo->MAX_SUPPLY)
+    if(!$error && $btInfo && $btInfo->LOCK_MAX_SUPPLY && isset($data->MAX_SUPPLY) && $data->MAX_SUPPLY!=$btInfo->MAX_SUPPLY)
         $error = 'invalid: MAX_SUPPLY (locked)';
 
     // Verify MAX_MINT can not be changed if LOCK_MAX_MINT is enabled
-    if(!$error && $btInfo && $btnInfo->LOCK_MAX_MINT && isset($data->MAX_MINT) && $data->MAX_MINT!=$btnInfo->MAX_MINT)
+    if(!$error && $btInfo && $btInfo->LOCK_MAX_MINT && isset($data->MAX_MINT) && $data->MAX_MINT!=$btInfo->MAX_MINT)
         $error = 'invalid: MAX_MINT (locked)';
 
     // Verify DESCRIPTION is less than or equal to MAX_TOKEN_DESCRIPTION
@@ -228,35 +236,35 @@ function btnsIssue( $params=null, $data=null, $error=null){
         $error = 'invalid: DESCRIPTION (length)';
 
     // Verify DESCRIPTION can not be changed if LOCK_DESCRIPTION is enabled
-    if(!$error && $btInfo && $btnInfo->LOCK_DESCRIPTION && isset($data->DESCRIPTION) && $data->DESCRIPTION!=$btnInfo->DESCRIPTION)
+    if(!$error && $btInfo && $btInfo->LOCK_DESCRIPTION && isset($data->DESCRIPTION) && $data->DESCRIPTION!=$btInfo->DESCRIPTION)
         $error = 'invalid: DESCRIPTION (locked)';
 
     // Verify CALLBACK_BLOCK can not be changed if LOCK_CALLBACK is enabled
-    if(!$error && $btInfo && $btnInfo->LOCK_CALLBACK && isset($data->CALLBACK_BLOCK) && $data->CALLBACK_BLOCK!=$btnInfo->CALLBACK_BLOCK)
+    if(!$error && $btInfo && $btInfo->LOCK_CALLBACK && isset($data->CALLBACK_BLOCK) && $data->CALLBACK_BLOCK!=$btInfo->CALLBACK_BLOCK)
         $error = 'invalid: CALLBACK_BLOCK (locked)';
 
     // Verify CALLBACK_TICK can not be changed if LOCK_CALLBACK is enabled
-    if(!$error && $btInfo && $btnInfo->LOCK_CALLBACK && isset($data->CALLBACK_TICK) && $data->CALLBACK_TICK!=$btnInfo->CALLBACK_TICK)
+    if(!$error && $btInfo && $btInfo->LOCK_CALLBACK && isset($data->CALLBACK_TICK) && $data->CALLBACK_TICK!=$btInfo->CALLBACK_TICK)
         $error = 'invalid: CALLBACK_TICK (locked)';
 
     // Verify CALLBACK_TICK can not be changed if LOCK_CALLBACK is enabled
-    if(!$error && $btInfo && $btnInfo->LOCK_CALLBACK && isset($data->CALLBACK_AMOUNT) && $data->CALLBACK_AMOUNT!=$btnInfo->CALLBACK_AMOUNT)
+    if(!$error && $btInfo && $btInfo->LOCK_CALLBACK && isset($data->CALLBACK_AMOUNT) && $data->CALLBACK_AMOUNT!=$btInfo->CALLBACK_AMOUNT)
         $error = 'invalid: CALLBACK_AMOUNT (locked)';
 
-    // Verify CALLBACK_BLOCK only increases in value
-    if(!$error && $btInfo && isset($data->CALLBACK_BLOCK) && $data->CALLBACK_BLOCK < $btnInfo->CALLBACK_BLOCK)
-        $error = 'invalid: CALLBACK_BLOCK (decreased)';
-
     // Verify CALLBACK_BLOCK is greater than current block index
-    if(!$error && $btInfo && isset($data->CALLBACK_BLOCK) && $data->CALLBACK_BLOCK > $data->BLOCK_INDEX)
+    if(!$error && $btInfo && isset($issue->CALLBACK_BLOCK) && $data->CALLBACK_BLOCK < $data->BLOCK_INDEX)
         $error = 'invalid: CALLBACK_BLOCK (block index)';
 
+    // Verify CALLBACK_BLOCK can not be changed if supply is distributed
+    if(!$error && isset($issue->CALLBACK_BLOCK) && $data->CALLBACK_BLOCK!=$btInfo->CALLBACK_BLOCK && $isDistributed)
+        $error = 'invalid: CALLBACK_BLOCK (supply distributed)';
+
     // Verify CALLBACK_TICK can not be changed if supply is distributed
-    if(!$error && isset($data->CALLBACK_TICK) && $data->CALLBACK_TICK!=$btnInfo->CALLBACK_TICK && $isDistributed)
+    if(!$error && isset($issue->CALLBACK_TICK) && $data->CALLBACK_TICK!=$btInfo->CALLBACK_TICK && $isDistributed)
         $error = 'invalid: CALLBACK_TICK (supply distributed)';
 
     // Verify CALLBACK_AMOUNT can not be changed if supply is distributed
-    if(!$error && isset($data->CALLBACK_AMOUNT) && $data->CALLBACK_AMOUNT!=$btnInfo->CALLBACK_AMOUNT && $isDistributed)
+    if(!$error && isset($issue->CALLBACK_AMOUNT) && $data->CALLBACK_AMOUNT!=$btInfo->CALLBACK_AMOUNT && $isDistributed)
         $error = 'invalid: CALLBACK_AMOUNT (supply distributed)';
 
     // Verify ALLOW_LIST is a valid list of addresses

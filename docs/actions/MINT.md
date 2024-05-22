@@ -8,11 +8,12 @@ This command mints `BTNS` `token` supply
 | `TICK`        | String | 1 to 250 characters in length          |
 | `AMOUNT`      | String | Amount of `tokens` to mint             |
 | `DESTINATION` | String | Address to transfer minted `tokens` to |
+| `MEMO`        | String | An optional memo to include            |
 
 ## Formats
 
 ### Version `0`
-- `VERSION|TICK|AMOUNT|DESTINATION`
+- `VERSION|TICK|AMOUNT|DESTINATION|MEMO`
 
 ## Examples
 ```

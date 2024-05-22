@@ -17,7 +17,7 @@
  * 
  ********************************************************************/
 function btnsAirdrop($params=null, $data=null, $error=null){
-    global $mysqli, $reparse, $addresses, $tickers;
+    global $mysqli, $reparse, $addresses, $tickers, $credits, $debits;
 
     // Define list of known FORMATS
     $formats = array(
@@ -89,21 +89,15 @@ function btnsAirdrop($params=null, $data=null, $error=null){
     // Get source address balances
     $balances = getAddressBalances($data->SOURCE, null, $data->BLOCK_INDEX, $data->TX_INDEX);
 
-    // Get SOURCE address preferences
-    $preferences = getAddressPreferences($data->SOURCE, $data->BLOCK_INDEX, $data->TX_INDEX);
+    // Create the fees object 
+    $fees = createFeesObject($data);
 
     // Store original error value
     $origError = $error;
 
-    // Array of credits and debits
+    // reset credits and debits arrays
     $credits = [];
     $debits  = [];
-
-    // Copy base BTNS transaction data object into fees object
-    $fees = clone($data);
-    $fees->TICK   = 'GAS';
-    $fees->AMOUNT = 0;
-    $fees->METHOD = ($preferences->FEE_PREFERENCE==1) ? 1 : 2; // 1=Destroy, 2=Donate
 
     // Loop through airdrops and process each
     foreach($airdrops as $info){
@@ -197,8 +191,7 @@ function btnsAirdrop($params=null, $data=null, $error=null){
         $db_hits += 4;                      // 1 debits,  1 balances, 1 airdrops
 
         // Determine total transaction FEE based on database hits
-        $airdrop->FEE_TICK   = 'GAS';
-        $airdrop->FEE_AMOUNT = getTransactionFee($db_hits, $airdrop->FEE_TICK);
+        $fees->AMOUNT = getTransactionFee($db_hits, $fees->TICK);
 
         // Verify SOURCE has enough balances to cover TICK total DEBIT amount
         if(!$error && !hasBalance($balances, $airdrop->TICK, $airdrop->DEBIT))
@@ -209,12 +202,12 @@ function btnsAirdrop($params=null, $data=null, $error=null){
             $balances = debitBalances($balances, $airdrop->TICK, $airdrop->DEBIT);
 
         // Verify SOURCE has enough balances to cover FEE AMOUNT
-        if(!$error && !hasBalance($balances, $airdrop->FEE_TICK, $airdrop->FEE_AMOUNT))
+        if(!$error && !hasBalance($balances, $fees->TICK, $fees->AMOUNT))
             $error = 'invalid: insufficient funds (FEE)';
 
         // Adjust balances to reduce by FEE amount
         if(!$error)
-            $balances = debitBalances($balances, $airdrop->TICK, $airdrop->DEBIT);
+            $balances = debitBalances($balances, $fees->TICK, $fees->AMOUNT);
 
         // Determine final status
         $airdrop->STATUS = $status = ($error) ? $error : 'valid';
@@ -229,33 +222,13 @@ function btnsAirdrop($params=null, $data=null, $error=null){
         if($status=='valid'){
 
             // Store the SOURCE and TICK in addresses list
-            addAddressTicker($airdrop->SOURCE, [$airdrop->TICK, $airdrop->FEE_TICK]);
+            addAddressTicker($airdrop->SOURCE, [$airdrop->TICK, $fees->TICK]);
 
-            // Debit SOURCE with total DEBIT and FEE_AMOUNT
-            array_push($debits, array($airdrop->TICK,     $airdrop->DEBIT));
-            array_push($debits, array($airdrop->FEE_TICK, $airdrop->FEE_AMOUNT));
+            // Debit SOURCE with total DEBIT
+            array_push($debits, array($airdrop->TICK, $airdrop->DEBIT));
 
-            // Update FEES object with to AMOUNT
-            $fees->AMOUNT = bcadd($fees->AMOUNT, $airdrop->FEE_AMOUNT, 8);
-
-            // Handle using FEE according the the users ADDRESS preferences
-            if($preferences->FEE_PREFERENCE>1){
-
-                // Determine what address to donate to
-                $address = ($preferences->FEE_PREFERENCE==2) ? DONATE_ADDRESS_1 : DONATE_ADDRESS_2;
-
-                // Update the $fees object with the destination address
-                $fees->DESTINATION = $address;
-
-                // Store the donation ADDRESS and TICK in addresses list
-                addAddressTicker($address, $airdrop->FEE_TICK);
-
-                // Credit donation address with FEE_AMOUNT
-                array_push($credits, array($airdrop->FEE_TICK, $airdrop->FEE_AMOUNT, $address));
-            } 
-
-            // Create record of FEE in `fees` table
-            createFeeRecord($fees);
+            // Handle any transaction FEE according the users's ADDRESS preferences
+            processTransactionFees('AIRDROP', $fees);
 
             // Loop through recipient addresses
             foreach($recipients as $address){
@@ -269,21 +242,8 @@ function btnsAirdrop($params=null, $data=null, $error=null){
         }
     }
 
-    // Consolidate the credit and debit records to write as few records as possible
-    $debits  = consolidateCreditDebitRecords('debits', $debits);
-    $credits = consolidateCreditDebitRecords('credits', $credits);
-
-    // Create records in debits table
-    foreach($debits as $debit){
-        [$tick, $amount] = $debit;
-        createDebit('AIRDROP', $data->BLOCK_INDEX, $data->TX_HASH, $tick, $amount, $data->SOURCE);
-    }
-
-    // Create records in credits table
-    foreach($credits as $credit){
-        [$tick, $amount, $destination] = $credit;
-        createCredit('AIRDROP', $data->BLOCK_INDEX, $data->TX_HASH, $tick, $amount, $destination);
-    }
+    // Process any transaction credit/debit records
+    processTransactionCreditsDebits('AIRDROP', $data);
 
     // If this is a reparse, bail out before updating balances
     if($reparse)

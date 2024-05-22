@@ -321,6 +321,7 @@ function createMint( $data=null ){
     $source_id      = createAddress($data->SOURCE);
     $destination_id = createAddress($data->DESTINATION);
     $tx_hash_id     = createTransaction($data->TX_HASH);
+    $memo_id        = createMemo($data->MEMO);
     $status_id      = createStatus($data->STATUS);
     $tx_index       = $mysqli->real_escape_string($data->TX_INDEX);
     $amount         = $mysqli->real_escape_string($data->AMOUNT);
@@ -340,12 +341,13 @@ function createMint( $data=null ){
                         source_id='{$source_id}',
                         block_index='{$block_index}',
                         tx_index='{$tx_index}',
+                        memo_id='{$memo_id}',
                         status_id='{$status_id}'
                     WHERE 
                         tx_hash_id='{$tx_hash_id}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO mints (tx_index, tick_id, amount, source_id, destination_id, tx_hash_id, block_index, status_id) values ('{$tx_index}','{$tick_id}', '{$amount}', '{$source_id}', '{$destination_id}', '{$tx_hash_id}', '{$block_index}', '{$status_id}')";
+            $sql = "INSERT INTO mints (tx_index, tick_id, amount, source_id, destination_id, tx_hash_id, block_index, memo_id, status_id) values ('{$tx_index}','{$tick_id}', '{$amount}', '{$source_id}', '{$destination_id}', '{$tx_hash_id}', '{$block_index}', '{$memo_id}', '{$status_id}')";
         }
         $results = $mysqli->query($sql);
         if(!$results)
@@ -477,7 +479,7 @@ function createToken( $data=null ){
         $max_mint         = bcmul($max_mint,1,$decimals);
         $mint_supply      = bcmul($mint_supply,1,$decimals);
         $mint_address_max = bcmul($mint_address_max,1,$decimals);
-        $callback_amount  = bcmul($callback_amount,1,$decimals);
+        // $callback_amount  = bcmul($callback_amount,1,$decimals);
     }
     $supply             = $mysqli->real_escape_string($supply);
     $max_supply         = $mysqli->real_escape_string($max_supply);
@@ -927,6 +929,7 @@ function getTokenInfo($tick=null, $tick_id=null, $block_index=null, $tx_index=nu
                     'OWNER'             => ($row->transfer) ? $row->transfer : $row->owner,
                     'MAX_SUPPLY'        => $row->max_supply,
                     'MAX_MINT'          => $row->max_mint,
+                    // Force decimal precision to a integer value
                     'DECIMALS'          => (isset($row->decimals)) ? intval($row->decimals) : 0,
                     'DESCRIPTION'       => $row->description,
                     'LOCK_MAX_SUPPLY'   => $row->lock_max_supply,
@@ -953,6 +956,9 @@ function getTokenInfo($tick=null, $tick_id=null, $block_index=null, $tx_index=nu
                     if(substr($key,0,5)=='LOCK_')
                         if($data[$key]==1)
                             continue;
+                    // Prevent changing decimal precision 
+                    if($key=='DECIMALS' && $data[$key]>$value)
+                        continue;
                     // Skip setting value if value is null or empty (use last explicit value)
                     if(!isset($value) || $value=='')
                         continue;
@@ -1382,6 +1388,9 @@ function getTokenSupply( $tick=null, $tick_id=null, $block_index=null, $tx_index
         byeLog('Error while trying to get list of debits');
     }
     $supply = bcsub($credits, $debits, $decimals);
+    // print "credits={$credits}\n";
+    // print "debits={$debits}\n";
+    // print "supply={$supply}\n";
     return $supply;
 }
 
@@ -1623,6 +1632,7 @@ function setActionParams($data=null, $params=null, $format=null){
 // @param {tick}            string  Ticker name
 // @param {block_index}     integer Block Index 
 // @param {tx_index}        integer tx_index of transaction
+// TODO: Add support for 'escrowed' tokens (dispensers, orders, bets)
 function getHolders( $tick=null, $block_index=null, $tx_index=null ){
     global $mysqli, $dbase;
     $holders = [];
@@ -1795,8 +1805,9 @@ function hasBalance($balances=null, $tick=null, $amount=null){
 
 // Handle deducting TICK AMOUNT from balances and return updated balances array
 function debitBalances($balances=null, $tick=null, $amount=null){
-    $balance = (isset($balances[$tick])) ? $balances[$tick] : 0;
-    $balances[$tick] = $balance - $amount;
+    $tick_id = createTicker($tick);
+    $balance = (isset($balances[$tick_id])) ? $balances[$tick_id] : 0;
+    $balances[$tick_id] = $balance - $amount;
     return $balances;
 }
 
@@ -1852,10 +1863,14 @@ function sanityCheck( $block=null ){
         $supplyA = $supply[$tick];               // Supply from tokens table
         $supplyB = getTokenSupplyBalance($tick); // Supply from balances table
         $supplyC = getTokenSupply($tick);        // Supply from credits/debits tables
+        // print "\nTick={$tick} tick_id={$tick_id}\n";
+        // print "token        supply = {$supplyA}\n";
+        // print "balances     supply = {$supplyB}\n";
+        // print "credit/debit supply = {$supplyC}\n";
         if($supplyA!=$supplyB)
-            byeLog("SanityError: balances table supply does not match token supply : {$tick}");
+            byeLog("SanityError: balances table supply does not match token supply : {$tick} ({$supplyB} != {$supplyA})");
         if($supplyA!=$supplyC)
-            byeLog("SanityError: credits/debits table supply does not match token supply : {$tick}");
+            byeLog("SanityError: credits/debits table supply does not match token supply : {$tick} ({$supplyC} != {$supplyA})");
     }
 }
 
@@ -2424,6 +2439,280 @@ function createFeeRecord( $data=null ){
             byeLog('Error while trying to create / update a record in the fees table');
     } else {
         byeLog('Error while trying to lookup record in fees table');
+    }
+}
+
+// Create record in `dividends` table
+function createDividend( $data=null ){
+    global $mysqli;
+    $tick_id          = createTicker($data->TICK);
+    $dividend_tick_id = createTicker($data->DIVIDEND_TICK);
+    $source_id        = createAddress($data->SOURCE);
+    $tx_hash_id       = createTransaction($data->TX_HASH);
+    $memo_id          = createMemo($data->MEMO);
+    $status_id        = createStatus($data->STATUS);
+    $tx_index         = $mysqli->real_escape_string($data->TX_INDEX);
+    $amount           = $mysqli->real_escape_string($data->AMOUNT);
+    $block_index      = $mysqli->real_escape_string($data->BLOCK_INDEX);
+    // Check if record already exists
+    $sql = "SELECT
+                tx_index
+            FROM
+                dividends
+            WHERE
+                tick_id='{$tick_id}' AND
+                dividend_tick_id='{$dividend_tick_id}' AND
+                source_id='{$source_id}' AND
+                amount='{$amount}' AND
+                tx_hash_id='{$tx_hash_id}'";
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows){
+            // UPDATE record
+            $sql = "UPDATE
+                        dividends
+                    SET
+                        tx_index='{$tx_index}',
+                        block_index='{$block_index}',
+                        memo_id='{$memo_id}',
+                        status_id='{$status_id}'
+                    WHERE 
+                        tick_id='{$tick_id}' AND
+                        dividend_tick_id='{$dividend_tick_id}' AND
+                        source_id='{$source_id}' AND
+                        amount='{$amount}' AND
+                        tx_hash_id='{$tx_hash_id}'";
+        } else {
+            // INSERT record
+            $sql = "INSERT INTO dividends (tx_index, tick_id, source_id, dividend_tick_id, amount, memo_id, tx_hash_id, block_index, status_id) values ('{$tx_index}','{$tick_id}', '{$source_id}', '{$dividend_tick_id}', '{$amount}','{$memo_id}', '{$tx_hash_id}', '{$block_index}', '{$status_id}')";
+        }
+        $results = $mysqli->query($sql);
+        if(!$results)
+            byeLog('Error while trying to create / update a record in the dividends table');
+    } else {
+        byeLog('Error while trying to lookup record in dividends table');
+    }
+}
+
+// Get list of tokens owned by a given address
+function getAddressOwnership($address=null, $block_index=null, $tx_index=null){
+    global $mysqli;
+    $address_id = createAddress($address);
+    $data       = [];
+    $whereSql   = "";
+    if(isset($block_index) && is_numeric($block_index))
+        $whereSql .= " AND block_index <= {$block_index}";
+    if(isset($tx_index) && is_numeric($tx_index))
+        $whereSql .= " AND tx_index < '{$tx_index}'";
+    // get list of issuances where address is SOURCE or TRANSFER (list of tokens)
+    $sql = "SELECT
+                t.tick,
+                i.tick_id
+            FROM
+                issues i,
+                index_tickers t
+            WHERE
+                t.id=i.tick_id AND
+                (source_id='{$address_id}' OR transfer_id='{$address_id}')
+                {$whereSql}
+            ORDER BY tick DESC";
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows){
+            while($row = $results->fetch_assoc()){
+                $row  = (object) $row;
+                $info = getTokenInfo($row->tick, null, $block_index, $tx_index);
+                if($info->OWNER==$address)
+                    array_push($data, $row->tick);
+            }
+        }
+    } else {
+        byeLog('Error while trying to lookup records in issues table');
+    }
+    return $data;
+}
+
+// Create record in `sweeps` table
+function createSweep( $data=null ){
+    global $mysqli;
+    $tick_id          = createTicker($data->TICK);
+    $source_id        = createAddress($data->SOURCE);
+    $destination_id   = createAddress($data->DESTINATION);
+    $tx_hash_id       = createTransaction($data->TX_HASH);
+    $memo_id          = createMemo($data->MEMO);
+    $status_id        = createStatus($data->STATUS);
+    $tx_index         = $mysqli->real_escape_string($data->TX_INDEX);
+    $balances         = $mysqli->real_escape_string($data->BALANCES);
+    $ownerships       = $mysqli->real_escape_string($data->OWNERSHIPS);
+    $block_index      = $mysqli->real_escape_string($data->BLOCK_INDEX);
+    // Check if record already exists
+    $sql = "SELECT
+                tx_index
+            FROM
+                sweeps
+            WHERE
+                source_id='{$source_id}' AND
+                tx_hash_id='{$tx_hash_id}'";
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows){
+            // UPDATE record
+            $sql = "UPDATE
+                        sweeps
+                    SET
+                        tx_index='{$tx_index}',
+                        block_index='{$block_index}',
+                        destination_id='{$destination_id}',
+                        balances='{$balances}',
+                        ownerships='{$ownerships}',
+                        memo_id='{$memo_id}',
+                        status_id='{$status_id}'
+                    WHERE 
+                        source_id='{$source_id}' AND
+                        tx_hash_id='{$tx_hash_id}'";
+        } else {
+            // INSERT record
+            $sql = "INSERT INTO sweeps (tx_index, source_id, destination_id, balances, ownerships, memo_id, tx_hash_id, block_index, status_id) values ('{$tx_index}', '{$source_id}','{$destination_id}', '{$balances}', '{$ownerships}', '{$memo_id}', '{$tx_hash_id}', '{$block_index}', '{$status_id}')";
+        }
+        $results = $mysqli->query($sql);
+        if(!$results)
+            byeLog('Error while trying to create / update a record in the dividends table');
+    } else {
+        byeLog('Error while trying to lookup record in dividends table');
+    }
+}
+
+// Get TICK for a given tick_id
+function getTicker( $tick_id=null ){
+    global $mysqli;
+    if(!isset($tick_id) || $tick_id=='')
+        return 0;
+    // Truncate description to 250 chars 
+    $tick_id = $mysqli->real_escape_string($tick_id);
+    $results = $mysqli->query("SELECT tick FROM index_tickers WHERE id='{$tick_id}' LIMIT 1");
+    if($results){
+        if($results->num_rows){
+            $row = $results->fetch_assoc();
+            return $row['tick'];
+        }
+    } else {
+        byeLog('Error while trying to lookup ticker in index_tickers table');
+    }
+}
+
+// Create the basic $fees object used to calculate platform transaction fees
+function createFeesObject($data=null){
+    // Get SOURCE address preferences
+    $preferences = getAddressPreferences($data->SOURCE, $data->BLOCK_INDEX, $data->TX_INDEX);
+    // Copy base BTNS transaction data object into fees object
+    $fees = clone($data);
+    $fees->TICK   = 'GAS';
+    $fees->AMOUNT = 0;
+    $fees->METHOD = ($preferences->FEE_PREFERENCE==1) ? 1 : 2; // 1=Destroy, 2=Donate
+    return $fees;
+}
+
+// Process any transaction FEE according the user's ADDRESS preferences
+function processTransactionFees($action=null, $fees=null){
+    global $credits, $debits;
+    $immediate = true;
+    if(in_array($action,array('AIRDROP')))
+        $immediate = false;
+    // Debit FEE from SOURCE
+    if($immediate){
+        createDebit($action, $fees->BLOCK_INDEX, $fees->TX_HASH, $fees->TICK, $fees->AMOUNT, $fees->SOURCE);
+    } else {
+        array_push($debits, array($fees->TICK, $fees->AMOUNT));
+    }
+    // Handle using FEE according the the users ADDRESS preferences
+    if($fees->METHOD>1){
+        // Determine what address to donate to
+        $fees->DESTINATION = ($fees->METHOD==2) ? DONATE_ADDRESS_1 : DONATE_ADDRESS_2;
+        // Store the donation ADDRESS and TICK in addresses list
+        addAddressTicker($fees->DESTINATION, $fees->TICK);
+        // Credit donation address with FEE
+        if($immediate){
+            createCredit($action, $fees->BLOCK_INDEX, $fees->TX_HASH, $fees->TICK, $fees->AMOUNT, $fees->DESTINATION);
+        } else {
+            array_push($credits, array($fees->TICK, $fees->AMOUNT, $fees->DESTINATION));
+        }
+    } 
+    // Create record of FEE in `fees` table
+    createFeeRecord($fees);
+}
+
+// Process any transaction credit/debit records
+function processTransactionCreditsDebits($action=null, $data=null){
+    global $credits, $debits;
+    // Consolidate the credit and debit records to write as few records as possible
+    $debits  = consolidateCreditDebitRecords('debits', $debits);
+    $credits = consolidateCreditDebitRecords('credits', $credits);
+    // Create records in debits table
+    foreach($debits as $debit){
+        [$tick, $amount] = $debit;
+        createDebit($action, $data->BLOCK_INDEX, $data->TX_HASH, $tick, $amount, $data->SOURCE);
+    }
+    // Create records in credits table
+    foreach($credits as $credit){
+        [$tick, $amount, $destination] = $credit;
+        createCredit($action, $data->BLOCK_INDEX, $data->TX_HASH, $tick, $amount, $destination);
+    }
+}    
+
+// Handle cleaning up the holders list to only deal with integer amounts
+function cleanupHolders($holders){
+    foreach($holders as $addr => $amount){
+        $holders[$addr] = bcadd($amount,0,0);
+        if($holders[$addr]<1)
+            unset($holders[$addr]);
+    }
+    return $holders;
+}
+
+// Create record in `callbacks` table
+function createCallback( $data=null ){
+    global $mysqli;
+    $tick_id          = createTicker($data->TICK);
+    $callback_tick_id = createTicker($data->CALLBACK_TICK);
+    $source_id        = createAddress($data->SOURCE);
+    $tx_hash_id       = createTransaction($data->TX_HASH);
+    $memo_id          = createMemo($data->MEMO);
+    $status_id        = createStatus($data->STATUS);
+    $tx_index         = $mysqli->real_escape_string($data->TX_INDEX);
+    $block_index      = $mysqli->real_escape_string($data->BLOCK_INDEX);
+    $callback_amount  = $mysqli->real_escape_string($data->CALLBACK_AMOUNT);
+    // Check if record already exists
+    $sql = "SELECT
+                tx_index
+            FROM
+                callbacks
+            WHERE
+                source_id='{$source_id}' AND
+                tx_hash_id='{$tx_hash_id}'";
+    $results = $mysqli->query($sql);
+    if($results){
+        if($results->num_rows){
+            // UPDATE record
+            $sql = "UPDATE
+                        callbacks
+                    SET
+                        tx_index='{$tx_index}',
+                        block_index='{$block_index}',
+                        tick_id='{$tick_id}',
+                        memo_id='{$memo_id}',
+                        status_id='{$status_id}'
+                    WHERE 
+                        source_id='{$source_id}' AND
+                        tx_hash_id='{$tx_hash_id}'";
+        } else {
+            // INSERT record
+            $sql = "INSERT INTO callbacks (tx_index, source_id, tick_id, callback_tick_id, callback_amount, memo_id, tx_hash_id, block_index, status_id) values ('{$tx_index}', '{$source_id}', '{$tick_id}', '{$callback_tick_id}', '{$callback_amount}', '{$memo_id}', '{$tx_hash_id}', '{$block_index}', '{$status_id}')";
+        }
+        $results = $mysqli->query($sql);
+        if(!$results)
+            byeLog('Error while trying to create / update a record in the callbacks table');
+    } else {
+        byeLog('Error while trying to lookup record in callbacks table');
     }
 }
 
