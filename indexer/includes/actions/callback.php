@@ -128,11 +128,13 @@ function btnsCallback($params=null, $data=null, $error=null){
         $balances = debitBalances($balances, $btInfo->CALLBACK_TICK, $data->CALLBACK_TICK);
 
     // Calculate total number of database hits for this CALLBACK
-    $db_hits  = count($holders) * 3; // 1 debits, 1 credits, 1 balances
-    $db_hits += 4;                   // 1 debits, 1 credits, 1 balances, 1 callback
+    if(!$error){
+        $db_hits  = count($holders) * 3; // 1 debits, 1 credits, 1 balances
+        $db_hits += 4;                   // 1 debits, 1 credits, 1 balances, 1 callback
 
-    // Determine total transaction FEE based on database hits
-    $fees->AMOUNT = getTransactionFee($db_hits, $fees->TICK);
+        // Determine total transaction FEE based on database hits
+        $fees->AMOUNT = getTransactionFee($db_hits, $fees->TICK);
+    }
 
     // Verify SOURCE has enough balances to cover FEE AMOUNT
     if(!$error && !hasBalance($balances, $fees->TICK, $fees->AMOUNT))
