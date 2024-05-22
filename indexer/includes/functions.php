@@ -321,6 +321,7 @@ function createMint( $data=null ){
     $source_id      = createAddress($data->SOURCE);
     $destination_id = createAddress($data->DESTINATION);
     $tx_hash_id     = createTransaction($data->TX_HASH);
+    $memo_id        = createMemo($data->MEMO);
     $status_id      = createStatus($data->STATUS);
     $tx_index       = $mysqli->real_escape_string($data->TX_INDEX);
     $amount         = $mysqli->real_escape_string($data->AMOUNT);
@@ -340,12 +341,13 @@ function createMint( $data=null ){
                         source_id='{$source_id}',
                         block_index='{$block_index}',
                         tx_index='{$tx_index}',
+                        memo_id='{$memo_id}',
                         status_id='{$status_id}'
                     WHERE 
                         tx_hash_id='{$tx_hash_id}'";
         } else {
             // INSERT record
-            $sql = "INSERT INTO mints (tx_index, tick_id, amount, source_id, destination_id, tx_hash_id, block_index, status_id) values ('{$tx_index}','{$tick_id}', '{$amount}', '{$source_id}', '{$destination_id}', '{$tx_hash_id}', '{$block_index}', '{$status_id}')";
+            $sql = "INSERT INTO mints (tx_index, tick_id, amount, source_id, destination_id, tx_hash_id, block_index, memo_id, status_id) values ('{$tx_index}','{$tick_id}', '{$amount}', '{$source_id}', '{$destination_id}', '{$tx_hash_id}', '{$block_index}', '{$memo_id}', '{$status_id}')";
         }
         $results = $mysqli->query($sql);
         if(!$results)

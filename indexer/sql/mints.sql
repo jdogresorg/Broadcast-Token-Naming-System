@@ -7,6 +7,7 @@ CREATE TABLE mints (
     destination_id INTEGER UNSIGNED, -- id of record in index_addresses table (optional, mint and transfer)
     tx_hash_id     INTEGER UNSIGNED, -- id of record in index_transactions
     block_index    INTEGER UNSIGNED, -- block index of MINT transaction
+    memo_id        INTEGER UNSIGNED, -- id of record in index_memos table 
     status_id      INTEGER UNSIGNED  -- id of record in index_statuses table
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -15,4 +16,5 @@ CREATE        INDEX tick_id        ON mints (tick_id);
 CREATE        INDEX tx_hash_id     ON mints (tx_hash_id);
 CREATE        INDEX source_id      ON mints (source_id);
 CREATE        INDEX destination_id ON mints (destination_id);
+CREATE        INDEX memo_id        ON mints (memo_id);
 CREATE        INDEX status_id      ON mints (status_id);

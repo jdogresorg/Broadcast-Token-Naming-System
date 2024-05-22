@@ -17,7 +17,7 @@ function btnsMint($params=null, $data=null, $error=null){
 
     // Define list of known FORMATS
     $formats = array(
-        0 => 'VERSION|TICK|AMOUNT|DESTINATION'
+        0 => 'VERSION|TICK|AMOUNT|DESTINATION|MEMO'
     );
 
     /*****************************************************************
@@ -90,6 +90,14 @@ function btnsMint($params=null, $data=null, $error=null){
     /*****************************************************************
      * General Validations
      ****************************************************************/
+
+    // Verify no pipe in MEMO (BTNS uses pipe as field delimiter)
+    if(!$error && isset($data->MEMO) && strpos($data->MEMO,'|')!==false)
+        $error = 'invalid: MEMO (pipe)';
+
+    // Verify no semicolon in MEMO (BTNS uses semicolon as action delimiter)
+    if(!$error && isset($data->MEMO) && strpos($data->MEMO,';')!==false)
+        $error = 'invalid: MEMO (semicolon)';
 
     // Verify AMOUNT is less than MAX_MINT
     if(!$error && isset($data->AMOUNT) && $data->AMOUNT > $data->MAX_MINT)
