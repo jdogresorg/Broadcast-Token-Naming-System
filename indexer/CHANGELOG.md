@@ -1,5 +1,14 @@
 CHANGELOG
 ---
+0.14.0
+- `DIVIDEND` support
+- `SWEEP` support
+- `CALLBACK` support (disabled for now)
+- fixed issue with `getTokenInfo()` setting `DECIMALS` incorrectly
+- Added support for `MEMO` in `MINT` action
+- Cleanup transaction fees code
+- Updated `SEND` to consolidate sends by DESTINATION and TICK
+
 0.13.0
 - Added support for `--compare=DB`
 - start using `—block=#` instead of `—reparse=#`

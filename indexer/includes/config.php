@@ -9,7 +9,7 @@ define("NETWORK", $network);
 
 // BTNS Indexer Version
 define("VERSION_MAJOR", 0);
-define("VERSION_MINOR", 13);
+define("VERSION_MINOR", 14);
 define("VERSION_REVISION",0);
 define("VERSION_STRING", VERSION_MAJOR . '.' . VERSION_MINOR . '.' . VERSION_REVISION);
 
