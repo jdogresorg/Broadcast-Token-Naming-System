@@ -29,7 +29,7 @@ This example pauses/sleeps ALL BTNS `ACTION` commands on JDOG `token` until bloc
 - `SLEEP` with `RESUME_BLOCK` set to `-1` value, will pause actions indefinitely.
 - `ISSUE` `TICK` with `LOCK_SLEEP` set to `1` to permanently prevent use of the `SLEEP` command
 - Can use `BATCH` commands to stop `SLEEP`, execute `ACTION` commands, and then resume `SLEEP`, etc.
-`
+```
 bt:BATCH|0|
 SLEEP|0|JDOG|0;
 ISSUE|1|JDOG|We are working to resolve the problem;
@@ -37,4 +37,4 @@ ISSUE|2|JDOG||1000;
 SEND|0|JDOG|1000|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev|Funding contract address;
 MINT|0|JDOG||1000|1JDogZS6tQcSxwfxhv6XKKjcyicYA4Feev;
 SLEEP|0|JDOG|-1
-`
+```
