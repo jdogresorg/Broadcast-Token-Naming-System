@@ -123,8 +123,8 @@ function createTicker( $tick=null ){
     global $mysqli;
     if(!isset($tick) || $tick=='')
         return 0;
-    // Truncate description to 250 chars 
-    $tick    = substr($tick,0,250);
+    // Truncate description to 249 chars 
+    $tick    = substr($tick,0,249);
     $tick    = $mysqli->real_escape_string($tick);
     $results = $mysqli->query("SELECT id FROM index_tickers WHERE tick='{$tick}' LIMIT 1");
     if($results){
